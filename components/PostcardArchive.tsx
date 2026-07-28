@@ -66,20 +66,8 @@ export default function PostcardArchive() {
           setLastViewedId(data[0].id);
         }
       })
-      .catch(() => {
-        /* Fallback: import hardcoded data if API fails */
-        import('../data/archive').then((mod) => {
-          const fallback = mod.ARCHIVE_CARDS.map((c) => ({
-            ...c,
-            urbanautUrl: c.urbanautUrl,
-            youtubeUrls: [],
-            substackUrls: [],
-          }));
-          setCards(fallback);
-          if (fallback.length > 0 && !lastViewedId) {
-            setLastViewedId(fallback[0].id);
-          }
-        });
+      .catch((err) => {
+        console.error('Failed to load archive:', err);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

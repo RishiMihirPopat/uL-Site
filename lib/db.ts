@@ -54,7 +54,29 @@ function initSchema(db: any) {
   `);
 }
 
-/* ── Typed helpers ── */
+/* ── Shared types ── */
+
+export type EventCategory =
+  | 'unlecture'
+  | 'grounds-for-thought'
+  | 'community'
+  | 'unlecture-series';
+
+export interface Event {
+  id: string;
+  category: EventCategory;
+  title: string;
+  speaker: string;
+  venue: string;
+  date: string;
+  time: string;
+  price: string;
+  description: string;
+  image: string;
+  urbanautUrl: string;
+}
+
+/* ── DB row type ── */
 
 export interface EventRow {
   id: string;

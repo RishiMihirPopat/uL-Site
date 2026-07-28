@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import BookingModal from './BookingModal';
-import type { Event } from '../data/events';
+import type { Event } from '../lib/db';
 import styles from './EventCard.module.css';
 
 export default function EventCard({ event, index = 0 }: { event: Event; index?: number }) {

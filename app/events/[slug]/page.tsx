@@ -1,5 +1,5 @@
 import { getActiveEvents } from '@/lib/db';
-import type { EventCategory } from '@/data/events';
+import type { EventCategory } from '@/lib/db';
 import { BackButton } from '@/components/FormatCardLink';
 import { HeaderTitle } from '@/components/AnimatedTitle';
 import EventCard from '@/components/EventCard';
@@ -16,7 +16,7 @@ const FORMAT_CONFIG: Record<string, {
     name: 'Grounds for Thought',
     category: 'grounds-for-thought',
     description:
-      'In partnership with Blue Tokai. A smaller format, more intimate setting — conversations on the things we actually live with.',
+      'In partnership with Blue Tokai. A smaller format, more intimate setting -- conversations on the things we actually live with.',
   },
   'unlecture': {
     name: 'unLecture',
@@ -34,7 +34,7 @@ const FORMAT_CONFIG: Record<string, {
     name: 'unLecture Series',
     category: 'unlecture-series',
     description:
-      'A series of connected conversations and hands-on sessions exploring one idea deeply — multiple perspectives, one thread.',
+      'A series of connected conversations and hands-on sessions exploring one idea deeply -- multiple perspectives, one thread.',
   },
 };
 
@@ -64,27 +64,20 @@ export default async function EventsFormatPage({
     );
   }
 
-  let dbEvents: any[] = [];
-  try {
-    const allActive = getActiveEvents();
-    dbEvents = allActive.map((e) => ({
-      id: e.id,
-      category: e.category as EventCategory,
-      title: e.title,
-      speaker: e.speaker,
-      venue: e.venue,
-      date: e.date,
-      time: e.time,
-      price: e.price,
-      description: e.description,
-      image: e.image,
-      urbanautUrl: e.urbanaut_url,
-    }));
-  } catch {
-    /* Fallback if DB unavailable */
-    const { EVENTS } = await import('@/data/events');
-    dbEvents = EVENTS;
-  }
+  const allActive = getActiveEvents();
+  const dbEvents = allActive.map((e) => ({
+    id: e.id,
+    category: e.category as EventCategory,
+    title: e.title,
+    speaker: e.speaker,
+    venue: e.venue,
+    date: e.date,
+    time: e.time,
+    price: e.price,
+    description: e.description,
+    image: e.image,
+    urbanautUrl: e.urbanaut_url,
+  }));
 
   const events = dbEvents.filter((e) => e.category === config.category);
 
@@ -93,7 +86,7 @@ export default async function EventsFormatPage({
 
       <header className={styles.header} data-format={slug}>
         <BackButton className={styles.back}>
-          ← All formats
+          &larr; All formats
         </BackButton>
         <div className={styles.headerInner}>
           <p className={styles.headerLabel}>Format</p>
@@ -105,7 +98,7 @@ export default async function EventsFormatPage({
 
       <section className={styles.section}>
         {events.length === 0 ? (
-          <p className={styles.empty}>No upcoming events in this category currently — check back soon.</p>
+          <p className={styles.empty}>No upcoming events in this category currently -- check back soon.</p>
         ) : (
           <div className={styles.grid}>
             {events.map((event, index) => (
