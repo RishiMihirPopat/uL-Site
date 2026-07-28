@@ -1,0 +1,597 @@
+.main {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ════════════════════════════════════════════════
+   HERO — dark forest, split two-column, polaroid
+   ════════════════════════════════════════════════ */
+
+.hero {
+  background-color: var(--color-forest);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
+  gap: var(--space-2xl);
+  position: relative;
+}
+
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+/* Circular postmark badge */
+.heroBadge {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-full);
+  border: 2px solid rgba(240, 232, 220, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(240, 232, 220, 0.45);
+  transform: rotate(-14deg);
+  line-height: 1.9;
+  flex-shrink: 0;
+}
+
+.heroTextBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.heroEyebrow {
+  font-size: var(--text-small);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-mustard);
+}
+
+.heroWordmark {
+  font-family: var(--font-brand);
+  font-size: clamp(4rem, 10vw, 9rem);
+  font-weight: 400;
+  color: var(--color-text-on-dark);
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+}
+
+.heroTagline {
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  font-style: italic;
+  color: rgba(240, 232, 220, 0.55);
+  line-height: 1.55;
+  max-width: 32ch;
+}
+
+/* Vintage stamp label at bottom */
+.heroStamp {
+  display: inline-flex;
+  gap: var(--space-sm);
+  align-items: center;
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(240, 232, 220, 0.28);
+  border: 1px solid rgba(240, 232, 220, 0.14);
+  padding: 6px var(--space-md);
+  align-self: flex-start;
+  transform: rotate(-1.5deg);
+}
+
+/* Right column — wraps PostcardArchive component */
+.heroRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ════════════════════════════════════════════════
+   TICKER — terracotta scrolling marquee
+   ════════════════════════════════════════════════ */
+
+.ticker {
+  background-color: var(--color-terracotta);
+  overflow: hidden;
+  padding: var(--space-md) 0;
+  border-top: 2px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+}
+
+.tickerTrack {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 26s linear infinite;
+}
+
+.tickerText {
+  font-size: var(--text-small);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-text-on-dark);
+  white-space: nowrap;
+  padding: 0 var(--space-lg);
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ════════════════════════════════════════════════
+   ABOUT — parchment, giant watermark, asymmetric
+   ════════════════════════════════════════════════ */
+
+.about {
+  background-color: var(--color-parchment);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(180, 150, 100, 0.1) 1px, transparent 0);
+  background-size: 22px 22px;
+  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Giant watermark number */
+.aboutWatermark {
+  position: absolute;
+  top: -0.12em;
+  left: -0.06em;
+  font-family: var(--font-brand);
+  font-size: clamp(14rem, 32vw, 28rem);
+  line-height: 0.85;
+  color: var(--color-border);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.aboutGrid {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: calc(var(--space-2xl) * 2);
+  position: relative;
+  z-index: 1;
+}
+
+.aboutLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.aboutLabel {
+  font-size: var(--text-small);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-terracotta);
+}
+
+.aboutHeading {
+  font-family: var(--font-body);
+  font-size: clamp(var(--text-h3), 2.2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+
+.aboutRight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.aboutRight p {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-text-muted);
+}
+
+/* ════════════════════════════════════════════════
+   FORMATS — tall portrait cards, color-blocked
+   ════════════════════════════════════════════════ */
+
+.formats {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl);
+}
+
+.formatsLabel {
+  max-width: var(--max-width);
+  margin: 0 auto var(--space-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--text-small);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+
+.formatsLabelRule {
+  width: 28px;
+  height: 1px;
+  background-color: var(--color-border-strong);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Four portrait cards in one row */
+.formatGrid {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.formatCard {
+  display: block;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  will-change: transform;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.38s ease;
+}
+
+/* Each card has its own background colour and slight tilt */
+.formatCard:nth-child(1) {
+  background-color: var(--color-terracotta);
+  transform: rotate(-1.8deg);
+}
+.formatCard:nth-child(2) {
+  background-color: var(--color-forest);
+  transform: rotate(1deg);
+}
+.formatCard:nth-child(3) {
+  background-color: var(--color-primary);
+  transform: rotate(-0.6deg);
+}
+.formatCard:nth-child(4) {
+  background-color: var(--color-olive);
+  transform: rotate(1.2deg);
+}
+
+/* Per-card image focal point */
+.formatCard:nth-child(1) .formatCardImg {
+  object-position: right center;
+}
+.formatCard:nth-child(2) .formatCardImg {
+  object-position: left center;
+}
+
+/* On hover: snap straight and lift */
+.formatCard:hover {
+  transform: rotate(0deg) translateY(-10px);
+  box-shadow: var(--shadow-lift);
+  z-index: 2;
+}
+
+/* Image always visible */
+.formatCardImgReveal {
+  position: absolute;
+  inset: 0;
+}
+
+.formatCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Gradient always on for text readability */
+.formatCardGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.78) 100%);
+  z-index: 1;
+}
+
+/* Text always above image and gradient */
+.formatCardContent {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-lg);
+}
+
+
+.formatCardInfo {
+  position: relative;
+}
+
+.formatCardName {
+  font-family: var(--font-body);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  color: var(--color-text-on-dark);
+  line-height: 1.2;
+}
+
+/* Description floats above the title, out of flow — title position unaffected by desc length */
+.formatCardDesc {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--space-sm);
+  font-size: var(--text-small);
+  color: var(--color-text-on-dark);
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 0.38s ease 0.1s;
+}
+
+.formatCard:hover .formatCardDesc {
+  opacity: 0.85;
+}
+
+/* ════════════════════════════════════════════════
+   QUOTE — mustard, huge editorial type
+   ════════════════════════════════════════════════ */
+
+.quote {
+  background-color: var(--color-mustard);
+  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Giant decorative open-quote */
+.quoteOpenMark {
+  display: block;
+  font-family: var(--font-body);
+  font-size: clamp(8rem, 20vw, 18rem);
+  color: rgba(255, 255, 255, 0.18);
+  line-height: 0.5;
+  margin-bottom: var(--space-2xl);
+  user-select: none;
+}
+
+.quoteText {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  font-family: var(--font-body);
+  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.15;
+  color: var(--color-bg-dark);
+  quotes: none;
+}
+
+.quoteAttr {
+  display: block;
+  max-width: var(--max-width);
+  margin: var(--space-2xl) auto 0;
+  text-align: right;
+  font-size: var(--text-small);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(42, 36, 32, 0.45);
+}
+
+/* ════════════════════════════════════════════════
+   PRESS — dark background carousel
+   ════════════════════════════════════════════════ */
+
+.press {
+  background-color: var(--color-bg-dark);
+  padding: var(--space-2xl) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.pressLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  padding: 0 var(--space-2xl);
+  font-size: var(--text-small);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(240, 232, 220, 0.38);
+}
+
+.pressRule {
+  flex: 1;
+  height: 1px;
+  background-color: rgba(240, 232, 220, 0.1);
+  display: inline-block;
+}
+
+.carouselWrap {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
+.carouselWrap:hover .carouselInner {
+  animation-play-state: paused;
+}
+
+.carouselInner {
+  display: flex;
+  width: max-content;
+  animation: carouselScroll 32s linear infinite;
+}
+
+@keyframes carouselScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.logoItem {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-xl);
+}
+
+.logoFrame {
+  position: relative;
+  width: 148px;
+  height: 52px;
+  flex-shrink: 0;
+  transition: opacity 0.22s ease;
+}
+
+.logoImg {
+  object-fit: contain;
+  object-position: center;
+  filter: brightness(0) invert(1);
+  opacity: 0.45;
+  transition: opacity 0.22s ease;
+}
+
+.logoItem:hover .logoImg {
+  opacity: 0.85;
+}
+
+/* ════════════════════════════════════════════════
+   SCROLL REVEAL — progressive enhancement
+   ════════════════════════════════════════════════ */
+
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@supports (animation-timeline: view()) {
+  .about,
+  .formats,
+  .quote,
+  .press {
+    animation: revealUp linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 28%;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   TABLET — 2-column format grid
+   ════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .formatGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  /* Remove tilts on tablet */
+  .formatCard:nth-child(1),
+  .formatCard:nth-child(2),
+  .formatCard:nth-child(3),
+  .formatCard:nth-child(4) {
+    transform: none;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   MOBILE
+   ════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: var(--space-2xl) var(--space-md);
+    gap: var(--space-2xl);
+  }
+
+  .heroBadge {
+    width: 64px;
+    height: 64px;
+    font-size: 0.5rem;
+  }
+
+  .heroWordmark {
+    font-size: clamp(3.5rem, 18vw, 5rem);
+  }
+
+  .heroPolaroid {
+    width: min(320px, 88%);
+  }
+
+  .about {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .aboutGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .formats {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .formatGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .formatCard {
+    aspect-ratio: 3 / 2;
+  }
+
+  /* Remove tilts on mobile */
+  .formatCard:nth-child(1),
+  .formatCard:nth-child(2),
+  .formatCard:nth-child(3),
+  .formatCard:nth-child(4) {
+    transform: none;
+  }
+
+  .formatCard:hover {
+    transform: translateY(-6px);
+  }
+
+  .quote {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  .pressLabel {
+    padding: 0 var(--space-md);
+  }
+}

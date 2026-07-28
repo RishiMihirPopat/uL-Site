@@ -1,0 +1,163 @@
+/* ════════════════════════════════════════════════
+   HERO DRAGGABLES
+   Positions come from CSS custom properties set via
+   style.setProperty() — no style={} props in JSX.
+   ════════════════════════════════════════════════ */
+
+/* Full-hero absolute overlay — pointer-events:none
+   so polaroid and wordmark remain clickable through it */
+.wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Individual scattered object ─────────────────── */
+
+.item {
+  position: absolute;
+  left: var(--ix, 0px);
+  top:  var(--iy, 0px);
+  transform: rotate(var(--irot, 0deg));
+
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  z-index: 1;
+
+  /* Vintage card aesthetic */
+  background-color: var(--color-parchment);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(180, 150, 100, 0.1) 1px,
+    transparent 0
+  );
+  background-size: 14px 14px;
+  border: 1px solid var(--color-border-strong);
+  /* Double-border via layered box-shadow — vintage look */
+  box-shadow:
+    inset 0 0 0 3px var(--color-parchment),
+    inset 0 0 0 4px var(--color-border),
+    2px 5px 14px rgba(0, 0, 0, 0.55);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: var(--space-sm);
+
+  /* Smooth scale for hover + drag states */
+  scale: 1;
+  transition:
+    scale     0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s ease;
+}
+
+.item:hover {
+  scale: 1.05;
+  box-shadow:
+    inset 0 0 0 3px var(--color-parchment),
+    inset 0 0 0 4px var(--color-border),
+    3px 7px 18px rgba(0, 0, 0, 0.65);
+}
+
+.itemDragging {
+  cursor: grabbing;
+  scale: 1.08;
+  z-index: 50;
+  box-shadow:
+    inset 0 0 0 3px var(--color-parchment),
+    inset 0 0 0 4px var(--color-border),
+    6px 14px 30px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Content inside each object ──────────────────── */
+
+.itemIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.itemLabel {
+  font-family: var(--font-body);
+  font-size: 0.56rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.25;
+  word-break: break-word;
+  pointer-events: none;
+}
+
+/* ── Image items ─────────────────────────────────── */
+
+/* Strip everything for transparent PNG items — pure floating image, no box */
+.item[data-has-image='true'] {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.item[data-has-image='true']:hover {
+  box-shadow: none;
+}
+
+.item[data-has-image='true'].itemDragging {
+  box-shadow: none;
+}
+
+/* Drop shadow follows the image's actual shape (not the div bounds) */
+.itemImgWrap {
+  position: absolute;
+  inset: 0;
+  filter: drop-shadow(2px 6px 12px rgba(0, 0, 0, 0.5));
+  transition: filter 0.22s ease;
+}
+
+.item[data-has-image='true']:hover .itemImgWrap {
+  filter: drop-shadow(3px 8px 18px rgba(0, 0, 0, 0.65));
+}
+
+.item[data-has-image='true'].itemDragging .itemImgWrap {
+  filter: drop-shadow(6px 14px 28px rgba(0, 0, 0, 0.8));
+}
+
+.itemImg {
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
+/* ── Per-object sizes ────────────────────────────── */
+
+/* ── Priority elements: 3–4× ─── */
+.item[data-obj-id='zines']    { width: 400px; height: 320px; }
+.item[data-obj-id='polaroid'] { width: 300px; height: 400px; }
+.item[data-obj-id='key']      { width: 400px; height: 155px; }
+
+/* ── Standard elements: 1.5–2× ─── */
+.item[data-obj-id='camera']   { width: 240px; height: 175px; }
+.item[data-obj-id='film']     { width: 160px; height: 230px; }
+.item[data-obj-id='coffee']   { width: 180px; height: 205px; }
+.item[data-obj-id='cassette'] { width: 280px; height: 190px; }
+.item[data-obj-id='flower']   { width: 130px; height: 130px; }
+.item[data-obj-id='notebook'] { width: 210px; height: 185px; }
+.item[data-obj-id='postcard'] { width:  93px; height:  93px; }
+
+/* ── Mobile: hide entirely ───────────────────────── */
+
+@media (max-width: 768px) {
+  .wrapper {
+    display: none;
+  }
+}

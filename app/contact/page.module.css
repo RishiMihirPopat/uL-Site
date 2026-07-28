@@ -1,0 +1,77 @@
+/* ════════════════════════════════════════════════
+   CONTACT PAGE
+   Warm cream — like writing a letter on good paper.
+   ════════════════════════════════════════════════ */
+
+.main {
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
+}
+
+.inner {
+  max-width: var(--max-width-narrow);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--space-2xl) * 2);
+  align-items: start;
+}
+
+/* ── Left column: header copy ────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  position: sticky;
+  top: calc(var(--space-2xl) * 2);
+}
+
+.eyebrow {
+  font-size: var(--text-small);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.heading {
+  font-family: var(--font-brand);
+  font-size: clamp(var(--text-h2), 6vw, 3.5rem);
+  font-weight: 400;
+  color: var(--color-text);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  max-width: 36ch;
+}
+
+/* ── Right column: form ──────────────────────────── */
+
+.formWrap {
+  padding-top: var(--space-sm);
+}
+
+/* ── Responsive ──────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .main {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .header {
+    position: static;
+  }
+}

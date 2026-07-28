@@ -1,0 +1,165 @@
+/* ════════════════════════════════════════════════
+   EVENTS FORMAT PAGE
+   ════════════════════════════════════════════════ */
+
+@keyframes revealPage {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.main {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  animation: revealPage 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Page header ─────────────────────────────────── */
+
+.header {
+  background-color: var(--color-bg-dark);
+  padding: var(--space-2xl);
+  position: relative;
+}
+
+.back {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  letter-spacing: 0.08em;
+  color: rgba(240, 232, 220, 0.45);
+  text-decoration: none;
+  margin-bottom: var(--space-2xl);
+  transition: color 0.2s ease;
+}
+
+.back:hover {
+  color: var(--color-text-on-dark);
+}
+
+.headerInner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.headerLabel {
+  font-size: var(--text-small);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mustard);
+}
+
+.headerTitle {
+  font-family: var(--font-brand);
+  font-size: clamp(var(--text-h2), 6vw, 5rem);
+  font-weight: 400;
+  color: var(--color-text-on-dark);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+}
+
+.headerDesc {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-style: italic;
+  color: rgba(240, 232, 220, 0.55);
+  line-height: 1.6;
+  max-width: 52ch;
+  margin-top: var(--space-sm);
+}
+
+/* Accent rule below header — colour set by [data-format] */
+.headerRule {
+  height: 3px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: var(--color-border-strong);
+}
+
+/* Per-format accent color on the rule */
+.header[data-format='grounds-for-thought'] .headerRule {
+  background-color: var(--color-terracotta);
+}
+.header[data-format='unlecture'] .headerRule {
+  background-color: var(--color-sage-green);
+}
+.header[data-format='community'] .headerRule {
+  background-color: var(--color-primary);
+}
+.header[data-format='unlecture-series'] .headerRule {
+  background-color: var(--color-olive);
+}
+
+/* ── Event grid ──────────────────────────────────── */
+
+.section {
+  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.empty {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: calc(var(--space-2xl) * 2) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@keyframes floatUpCard {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.grid > article {
+  animation: floatUpCard 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.grid > article:nth-child(1) { animation-delay: 0.12s; }
+.grid > article:nth-child(2) { animation-delay: 0.20s; }
+.grid > article:nth-child(3) { animation-delay: 0.28s; }
+.grid > article:nth-child(4) { animation-delay: 0.36s; }
+.grid > article:nth-child(5) { animation-delay: 0.44s; }
+.grid > article:nth-child(6) { animation-delay: 0.52s; }
+.grid > article:nth-child(7) { animation-delay: 0.60s; }
+
+/* ── Responsive ──────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: var(--space-lg);
+  }
+
+  .section {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+}

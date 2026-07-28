@@ -1,0 +1,122 @@
+.footer {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-on-dark);
+}
+
+/* Large wordmark block at top */
+
+.footerTop {
+  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl) var(--space-2xl);
+  text-align: center;
+  border-bottom: 1px solid rgba(240, 232, 220, 0.1);
+}
+
+.footerWordmark {
+  display: block;
+  font-family: var(--font-brand);
+  font-size: clamp(3rem, 9vw, 6rem);
+  color: var(--color-text-on-dark);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.footerTagline {
+  margin-top: var(--space-md);
+  font-size: var(--text-small);
+  font-style: italic;
+  color: rgba(240, 232, 220, 0.45);
+  letter-spacing: 0.06em;
+}
+
+/* Links + socials */
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.email {
+  font-size: var(--text-body);
+  color: var(--color-text-on-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(240, 232, 220, 0.25);
+  transition: text-decoration-color 0.15s ease;
+}
+
+.email:hover {
+  text-decoration-color: var(--color-mustard);
+}
+
+.socials {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.socials a {
+  font-size: var(--text-small);
+  color: rgba(240, 232, 220, 0.55);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: color 0.15s ease;
+}
+
+.socials a:hover {
+  color: var(--color-mustard);
+}
+
+/* Bottom row */
+
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(240, 232, 220, 0.1);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.footerCity {
+  font-size: var(--text-small);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(240, 232, 220, 0.35);
+}
+
+.copy {
+  font-size: var(--text-small);
+  color: rgba(240, 232, 220, 0.35);
+}
+
+@media (max-width: 600px) {
+  .footerTop {
+    padding: var(--space-2xl) var(--space-md) var(--space-xl);
+  }
+
+  .inner {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .top {
+    flex-direction: column;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

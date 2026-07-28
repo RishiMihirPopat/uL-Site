@@ -1,0 +1,40 @@
+.container {
+  min-height: 100vh;
+  background: #f8f8f8;
+  color: #333;
+}
+.topbar {
+  background: white;
+  padding: 0 2rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #333;
+  text-decoration: none;
+}
+.nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.navLink {
+  color: #555;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.navLink:hover {
+  color: #000;
+}
+.logoutBtn {
+  background: none;
+  border: none;
+  color: #d93025;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
