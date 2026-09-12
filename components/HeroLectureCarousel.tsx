@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import BookingModal from './BookingModal';
 import AllUpcomingEventsModal from './AllUpcomingEventsModal';
 import { formatEventPrice } from '../lib/utils/formatPrice';
@@ -15,6 +16,50 @@ interface HeroLectureCarouselProps {
 
 export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCarouselProps) {
   const displayList = events && events.length > 0 ? events : [];
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Responsive dimensions for card and gap
+  const getCardDims = useCallback(() => {
+    if (typeof window === 'undefined') return { cardW: 360, gap: 20, cardH: 240 };
+    if (window.innerWidth <= 480) return { cardW: 260, gap: 14, cardH: 175 };
+    if (window.innerWidth <= 768) return { cardW: 300, gap: 16, cardH: 200 };
+    return { cardW: 360, gap: 20, cardH: 240 };
+  }, []);
+
+  const [cardDims, setCardDims] = useState({ cardW: 360, gap: 20, cardH: 240 });
+  const [stageWidth, setStageWidth] = useState(600);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Measure stage and window
+  useEffect(() => {
+    setIsMounted(true);
+    setCardDims(getCardDims());
+
+    const updateDimensions = () => {
+      setCardDims(getCardDims());
+      if (stageRef.current) {
+        setStageWidth(stageRef.current.offsetWidth);
+      }
+    };
+
+    updateDimensions();
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setStageWidth(entry.contentRect.width);
+      }
+    });
+
+    if (stageRef.current) {
+      ro.observe(stageRef.current);
+    }
+
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, [getCardDims]);
 
   // Default to the soonest upcoming event based on today's date
   const getInitialIndex = useCallback(() => {
@@ -24,101 +69,91 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     return idx >= 0 ? idx : 0;
   }, [displayList]);
 
-  // Extended list with clones at each end for smooth, seamless infinite sliding
-  // If displayList = [A, B, C, D, E], extendedList = [E, A, B, C, D, E, A]
+  // Ensure base list has at least 3 items for infinite peeking clones
+  let baseList = [...displayList];
+  if (baseList.length > 0) {
+    while (baseList.length < 4 && displayList.length > 1) {
+      baseList = [...baseList, ...displayList];
+    }
+  }
+
   const hasMultiple = displayList.length > 1;
+  const n = baseList.length;
+
+  // Extended list with 2 clones before and 2 clones after
+  // Indices:
+  // 0: clone n-2
+  // 1: clone n-1
+  // 2: real 0
+  // ...
+  // n+1: real n-1
+  // n+2: clone 0
+  // n+3: clone 1
   const extendedList = hasMultiple
-    ? [displayList[displayList.length - 1], ...displayList, displayList[0]]
+    ? [baseList[n - 2], baseList[n - 1], ...baseList, baseList[0], baseList[1]]
     : displayList;
 
-  // trackIndex: index 1 maps to real index 0 in displayList
-  const [trackIndex, setTrackIndex] = useState(() => (hasMultiple ? getInitialIndex() + 1 : 0));
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  // trackIndex: 2 corresponds to real item 0
+  const [trackIndex, setTrackIndex] = useState(() => (hasMultiple ? getInitialIndex() + 2 : 0));
+  const [isSnapping, setIsSnapping] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<{ url: string; title: string } | null>(null);
   const [showAllEventsModal, setShowAllEventsModal] = useState(false);
 
-  // Drag / swipe state
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const deltaXRef = useRef(0);
-  const isAnimatingRef = useRef(false);
-
-  // Active dot index (0 .. displayList.length - 1)
+  // Active dot index (0..displayList.length-1)
   const activeDotIndex = hasMultiple
-    ? (trackIndex - 1 + displayList.length) % displayList.length
+    ? ((trackIndex - 2) % displayList.length + displayList.length) % displayList.length
     : 0;
 
-  // Reset trackIndex if displayList changes
+  // Reset if list changes
   useEffect(() => {
     if (hasMultiple) {
-      setTrackIndex(getInitialIndex() + 1);
+      setTrackIndex(getInitialIndex() + 2);
     } else {
       setTrackIndex(0);
     }
   }, [displayList.length, getInitialIndex, hasMultiple]);
 
-  // Re-enable CSS transition on next animation frames after silent snap
-  useEffect(() => {
-    if (!isTransitioning) {
-      const id1 = requestAnimationFrame(() => {
-        const id2 = requestAnimationFrame(() => {
-          setIsTransitioning(true);
-        });
-        return () => cancelAnimationFrame(id2);
-      });
-      return () => cancelAnimationFrame(id1);
-    }
-  }, [isTransitioning]);
-
-  // Handle transition end for seamless infinite looping
-  const handleTransitionEnd = useCallback(() => {
-    isAnimatingRef.current = false;
+  // Infinite snap boundary reset
+  const handleAnimationComplete = useCallback(() => {
     if (!hasMultiple) return;
-
-    if (trackIndex >= displayList.length + 1) {
-      // Reached end clone (clone of index 0) -> jump silently to real index 0 (slot 1)
-      setIsTransitioning(false);
-      setTrackIndex(1);
-    } else if (trackIndex <= 0) {
-      // Reached start clone (clone of last index) -> jump silently to real last index
-      setIsTransitioning(false);
-      setTrackIndex(displayList.length);
+    if (trackIndex >= n + 2) {
+      // Reached clone 0 -> silently jump to real 0 (slot 2)
+      setIsSnapping(true);
+      setTrackIndex(2);
+    } else if (trackIndex <= 1) {
+      // Reached clone n-1 -> silently jump to real n-1 (slot n+1)
+      setIsSnapping(true);
+      setTrackIndex(n + 1);
     }
-  }, [displayList.length, hasMultiple, trackIndex]);
+  }, [hasMultiple, n, trackIndex]);
 
-  // Safety timer in case onTransitionEnd doesn't fire
+  // Turn off snapping on next tick so subsequent animations use spring
   useEffect(() => {
-    if (isAnimatingRef.current) {
-      const timer = setTimeout(() => {
-        isAnimatingRef.current = false;
-      }, 550);
-      return () => clearTimeout(timer);
+    if (isSnapping) {
+      const raf = requestAnimationFrame(() => {
+        setIsSnapping(false);
+      });
+      return () => cancelAnimationFrame(raf);
     }
-  }, [trackIndex]);
+  }, [isSnapping]);
 
   const handleNext = useCallback(() => {
-    if (!hasMultiple || isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
-    setIsTransitioning(true);
+    if (!hasMultiple || isSnapping) return;
     setTrackIndex((prev) => prev + 1);
-  }, [hasMultiple]);
+  }, [hasMultiple, isSnapping]);
 
   const handlePrev = useCallback(() => {
-    if (!hasMultiple || isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
-    setIsTransitioning(true);
+    if (!hasMultiple || isSnapping) return;
     setTrackIndex((prev) => prev - 1);
-  }, [hasMultiple]);
+  }, [hasMultiple, isSnapping]);
 
   const goTo = useCallback(
     (realIndex: number) => {
-      if (!hasMultiple || isAnimatingRef.current || realIndex === activeDotIndex) return;
-      isAnimatingRef.current = true;
-      setIsTransitioning(true);
-      setTrackIndex(realIndex + 1);
+      if (!hasMultiple || isSnapping || realIndex === activeDotIndex) return;
+      setTrackIndex(realIndex + 2);
     },
-    [activeDotIndex, hasMultiple]
+    [activeDotIndex, hasMultiple, isSnapping]
   );
 
   // Auto-slideshow every 8 seconds
@@ -143,51 +178,6 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleNext, handlePrev, selectedBooking, showAllEventsModal]);
 
-  // Swipe / Drag handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    isDraggingRef.current = true;
-    startXRef.current = e.touches[0].clientX;
-    deltaXRef.current = 0;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current) return;
-    deltaXRef.current = e.touches[0].clientX - startXRef.current;
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    const dx = deltaXRef.current;
-    if (Math.abs(dx) > 40) {
-      if (dx < 0) handleNext();
-      else handlePrev();
-    }
-    deltaXRef.current = 0;
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDraggingRef.current = true;
-    startXRef.current = e.clientX;
-    deltaXRef.current = 0;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    deltaXRef.current = e.clientX - startXRef.current;
-  };
-
-  const handleMouseUp = () => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    const dx = deltaXRef.current;
-    if (Math.abs(dx) > 40) {
-      if (dx < 0) handleNext();
-      else handlePrev();
-    }
-    deltaXRef.current = 0;
-  };
-
   if (displayList.length === 0) {
     return (
       <div className={styles.emptyWrap}>
@@ -196,6 +186,10 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     );
   }
 
+  const pitch = cardDims.cardW + cardDims.gap;
+  // Calculate targetX to center slot trackIndex exactly in the middle of stage
+  const targetX = stageWidth / 2 - (trackIndex * pitch + cardDims.cardW / 2);
+
   const allActiveEventsList = allEvents && allEvents.length > 0 ? allEvents : displayList;
 
   return (
@@ -203,10 +197,7 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
       <div
         className={styles.carouselContainer}
         onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => {
-          setIsPaused(false);
-          isDraggingRef.current = false;
-        }}
+        onMouseLeave={() => setIsPaused(false)}
         aria-roledescription="carousel"
         aria-label="Upcoming Lectures Poster Carousel"
       >
@@ -248,95 +239,185 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
           </div>
         </div>
 
-        {/* Carousel Stage & Flat Sliding Track */}
-        <div
-          className={styles.stage}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-        >
-          <div
-            className={`${styles.track} ${isTransitioning ? styles.trackAnimated : ''}`}
-            style={{
-              transform: hasMultiple ? `translateX(-${trackIndex * 100}%)` : 'none',
-            }}
-            onTransitionEnd={handleTransitionEnd}
-          >
-            {extendedList.map((ev, index) => {
-              const isCurrent = hasMultiple ? index === trackIndex : true;
-              return (
-                <div key={`${ev.id}-${index}`} className={styles.slide}>
+        {/* Carousel Stage (Viewport with soft side edge fade) */}
+        <div ref={stageRef} className={styles.stage}>
+          {hasMultiple ? (
+            <motion.div
+              className={styles.track}
+              animate={{ x: isMounted ? targetX : 0 }}
+              transition={
+                isSnapping
+                  ? { duration: 0 }
+                  : {
+                      type: 'spring',
+                      stiffness: 280,
+                      damping: 30,
+                      mass: 0.8,
+                    }
+              }
+              onAnimationComplete={handleAnimationComplete}
+              drag="x"
+              dragConstraints={{ left: targetX - 50, right: targetX + 50 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                const offset = info.offset.x;
+                const velocity = info.velocity.x;
+                if (offset < -40 || velocity < -400) {
+                  handleNext();
+                } else if (offset > 40 || velocity > 400) {
+                  handlePrev();
+                }
+              }}
+            >
+              {extendedList.map((ev, index) => {
+                const isCurrent = index === trackIndex;
+                const isLeftNeighbor = index === trackIndex - 1;
+                const isRightNeighbor = index === trackIndex + 1;
+
+                return (
                   <div
-                    className={styles.card}
-                    onClick={() => {
-                      if (Math.abs(deltaXRef.current) > 10) return;
-                      setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                    key={`${ev.id}-${index}`}
+                    className={styles.slide}
+                    style={{
+                      width: cardDims.cardW,
+                      marginRight: cardDims.gap,
                     }}
-                    role="button"
-                    tabIndex={isCurrent ? 0 : -1}
-                    aria-label={`${ev.title} — ${ev.date}`}
                   >
-                    <div className={styles.posterInner}>
-                      {/* Poster Image */}
-                      {ev.image ? (
-                        <Image
-                          src={ev.image}
-                          alt={ev.title}
-                          fill
-                          sizes="(max-width: 600px) 100vw, 520px"
-                          className={styles.posterImg}
-                          priority={index === 1}
-                        />
-                      ) : (
-                        <div className={styles.posterPlaceholder}>{ev.title}</div>
-                      )}
+                    <div
+                      className={`${styles.card} ${isCurrent ? styles.activeCard : styles.inactiveCard}`}
+                      style={{
+                        height: cardDims.cardH,
+                      }}
+                      onClick={() => {
+                        if (isCurrent) {
+                          setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                        } else if (isLeftNeighbor) {
+                          handlePrev();
+                        } else if (isRightNeighbor) {
+                          handleNext();
+                        } else {
+                          const dist = index - trackIndex;
+                          setTrackIndex((prev) => prev + dist);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={isCurrent ? 0 : -1}
+                      aria-label={`${ev.title} — ${ev.date}`}
+                    >
+                      <div className={styles.posterInner}>
+                        {/* Poster Image */}
+                        {ev.image ? (
+                          <Image
+                            src={ev.image}
+                            alt={ev.title}
+                            fill
+                            sizes="(max-width: 600px) 90vw, 420px"
+                            className={styles.posterImg}
+                            priority={isCurrent}
+                          />
+                        ) : (
+                          <div className={styles.posterPlaceholder}>{ev.title}</div>
+                        )}
 
-                      {/* Smooth dark gradient overlay for effortless readability */}
-                      <div className={styles.posterGradientOverlay} aria-hidden="true" />
+                        {/* Smooth dark gradient overlay for crystal-clear readability */}
+                        <div className={styles.posterGradientOverlay} aria-hidden="true" />
 
-                      {/* Poster Content */}
-                      <div className={styles.posterContent}>
-                        <div className={styles.eyebrowRow}>
-                          <span className={styles.eyebrow}>
-                            {ev.date}
-                            {ev.time && ev.time !== '—' && ` · ${ev.time}`}
-                          </span>
-                          {ev.badge && <span className={styles.posterBadge}>{ev.badge}</span>}
-                        </div>
+                        {/* Poster Content Overlay */}
+                        <div className={styles.posterContent}>
+                          <div className={styles.eyebrowRow}>
+                            <span className={styles.eyebrow}>
+                              {ev.date}
+                              {ev.time && ev.time !== '—' && ` · ${ev.time}`}
+                            </span>
+                            {ev.badge && <span className={styles.posterBadge}>{ev.badge}</span>}
+                          </div>
 
-                        <h2 className={styles.posterTitle}>{ev.title}</h2>
+                          <h2 className={styles.posterTitle}>{ev.title}</h2>
 
-                        <div className={styles.metaRow}>
-                          {ev.venue && ev.venue !== '—' && (
-                            <span className={styles.posterVenue}>{ev.venue}</span>
-                          )}
-                          {ev.price && (
-                            <span className={styles.posterPrice}>{formatEventPrice(ev.price)}</span>
-                          )}
-                        </div>
+                          <div className={styles.metaRow}>
+                            {ev.venue && ev.venue !== '—' && (
+                              <span className={styles.posterVenue}>{ev.venue}</span>
+                            )}
+                            {ev.price && (
+                              <span className={styles.posterPrice}>{formatEventPrice(ev.price)}</span>
+                            )}
+                          </div>
 
-                        <div className={styles.footerRow}>
-                          <span className={styles.formatTag}>
-                            {ev.category === 'grounds-for-thought'
-                              ? 'Grounds for Thought'
-                              : ev.category === 'unlecture-series'
-                              ? 'unLecture Series'
-                              : ev.category === 'community'
-                              ? 'Community'
-                              : 'unLecture'}
-                          </span>
-                          <span className={styles.bookCta}>Book Tickets &rarr;</span>
+                          <div className={styles.footerRow}>
+                            <span className={styles.formatTag}>
+                              {ev.category === 'grounds-for-thought'
+                                ? 'Grounds for Thought'
+                                : ev.category === 'unlecture-series'
+                                ? 'unLecture Series'
+                                : ev.category === 'community'
+                                ? 'Community'
+                                : 'unLecture'}
+                            </span>
+                            <span className={styles.bookCta}>Book Tickets &rarr;</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            // Single item fallback
+            <div className={styles.singleItemWrap}>
+              <div
+                className={`${styles.card} ${styles.activeCard}`}
+                style={{ width: cardDims.cardW, height: cardDims.cardH, margin: '0 auto' }}
+                onClick={() =>
+                  setSelectedBooking({ url: displayList[0].urbanautUrl, title: displayList[0].title })
+                }
+                role="button"
+                tabIndex={0}
+              >
+                <div className={styles.posterInner}>
+                  {displayList[0].image ? (
+                    <Image
+                      src={displayList[0].image}
+                      alt={displayList[0].title}
+                      fill
+                      sizes="(max-width: 600px) 90vw, 420px"
+                      className={styles.posterImg}
+                      priority
+                    />
+                  ) : (
+                    <div className={styles.posterPlaceholder}>{displayList[0].title}</div>
+                  )}
+                  <div className={styles.posterGradientOverlay} aria-hidden="true" />
+                  <div className={styles.posterContent}>
+                    <div className={styles.eyebrowRow}>
+                      <span className={styles.eyebrow}>
+                        {displayList[0].date}
+                        {displayList[0].time && displayList[0].time !== '—' && ` · ${displayList[0].time}`}
+                      </span>
+                      {displayList[0].badge && (
+                        <span className={styles.posterBadge}>{displayList[0].badge}</span>
+                      )}
+                    </div>
+                    <h2 className={styles.posterTitle}>{displayList[0].title}</h2>
+                    <div className={styles.metaRow}>
+                      {displayList[0].venue && displayList[0].venue !== '—' && (
+                        <span className={styles.posterVenue}>{displayList[0].venue}</span>
+                      )}
+                      {displayList[0].price && (
+                        <span className={styles.posterPrice}>
+                          {formatEventPrice(displayList[0].price)}
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.footerRow}>
+                      <span className={styles.formatTag}>unLecture</span>
+                      <span className={styles.bookCta}>Book Tickets &rarr;</span>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Dots Indicator */}
@@ -348,7 +429,7 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                 type="button"
                 className={`${styles.dot} ${i === activeDotIndex ? styles.dotActive : ''}`}
                 onClick={() => goTo(i)}
-                aria-label={`Go to slide ${i + 1}`}
+                aria-label={`Go to poster ${i + 1}`}
               />
             ))}
           </div>
