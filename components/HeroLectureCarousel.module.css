@@ -88,34 +88,9 @@
 .stage {
   position: relative;
   width: 100%;
-  height: 330px;
+  height: 270px;
   overflow: hidden;
   cursor: grab;
-}
-
-/* Soft gradient edge fades on left and right without GPU mask-image compositing mismatch */
-.stage::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50px;
-  background: linear-gradient(to right, #EDE5D8 15%, rgba(237, 229, 216, 0) 100%);
-  pointer-events: none;
-  z-index: 4;
-}
-
-.stage::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  background: linear-gradient(to left, #EDE5D8 15%, rgba(237, 229, 216, 0) 100%);
-  pointer-events: none;
-  z-index: 4;
 }
 
 .stage:active {
@@ -153,32 +128,29 @@
   border-radius: 12px;
   overflow: hidden;
   background-color: #2D0D0D;
-  border: 1px solid rgba(240, 232, 220, 0.15);
+  border: 1px solid rgba(240, 232, 220, 0.18);
   box-sizing: border-box;
-  opacity: 0.46;
+  opacity: 0.45;
   cursor: pointer;
   transition:
-    opacity 0.48s cubic-bezier(0.25, 1, 0.5, 1),
-    box-shadow 0.48s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.35s ease,
+    border-color 0.25s ease,
     transform 0.25s ease;
 }
 
 .activeCard {
   opacity: 1;
-  box-shadow:
-    0 4px 10px rgba(40, 24, 18, 0.05),
-    0 10px 22px rgba(40, 24, 18, 0.09);
+  border-color: rgba(240, 232, 220, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .activeCard:hover {
   transform: translateY(-2px);
-  box-shadow:
-    0 6px 14px rgba(40, 24, 18, 0.07),
-    0 14px 28px rgba(40, 24, 18, 0.13);
+  border-color: var(--color-terracotta);
 }
 
 .inactiveCard:hover {
-  opacity: 0.7;
+  opacity: 0.72;
 }
 
 /* ── Poster Inner Content ── */
@@ -357,7 +329,7 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top: 0.18rem;
+  margin-top: 0.6rem;
 }
 
 .dot {
@@ -427,7 +399,7 @@
   }
 
   .stage {
-    height: 285px;
+    height: 230px;
   }
 
   .track {
@@ -461,7 +433,7 @@
   }
 
   .stage {
-    height: 255px;
+    height: 200px;
   }
 
   .track {
