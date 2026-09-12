@@ -1,12 +1,11 @@
 /* ════════════════════════════════════════════════
-   CONTACT FORM
-   Warm parchment — reads like writing a letter.
+   CONTACT FORM — Beige on Maroon
    ════════════════════════════════════════════════ */
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   width: 100%;
 }
 
@@ -15,17 +14,23 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  border-bottom: 1px solid var(--color-border-strong);
-  padding-bottom: var(--space-md);
+  gap: 6px;
+  border-bottom: 1px solid rgba(245, 239, 235, 0.22);
+  padding-bottom: var(--space-sm);
+  transition: border-color 0.2s ease;
+}
+
+.field:focus-within {
+  border-bottom-color: rgba(245, 239, 235, 0.7);
 }
 
 .label {
   font-family: var(--font-body);
-  font-size: var(--text-small);
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(245, 239, 235, 0.6);
+  font-weight: 600;
 }
 
 .input {
@@ -33,17 +38,18 @@
   border: none;
   outline: none;
   font-family: var(--font-body);
-  font-size: var(--text-body);
+  font-size: 1.05rem;
   font-style: italic;
-  color: var(--color-text);
-  padding: var(--space-sm) 0;
+  color: #FAF5EE;
+  padding: 4px 0;
   width: 100%;
   resize: none;
   transition: opacity 0.2s ease;
 }
 
 .input::placeholder {
-  color: var(--color-border-strong);
+  color: rgba(245, 239, 235, 0.35);
+  font-style: italic;
 }
 
 .input:disabled {
@@ -51,32 +57,77 @@
 }
 
 .textarea {
-  min-height: 120px;
+  min-height: 90px;
   line-height: 1.6;
+}
+
+/* ── Dropdown Select ─────────────────────────────── */
+
+.selectWrap {
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #FAF5EE;
+  padding: 6px 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.select option {
+  background-color: #361212;
+  color: #FAF5EE;
+  padding: 8px;
+}
+
+.selectWrap::after {
+  content: '▾';
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(245, 239, 235, 0.6);
+  pointer-events: none;
+  font-size: 0.85rem;
 }
 
 /* ── Submit button ───────────────────────────────── */
 
 .btn {
   align-self: flex-start;
-  background-color: var(--color-primary);
-  color: var(--color-text-on-dark);
+  background-color: #FAF5EE;
+  color: #361212;
   border: none;
-  padding: var(--space-md) var(--space-2xl);
+  border-radius: var(--radius-full, 9999px);
+  padding: 12px 28px;
   font-family: var(--font-body);
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition: all 0.2s ease;
+  margin-top: var(--space-sm);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .btn:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-mustard, #E5A84B);
+  color: #1A1714;
+  transform: translateY(-1px);
 }
 
 .btn:disabled {
   cursor: default;
+  opacity: 0.6;
 }
 
 .btnLoading {
@@ -93,57 +144,51 @@
 
 .errorMsg {
   font-family: var(--font-body);
-  font-size: var(--text-small);
+  font-size: 0.85rem;
   font-style: italic;
-  color: var(--color-error);
+  color: #FFB4AB;
+  margin: 0;
 }
 
 .successWrap {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  padding: var(--space-xl) 0;
 }
 
 .successMsg {
   font-family: var(--font-brand);
-  font-size: clamp(var(--text-h2), 5vw, 3rem);
-  font-weight: 400;
-  color: var(--color-text);
-  line-height: 1.1;
+  font-size: 2rem;
+  color: #FAF5EE;
+  margin: 0;
 }
 
 .successSub {
   font-family: var(--font-body);
+  font-size: 1rem;
   font-style: italic;
-  color: var(--color-text-muted);
-  font-size: var(--text-body);
+  color: rgba(245, 239, 235, 0.7);
+  margin: 0;
 }
 
 .resetBtn {
   align-self: flex-start;
   background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid rgba(245, 239, 235, 0.3);
+  color: #FAF5EE;
+  padding: var(--space-sm) var(--space-lg);
   font-family: var(--font-body);
-  font-size: var(--text-small);
-  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  border-radius: var(--radius-full, 9999px);
+  margin-top: var(--space-sm);
 }
 
 .resetBtn:hover {
-  color: var(--color-text);
-}
-
-/* ── Responsive ──────────────────────────────────── */
-
-@media (max-width: 600px) {
-  .btn {
-    align-self: stretch;
-    text-align: center;
-  }
+  border-color: #FAF5EE;
+  background-color: rgba(245, 239, 235, 0.08);
 }

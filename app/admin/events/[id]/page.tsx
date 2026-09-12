@@ -2,162 +2,381 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import styles from '../../admin.module.css';
+import { validateEventLinks, normalizeTags, formatTagsForDisplay } from '@/lib/validators';
+import { StatusBadge } from '@/components/admin/StatusBadge';
+import { EventLifecycleBanner } from '@/components/admin/EventLifecycleBanner';
+import { EventSessionFields } from '@/components/admin/EventSessionFields';
+import { EventScheduleFields } from '@/components/admin/EventScheduleFields';
+import { EventMediaFields } from '@/components/admin/EventMediaFields';
+import { EventArchiveRecapFields } from '@/components/admin/EventArchiveRecapFields';
 
 export default function EditEventPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [event, setEvent] = useState<any>(null);
-  const [msg, setMsg] = useState('');
-
-  // Content state
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [youtubeUrls, setYoutubeUrls] = useState<string[]>([]);
   const [substackUrls, setSubstackUrls] = useState<string[]>([]);
+  const [role, setRole] = useState<string | null>(null);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingArchive, setUploadingArchive] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    fetch(`/api/admin/events/all`)
+  const loadEvent = () => {
+    fetch('/api/admin/events/all')
       .then(res => res.json())
       .then(events => {
+        if (!Array.isArray(events)) return;
         const found = events.find((e: any) => e.id.toString() === id);
         if (found) {
-          setEvent(found);
-          try { setYoutubeUrls(JSON.parse(found.youtube_urls || '[]')); } catch {}
-          try { setSubstackUrls(JSON.parse(found.substack_urls || '[]')); } catch {}
+          setEvent({
+            ...found,
+            archive_tags: formatTagsForDisplay(found.archive_tags),
+          });
+          try {
+            setYoutubeUrls(typeof found.youtube_urls === 'string' ? JSON.parse(found.youtube_urls || '[]') : (found.youtube_urls || []));
+          } catch {
+            setYoutubeUrls([]);
+          }
+          try {
+            setSubstackUrls(typeof found.substack_urls === 'string' ? JSON.parse(found.substack_urls || '[]') : (found.substack_urls || []));
+          } catch {
+            setSubstackUrls([]);
+          }
         }
       });
+  };
+
+  useEffect(() => {
+    fetch('/api/admin/auth')
+      .then(res => res.json())
+      .then(data => { if (data.role) setRole(data.role); });
+
+    loadEvent();
   }, [id]);
 
-  if (!event) return <div className={styles.page}>Loading...</div>;
+  if (!event) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.card} style={{ textAlign: 'center', padding: '3rem' }}>
+          <p style={{ color: '#666' }}>Loading event details...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch(`/api/admin/events/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event)
-    });
-    if (res.ok) setMsg('Event updated');
+  const showToast = (type: 'success' | 'error', text: string) => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 4000);
   };
 
-  const handleContentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch(`/api/admin/events/${id}/content`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ youtube_urls: JSON.stringify(youtubeUrls), substack_urls: JSON.stringify(substackUrls) })
+  const handleSaveAll = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const validation = validateEventLinks({
+      ...event,
+      youtube_urls: youtubeUrls,
+      substack_urls: substackUrls,
     });
-    if (res.ok) setMsg('Content updated');
+
+    if (!validation.valid) {
+      setValidationErrors(validation.errors);
+      alert('Please fix the link errors:\n' + Object.values(validation.errors).join('\n'));
+      return;
+    }
+    setValidationErrors({});
+    setIsSaving(true);
+
+    const tagsArray = normalizeTags(event.archive_tags);
+
+    const payload = {
+      ...event,
+      archive_tags: JSON.stringify(tagsArray),
+      youtube_urls: JSON.stringify(youtubeUrls),
+      substack_urls: JSON.stringify(substackUrls),
+    };
+
+    try {
+      const res = await fetch(`/api/admin/events/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        showToast('success', 'All event details and media links saved successfully.');
+        loadEvent();
+      } else {
+        const data = await res.json();
+        if (data.errors) setValidationErrors(data.errors);
+        showToast('error', data.error || 'Failed to save event changes');
+      }
+    } catch {
+      showToast('error', 'Network error while saving');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleArchiveAction = async (action: string) => {
-    const res = await fetch(`/api/admin/events/${id}/${action}`, { method: 'POST' });
-    if (res.ok) {
-      router.push('/admin/events');
+  const handleStatusChange = async (action: string) => {
+    try {
+      const res = await fetch(`/api/admin/events/${id}/${action}`, { method: 'POST' });
+      if (res.ok) {
+        showToast('success', `Status updated (${action})`);
+        loadEvent();
+      } else {
+        const data = await res.json();
+        showToast('error', data.error || 'Action failed');
+      }
+    } catch {
+      showToast('error', 'Network error changing status');
+    }
+  };
+
+  const handleDirectStatusSelect = async (newStatus: string) => {
+    try {
+      const res = await fetch(`/api/admin/events/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archive_status: newStatus })
+      });
+      if (res.ok) {
+        showToast('success', `Status updated to ${newStatus}`);
+        loadEvent();
+      } else {
+        const data = await res.json();
+        showToast('error', data.error || 'Failed to update status');
+      }
+    } catch {
+      showToast('error', 'Network error changing status');
+    }
+  };
+
+  const handlePublishToArchive = async () => {
+    const tagsArray = normalizeTags(event.archive_tags);
+
+    try {
+      const res = await fetch(`/api/admin/events/${id}/archive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          archive_badge: event.archive_badge || null,
+          archive_tags: tagsArray,
+          archive_image: event.archive_image || null,
+        })
+      });
+
+      if (res.ok) {
+        await fetch(`/api/admin/events/${id}/content`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            youtube_urls: youtubeUrls,
+            substack_urls: substackUrls,
+            archive_badge: event.archive_badge || null,
+            archive_tags: tagsArray,
+          })
+        });
+        showToast('success', 'Event successfully published to the Postcard Archive!');
+        loadEvent();
+      } else {
+        const data = await res.json();
+        showToast('error', data.error || 'Failed to publish to archive');
+      }
+    } catch {
+      showToast('error', 'Network error publishing to archive');
+    }
+  };
+
+  const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setUploadingPoster(true);
+    const data = new FormData();
+    data.append('file', e.target.files[0]);
+    data.append('type', 'posters');
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await res.json();
+      if (res.ok && result.url) {
+        setEvent((prev: any) => ({ ...prev, image: result.url }));
+        setValidationErrors(prev => {
+          const next = { ...prev };
+          delete next.image;
+          return next;
+        });
+        showToast('success', 'Poster image uploaded');
+      } else {
+        showToast('error', result.error || 'Failed to upload poster');
+      }
+    } catch {
+      showToast('error', 'Network error uploading poster');
+    } finally {
+      setUploadingPoster(false);
+    }
+  };
+
+  const handleArchiveImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setUploadingArchive(true);
+    const data = new FormData();
+    data.append('file', e.target.files[0]);
+    data.append('type', 'archive');
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await res.json();
+      if (res.ok && result.url) {
+        setEvent((prev: any) => ({ ...prev, archive_image: result.url }));
+        setValidationErrors(prev => {
+          const next = { ...prev };
+          delete next.archive_image;
+          return next;
+        });
+        showToast('success', 'Archive recap photo uploaded');
+      } else {
+        showToast('error', result.error || 'Failed to upload archive photo');
+      }
+    } catch {
+      showToast('error', 'Network error uploading archive photo');
+    } finally {
+      setUploadingArchive(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setEvent({ ...event, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const formData = new FormData();
-    formData.append('image', e.target.files[0]);
-    const res = await fetch(`/api/admin/events/${id}/image`, {
-      method: 'POST',
-      body: formData
-    });
-    if (res.ok) setMsg('Image uploaded');
+    if (name === 'event_datetime' && value) {
+      try {
+        const dt = new Date(value);
+        if (!isNaN(dt.getTime())) {
+          const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' });
+          const day = dt.getDate();
+          const month = dt.toLocaleDateString('en-US', { month: 'short' });
+          const dateFormatted = `${weekday}, ${day} ${month}`;
+          const timeFormatted = dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+          setEvent((prev: any) => ({
+            ...prev,
+            event_datetime: value,
+            date: dateFormatted,
+            time: timeFormatted,
+          }));
+          return;
+        }
+      } catch {}
+    }
+    setEvent((prev: any) => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className={styles.page}>
+      {/* Header */}
       <div className={styles.header}>
-        <h1>Edit Event #{id}</h1>
-      </div>
-      {msg && <div className={`${styles.alert} ${styles.alertSuccess}`}>{msg}</div>}
-
-      <div className={styles.card}>
-        <h2>Basic Details</h2>
-        <form onSubmit={handleEditSubmit} className={styles.form}>
-          <div><label>Title</label><input name="title" className={styles.input} value={event.title} onChange={handleChange} /></div>
-          <div><label>Speaker</label><input name="speaker" className={styles.input} value={event.speaker} onChange={handleChange} /></div>
-          <div><label>Venue</label><input name="venue" className={styles.input} value={event.venue} onChange={handleChange} /></div>
-          <div><label>Category</label>
-            <select name="category" className={styles.select} value={event.category} onChange={handleChange}>
-              <option value="talk">Talk</option>
-              <option value="workshop">Workshop</option>
-              <option value="performance">Performance</option>
-              <option value="other">Other</option>
-            </select>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h1 className={styles.headerTitle}>{event.title}</h1>
+            <StatusBadge status={event.archive_status} />
           </div>
-          <div><label>Date</label><input name="date" className={styles.input} value={event.date} onChange={handleChange} /></div>
-          <div><label>Event Datetime</label><input type="datetime-local" name="event_datetime" className={styles.input} value={event.event_datetime} onChange={handleChange} /></div>
-          <div><label>Time</label><input name="time" className={styles.input} value={event.time} onChange={handleChange} /></div>
-          <div><label>Price</label><input name="price" className={styles.input} value={event.price || ''} onChange={handleChange} /></div>
-          <div><label>Description</label><textarea name="description" className={styles.textarea} value={event.description} onChange={handleChange} /></div>
-          <div><label>Image URL</label><input name="image" className={styles.input} value={event.image || ''} onChange={handleChange} /></div>
-          <div><label>Urbanaut URL</label><input name="urbanaut_url" className={styles.input} value={event.urbanaut_url || ''} onChange={handleChange} /></div>
-          <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>Save Details</button>
-        </form>
-      </div>
-
-      {event.archive_status === 'active' && (
-        <div className={styles.card}>
-          <h2>Archive Event</h2>
-          <div className={styles.form}>
-            <div><label>Badge</label><input name="archive_badge" className={styles.input} value={event.archive_badge || ''} onChange={handleChange} /></div>
-            <div><label>Tags (comma-separated)</label><input name="archive_tags" className={styles.input} value={event.archive_tags || ''} onChange={handleChange} /></div>
-            <div><label>Archive Cover Image</label><input type="file" className={styles.input} onChange={handleImageUpload} /></div>
-            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleArchiveAction('archive')}>Archive This Event</button>
-          </div>
+          <p className={styles.headerSubtitle}>
+            ID: <code>{event.id}</code> &bull; Format: <span style={{ textTransform: 'capitalize' }}>{event.category?.replace(/-/g, ' ')}</span>
+          </p>
         </div>
-      )}
-
-      {event.archive_status === 'archived' && (
-        <div className={styles.card}>
-          <h2>Content Links</h2>
-          <form onSubmit={handleContentSubmit} className={styles.form}>
-            <div>
-              <label>YouTube URLs (one per line)</label>
-              <textarea 
-                className={styles.textarea} 
-                value={youtubeUrls.join('\n')} 
-                onChange={(e) => setYoutubeUrls(e.target.value.split('\n').filter(Boolean))} 
-              />
-            </div>
-            <div>
-              <label>Substack URLs (one per line)</label>
-              <textarea 
-                className={styles.textarea} 
-                value={substackUrls.join('\n')} 
-                onChange={(e) => setSubstackUrls(e.target.value.split('\n').filter(Boolean))} 
-              />
-            </div>
-            <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>Save Content</button>
-          </form>
-          <div style={{ marginTop: '1rem' }}>
-            <label>Upload Archive Cover Image</label>
-            <input type="file" className={styles.input} onChange={handleImageUpload} />
-          </div>
-        </div>
-      )}
-
-      <div className={styles.card}>
-        <h2>Status Actions</h2>
         <div className={styles.actions}>
-          {event.archive_status === 'active' && <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => handleArchiveAction('discard')}>Discard</button>}
-          {event.archive_status === 'archived' && <button className={styles.btn} onClick={() => handleArchiveAction('hide')}>Hide</button>}
-          {event.archive_status === 'hidden' && (
-            <>
-              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleArchiveAction('restore')}>Restore</button>
-              <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => handleArchiveAction('discard')}>Discard</button>
-            </>
-          )}
-          {event.archive_status === 'discarded' && <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleArchiveAction('restore')}>Restore</button>}
+          <Link href="/admin/events" className={styles.btn}>
+            &larr; All Events
+          </Link>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={() => handleSaveAll()}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
         </div>
       </div>
+
+      {/* Toast Feedback */}
+      {msg && (
+        <div className={`${styles.alert} ${msg.type === 'success' ? styles.alertSuccess : styles.alertError}`}>
+          {msg.text}
+        </div>
+      )}
+
+      {/* Lifecycle Status Banner */}
+      <EventLifecycleBanner
+        status={event.archive_status}
+        role={role}
+        onStatusChange={handleStatusChange}
+        onDirectStatusSelect={handleDirectStatusSelect}
+        onPublishArchive={handlePublishToArchive}
+      />
+
+      {/* Main Unified Form */}
+      <form onSubmit={handleSaveAll} className={styles.form}>
+        <EventSessionFields formData={event} onChange={handleChange} />
+        
+        <EventScheduleFields formData={event} onChange={handleChange} />
+
+        <EventMediaFields
+          formData={event}
+          validationErrors={validationErrors}
+          uploading={uploadingPoster}
+          onPosterUpload={handlePosterUpload}
+          onChange={handleChange}
+        />
+
+        <EventArchiveRecapFields
+          formData={event}
+          youtubeUrls={youtubeUrls}
+          substackUrls={substackUrls}
+          validationErrors={validationErrors}
+          uploading={uploadingArchive}
+          onArchiveUpload={handleArchiveImageUpload}
+          onChange={handleChange}
+          onYoutubeChange={setYoutubeUrls}
+          onSubstackChange={setSubstackUrls}
+        />
+
+        {/* Sticky Bottom Save Bar */}
+        <div className={styles.stickyBar}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span>Editing: <strong>{event.title}</strong></span>
+            <StatusBadge status={event.archive_status} />
+          </div>
+
+          <div className={styles.actions}>
+            <Link href="/admin/events" className={`${styles.btn} ${styles.btnSmall}`}>
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={isSaving || uploadingPoster || uploadingArchive}
+            >
+              {isSaving ? 'Saving...' : 'Save All Changes'}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

@@ -1,12 +1,11 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 /* ── FormatCardLink ─────────────────────────────────
-   Wraps a format card with Framer Motion hover & press
-   physics for smooth, tactile card interaction. */
+   Standard Next.js Link for format cards with instant prefetching
+   and clean navigation without scroll jumps. */
 export function FormatCardLink({
   href,
   className,
@@ -16,23 +15,10 @@ export function FormatCardLink({
   className: string;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
-  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    router.push(href);
-  }
-
   return (
-    <motion.a
-      href={href}
-      className={className}
-      onClick={handleClick}
-      whileHover={{ y: -10, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
-      whileTap={{ scale: 0.98 }}
-    >
+    <Link href={href} className={className}>
       {children}
-    </motion.a>
+    </Link>
   );
 }
 
@@ -41,7 +27,7 @@ export function OverlayManager() {
 }
 
 /* ── BackButton ─────────────────────────────────────
-   Reverse navigation button with Framer Motion hover mechanics. */
+   Reverse navigation back to the formats section. */
 export function BackButton({
   className,
   children,
@@ -49,22 +35,9 @@ export function BackButton({
   className: string;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
-  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    router.push('/#formats');
-  }
-
   return (
-    <motion.a
-      href="/#formats"
-      className={className}
-      onClick={handleClick}
-      whileHover={{ x: -5, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
-      whileTap={{ scale: 0.96 }}
-    >
+    <Link href="/#formats" className={className}>
       {children}
-    </motion.a>
+    </Link>
   );
 }

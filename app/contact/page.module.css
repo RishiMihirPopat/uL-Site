@@ -1,20 +1,23 @@
 /* ════════════════════════════════════════════════
-   CONTACT PAGE
-   Warm cream — like writing a letter on good paper.
+   CONTACT PAGE — Deep Maroon & Warm Beige
    ════════════════════════════════════════════════ */
 
 .main {
-  background-color: var(--color-bg);
-  min-height: 100vh;
+  background-color: #361212; /* Rich deep maroon */
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(245, 239, 235, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(245, 239, 235, 0.03) 0%, transparent 60%);
+  min-height: calc(100vh - 70px);
   padding: calc(var(--space-2xl) * 2) var(--space-2xl);
+  color: #FAF5EE;
 }
 
 .inner {
-  max-width: var(--max-width-narrow);
+  max-width: var(--max-width-narrow, 1040px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: calc(var(--space-2xl) * 2);
+  grid-template-columns: 1.1fr 1.2fr;
+  gap: calc(var(--space-2xl) * 1.5);
   align-items: start;
 }
 
@@ -23,47 +26,52 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   position: sticky;
   top: calc(var(--space-2xl) * 2);
+  padding-right: var(--space-lg);
 }
 
 .eyebrow {
-  font-size: var(--text-small);
-  letter-spacing: 0.2em;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(245, 239, 235, 0.6);
+  font-weight: 700;
 }
 
 .heading {
   font-family: var(--font-brand);
-  font-size: clamp(var(--text-h2), 6vw, 3.5rem);
+  font-size: clamp(2.4rem, 4.5vw, 3.6rem);
   font-weight: 400;
-  color: var(--color-text);
-  line-height: 1;
+  color: #FAF5EE;
+  line-height: 1.05;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .sub {
   font-family: var(--font-body);
-  font-size: var(--text-body);
+  font-size: 0.98rem;
   font-style: italic;
-  color: var(--color-text-muted);
+  color: rgba(245, 239, 235, 0.75);
   line-height: 1.7;
-  max-width: 36ch;
+  max-width: 38ch;
+  margin-top: var(--space-xs);
 }
 
-/* ── Right column: form ──────────────────────────── */
+/* ── Right column: form wrap ─────────────────────── */
 
 .formWrap {
-  padding-top: var(--space-sm);
+  padding-top: var(--space-xs);
 }
 
 /* ── Responsive ──────────────────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .main {
-    padding: var(--space-2xl) var(--space-md);
+    padding: var(--space-2xl) var(--space-lg);
   }
 
   .inner {
@@ -73,5 +81,10 @@
 
   .header {
     position: static;
+    padding-right: 0;
+  }
+
+  .heading {
+    white-space: normal;
   }
 }

@@ -1,27 +1,23 @@
-import { getDb } from '@/lib/db';
+import { eventService } from '@/lib/services/event.service';
+import { eventRepository } from '@/lib/repositories/event.repository';
 import { isAuthenticated, unauthorizedResponse } from '@/lib/auth';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) return unauthorizedResponse();
   const { id } = await params;
   const body = await request.json();
-  const db = getDb();
-  try {
-    const fields = Object.keys(body).map(k => `${k} = ?`).join(', ');
-    const values = Object.values(body);
-    const stmt = db.prepare(`UPDATE events SET ${fields} WHERE id = ?`);
-    stmt.run(...values, id);
-    return Response.json({ success: true });
-  } catch (err: any) {
-    return Response.json({ error: err.message }, { status: 500 });
+
+  const result = eventService.updateEvent(id, body);
+  if (!result.success) {
+    return Response.json({ error: result.error, errors: result.errors }, { status: 400 });
   }
+
+  return Response.json({ success: true });
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) return unauthorizedResponse();
   const { id } = await params;
-  const db = getDb();
-  const stmt = db.prepare('DELETE FROM events WHERE id = ?');
-  stmt.run(id);
+  eventRepository.delete(id);
   return Response.json({ success: true });
 }

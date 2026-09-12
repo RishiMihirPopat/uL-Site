@@ -20,9 +20,9 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-      router.push('/admin/dashboard');
+      window.location.href = '/admin/dashboard';
     } else {
-      setError('Invalid password');
+      setError('Invalid password. Try "unlecture2025" (Super Admin) or "ulmanager2025" (Event Manager).');
     }
   };
 

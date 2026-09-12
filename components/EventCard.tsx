@@ -4,8 +4,29 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import BookingModal from './BookingModal';
+import { formatEventPrice } from '../lib/utils/formatPrice';
 import type { Event } from '../lib/db';
 import styles from './EventCard.module.css';
+
+function ArrowUpRight({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="10"
+      height="10"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="7" y1="17" x2="17" y2="7" />
+      <polyline points="7 7 17 7 17 17" />
+    </svg>
+  );
+}
 
 export default function EventCard({ event, index = 0 }: { event: Event; index?: number }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -22,11 +43,10 @@ export default function EventCard({ event, index = 0 }: { event: Event; index?: 
           ease: [0.16, 1, 0.3, 1],
         }}
       >
-
         {/* Tape strip */}
         <div className={styles.tape} aria-hidden="true" />
 
-        {/* Cover image — only rendered when image path is provided */}
+        {/* Cover image */}
         {event.image && (
           <div className={styles.imgWrap}>
             <Image
@@ -40,41 +60,59 @@ export default function EventCard({ event, index = 0 }: { event: Event; index?: 
         )}
 
         <div className={styles.cardBody}>
+          <div className={styles.bodyTop}>
+            {/* Header line: Date & Time + Special Badge */}
+            <div className={styles.dateLine}>
+              <span className={styles.dateText}>{event.date}</span>
+              {event.time && event.time !== '—' && (
+                <>
+                  <span className={styles.dateDivider} aria-hidden="true">·</span>
+                  <span className={styles.dateTime}>{event.time}</span>
+                </>
+              )}
+              {event.badge && (
+                <span className={styles.cardBadge}>{event.badge}</span>
+              )}
+            </div>
 
-          <div className={styles.dateLine}>
-            <span className={styles.dateText}>{event.date}</span>
-            {event.time !== '—' && (
-              <>
-                <span className={styles.dateDivider} aria-hidden="true">·</span>
-                <span className={styles.dateTime}>{event.time}</span>
-              </>
+            {/* Event Title */}
+            <h2 className={styles.cardTitle}>{event.title}</h2>
+
+            {/* Speaker */}
+            {event.speaker && event.speaker !== '—' && (
+              <p className={styles.cardSpeaker}>{event.speaker}</p>
             )}
           </div>
 
-          <h2 className={styles.cardTitle}>{event.title}</h2>
-
-          {event.speaker !== '—' && (
-            <p className={styles.cardSpeaker}>{event.speaker}</p>
-          )}
-
-          <div className={styles.cardMeta}>
-            {event.venue !== '—' && (
-              <span className={styles.cardVenue}>{event.venue}</span>
-            )}
-            <span className={styles.cardPrice}>{event.price}</span>
+          <div className={styles.bodyBottom}>
+            {/* Consolidated Venue, Price & Action Row */}
+            <div className={styles.cardMeta}>
+              {event.venue && event.venue !== '—' ? (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.cardVenueLink}
+                  title={`View ${event.venue} on Google Maps`}
+                >
+                  <span className={styles.venueText}>{event.venue}</span>
+                  <ArrowUpRight className={styles.arrowIcon} />
+                </a>
+              ) : (
+                <span />
+              )}
+              <div className={styles.actionWrap}>
+                <span className={styles.cardPrice}>{formatEventPrice(event.price)}</span>
+                <button
+                  className={styles.bookBtn}
+                  onClick={() => setModalOpen(true)}
+                >
+                  <span>Book Now</span>
+                  <ArrowUpRight className={styles.btnArrowIcon} />
+                </button>
+              </div>
+            </div>
           </div>
-
-          {event.description && (
-            <p className={styles.cardDesc}>{event.description}</p>
-          )}
-
-          <button
-            className={styles.bookBtn}
-            onClick={() => setModalOpen(true)}
-          >
-            Book Now
-          </button>
-
         </div>
       </motion.article>
 

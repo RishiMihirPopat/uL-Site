@@ -11,16 +11,34 @@ interface Props {
 }
 
 export default function BookingModal({ url, title, onClose }: Props) {
-  /* Close on Escape */
+  /* Close on Escape and handle mobile browser back gesture */
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
     }
     document.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
+
+    let popped = false;
+    try {
+      window.history.pushState({ modal: 'booking' }, '', window.location.href);
+    } catch {}
+
+    const handlePopState = () => {
+      popped = true;
+      onClose();
+    };
+    window.addEventListener('popstate', handlePopState);
+
     return () => {
       document.removeEventListener('keydown', handleKey);
+      window.removeEventListener('popstate', handlePopState);
       document.body.style.overflow = '';
+      if (!popped && typeof window !== 'undefined' && window.history.state?.modal === 'booking') {
+        try {
+          window.history.back();
+        } catch {}
+      }
     };
   }, [onClose]);
 
@@ -39,14 +57,22 @@ export default function BookingModal({ url, title, onClose }: Props) {
       <motion.div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        initial={{ opacity: 0, scale: 0.98, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 12 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        exit={{ opacity: 0, scale: 0.98, y: 12 }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       >
-
         <div className={styles.modalHeader}>
-          <span className={styles.modalTitle}>{title}</span>
+          <button
+            className={styles.modalBackBtn}
+            onClick={onClose}
+            aria-label="Back to website"
+          >
+            &larr; Back
+          </button>
+
+          <span className={styles.modalTitle} title={title}>{title}</span>
+
           <div className={styles.modalActions}>
             <a
               href={url}
@@ -54,9 +80,28 @@ export default function BookingModal({ url, title, onClose }: Props) {
               rel="noopener noreferrer"
               className={styles.externalLink}
             >
-              Open on Urbanaut ↗
+              <span>Urbanaut</span>
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                style={{ marginLeft: 4, display: 'inline-block', verticalAlign: 'middle' }}
+              >
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
             </a>
-            <button className={styles.closeBtn} onClick={onClose} aria-label="Close booking modal">
+            <button
+              className={styles.closeBtn}
+              onClick={onClose}
+              aria-label="Close booking view"
+            >
               ✕
             </button>
           </div>
@@ -68,7 +113,6 @@ export default function BookingModal({ url, title, onClose }: Props) {
           title={`Book tickets: ${title}`}
           allow="payment"
         />
-
       </motion.div>
     </motion.div>
   );

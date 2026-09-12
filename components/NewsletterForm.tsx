@@ -32,8 +32,10 @@ import styles from './NewsletterForm.module.css';
   5. Paste it below as APPS_SCRIPT_URL
   ─────────────────────────────────────────────────────────────
 */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKN8GJ6QvJuRzVSzcDdO8bshY0Cijdta_6y7SCl1i_DUFLaIiEzcINpB0sPtd8wKUIiQ/exec';
-// ↑ PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+const APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_NEWSLETTER_GOOGLE_SHEET_URL ||
+  process.env.NEXT_PUBLIC_NEWSLETTER_SCRIPT_URL ||
+  'https://script.google.com/macros/s/AKfycbzKN8GJ6QvJuRzVSzcDdO8bshY0Cijdta_6y7SCl1i_DUFLaIiEzcINpB0sPtd8wKUIiQ/exec';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 

@@ -1,40 +1,138 @@
 .container {
   min-height: 100vh;
-  background: #f8f8f8;
-  color: #333;
+  background: var(--color-bg, #F5EFE0);
+  color: var(--color-text, #1A1714);
+  display: flex;
+  flex-direction: column;
 }
+
 .topbar {
-  background: white;
-  padding: 0 2rem;
-  height: 60px;
+  background: var(--color-bg-dark, #2A2420);
+  color: var(--color-text-on-dark, #F0E8DC);
+  padding: 0 var(--space-xl, 2rem);
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(240, 232, 220, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
+
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .brand {
-  font-weight: bold;
+  font-family: var(--font-brand, Georgia, serif);
+  font-weight: 700;
   font-size: 1.25rem;
-  color: #333;
+  letter-spacing: 0.04em;
+  color: var(--color-text-on-dark, #F0E8DC);
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
+.brand:hover {
+  color: var(--color-terracotta, #C26540);
+}
+
+.brandBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(240, 232, 220, 0.15);
+  color: var(--color-text-on-dark, #F0E8DC);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.roleBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.roleSuper {
+  background-color: var(--color-primary, #6B2D2D);
+  color: #F0E8DC;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.roleManager {
+  background-color: var(--color-olive, #5A5A3C);
+  color: #F0E8DC;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .nav {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: center;
 }
+
 .navLink {
-  color: #555;
+  color: rgba(240, 232, 220, 0.75);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.18s ease;
 }
+
 .navLink:hover {
-  color: #000;
+  color: #FFF;
+  background: rgba(255, 255, 255, 0.08);
 }
+
+.navLinkActive {
+  color: #FFF;
+  background: rgba(194, 101, 64, 0.35);
+  border-bottom: 2px solid var(--color-terracotta, #C26540);
+  font-weight: 600;
+}
+
+.viewSiteLink {
+  color: var(--color-terracotta, #C26540);
+  text-decoration: none;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(194, 101, 64, 0.4);
+  border-radius: 4px;
+  transition: all 0.18s ease;
+}
+
+.viewSiteLink:hover {
+  background: var(--color-terracotta, #C26540);
+  color: #FFF;
+}
+
 .logoutBtn {
   background: none;
-  border: none;
-  color: #d93025;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(240, 232, 220, 0.7);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: all 0.18s ease;
+}
+
+.logoutBtn:hover {
+  background: rgba(217, 48, 37, 0.2);
+  color: #ff8b80;
+  border-color: #d93025;
 }

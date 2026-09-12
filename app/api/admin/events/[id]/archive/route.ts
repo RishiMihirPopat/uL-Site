@@ -1,31 +1,20 @@
-import { getDb } from '@/lib/db';
+import { eventService } from '@/lib/services/event.service';
 import { isAuthenticated, unauthorizedResponse } from '@/lib/auth';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) return unauthorizedResponse();
   const { id } = await params;
-  let badge = null;
-  let tags = null;
-  let archive_image = null;
+  
+  let body: any = {};
   try {
-    const body = await request.json();
-    badge = body.badge;
-    tags = body.tags ? JSON.stringify(body.tags) : null;
-    archive_image = body.archive_image;
+    body = await request.json();
   } catch {}
-  
-  const db = getDb();
-  let query = "UPDATE events SET archive_status = 'archived'";
-  const queryParams = [];
-  
-  if (badge !== undefined) { query += ', archive_badge = ?'; queryParams.push(badge); }
-  if (tags !== null) { query += ', archive_tags = ?'; queryParams.push(tags); }
-  if (archive_image !== undefined) { query += ', archive_image = ?'; queryParams.push(archive_image); }
-  
-  query += ' WHERE id = ?';
-  queryParams.push(id);
-  
-  const stmt = db.prepare(query);
-  stmt.run(...queryParams);
-  return Response.json({ success: true });
+
+  const result = eventService.publishToArchive(id, {
+    archive_badge: body.archive_badge !== undefined ? body.archive_badge : body.badge,
+    archive_tags: body.archive_tags !== undefined ? body.archive_tags : body.tags,
+    archive_image: body.archive_image !== undefined ? body.archive_image : body.image,
+  });
+
+  return Response.json(result);
 }

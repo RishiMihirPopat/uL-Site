@@ -2,7 +2,7 @@ import { getActiveEvents } from '@/lib/db';
 import type { EventCategory } from '@/lib/db';
 import { BackButton } from '@/components/FormatCardLink';
 import { HeaderTitle } from '@/components/AnimatedTitle';
-import EventCard from '@/components/EventCard';
+import { FormatEventsList } from '@/components/FormatEventsList';
 import styles from './page.module.css';
 
 /* ── Format configuration ───────────────────────── */
@@ -16,25 +16,25 @@ const FORMAT_CONFIG: Record<string, {
     name: 'Grounds for Thought',
     category: 'grounds-for-thought',
     description:
-      'In partnership with Blue Tokai. A smaller format, more intimate setting -- conversations on the things we actually live with.',
+      "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
   },
   'unlecture': {
     name: 'unLecture',
     category: 'unlecture',
     description:
-      'In-person lectures in unconventional spaces. A speaker, an idea, and an evening that unfolds with the conversation.',
+      'Our flagship event. It breaks the binary that certain conversations only happen inside certain institutions. We make room for that discourse in the casual spaces we already frequent, and treat learning as something you do out in the city.',
   },
   'community': {
     name: 'Community Events',
     category: 'community',
     description:
-      'Recurring evenings shaped by the people who show up. Familiar faces, evolving formats, ideas that stay with you.',
+      'Unique events that build the space along with us. The formats keep evolving. This is our way of keeping the community, and the interactions that matter, accessible to most.',
   },
   'unlecture-series': {
     name: 'unLecture Series',
     category: 'unlecture-series',
     description:
-      'A series of connected conversations and hands-on sessions exploring one idea deeply -- multiple perspectives, one thread.',
+      "A chance to go deep into one topic of interest, programmed over a few weeks. By the end of it, you're sure to have grown and taken something away with you.",
   },
 };
 
@@ -77,19 +77,18 @@ export default async function EventsFormatPage({
     description: e.description,
     image: e.image,
     urbanautUrl: e.urbanaut_url,
+    badge: e.archive_badge || undefined,
   }));
 
   const events = dbEvents.filter((e) => e.category === config.category);
 
   return (
     <main className={styles.main}>
-
       <header className={styles.header} data-format={slug}>
         <BackButton className={styles.back}>
           &larr; All formats
         </BackButton>
         <div className={styles.headerInner}>
-          <p className={styles.headerLabel}>Format</p>
           <HeaderTitle href={`/events/${slug}`} className={styles.headerTitle}>{config.name}</HeaderTitle>
           <p className={styles.headerDesc}>{config.description}</p>
         </div>
@@ -97,17 +96,8 @@ export default async function EventsFormatPage({
       </header>
 
       <section className={styles.section}>
-        {events.length === 0 ? (
-          <p className={styles.empty}>No upcoming events in this category currently -- check back soon.</p>
-        ) : (
-          <div className={styles.grid}>
-            {events.map((event, index) => (
-              <EventCard key={event.id} event={event} index={index} />
-            ))}
-          </div>
-        )}
+        <FormatEventsList initialEvents={events} />
       </section>
-
     </main>
   );
 }

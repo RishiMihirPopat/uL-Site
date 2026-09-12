@@ -4,156 +4,206 @@
 }
 
 /* ════════════════════════════════════════════════
-   HERO — dark forest, split two-column, polaroid
+   HERO — Warm beige, compact breadth, split layout:
+   Left: "Lectures (+more) in unconventional spaces"
+   Right: Upcoming Lectures Carousel
    ════════════════════════════════════════════════ */
 
 .hero {
-  background-color: var(--color-forest);
-  min-height: 100vh;
+  background-color: #EDE5D8; /* Warm beige, slightly richer than page bg */
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(255, 255, 255, 0.35) 0%, transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(160, 130, 90, 0.08) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 20px 20px;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 420px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 0.95fr 1.05fr;
   align-items: center;
-  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
-  gap: var(--space-2xl);
+  padding: 2rem var(--space-2xl);
+  gap: var(--space-xl);
   position: relative;
+  overflow: hidden;
 }
 
 .heroLeft {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
-}
-
-/* Circular postmark badge */
-.heroBadge {
-  width: 88px;
-  height: 88px;
-  border-radius: var(--radius-full);
-  border: 2px solid rgba(240, 232, 220, 0.25);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(240, 232, 220, 0.45);
-  transform: rotate(-14deg);
-  line-height: 1.9;
-  flex-shrink: 0;
+  width: 100%;
+  padding: var(--space-sm) 0;
 }
 
-.heroTextBlock {
+.chalkboardWrap {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  position: relative;
+  max-width: 480px;
 }
 
-.heroEyebrow {
-  font-size: var(--text-small);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-mustard);
+.chalkboardHeading {
+  font-family: 'Caveat', 'Kalam', cursive, sans-serif;
+  font-size: clamp(2.2rem, 3.6vw, 3.6rem);
+  font-weight: 700;
+  color: #1A1714; /* Dark charcoal ink for beige background */
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  margin: 0;
+  transform: rotate(-0.8deg);
 }
 
-.heroWordmark {
-  font-family: var(--font-brand);
-  font-size: clamp(4rem, 10vw, 9rem);
-  font-weight: 400;
-  color: var(--color-text-on-dark);
-  line-height: 0.88;
-  letter-spacing: -0.02em;
-}
-
-.heroTagline {
-  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
-  font-style: italic;
-  color: rgba(240, 232, 220, 0.55);
-  line-height: 1.55;
-  max-width: 32ch;
-}
-
-/* Vintage stamp label at bottom */
-.heroStamp {
-  display: inline-flex;
-  gap: var(--space-sm);
-  align-items: center;
-  font-size: 0.55rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(240, 232, 220, 0.28);
-  border: 1px solid rgba(240, 232, 220, 0.14);
-  padding: 6px var(--space-md);
-  align-self: flex-start;
-  transform: rotate(-1.5deg);
-}
-
-/* Right column — wraps PostcardArchive component */
 .heroRight {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ════════════════════════════════════════════════
-   TICKER — terracotta scrolling marquee
+   FORMATS — "How We Gather"
    ════════════════════════════════════════════════ */
 
-.ticker {
-  background-color: var(--color-terracotta);
-  overflow: hidden;
-  padding: var(--space-md) 0;
-  border-top: 2px solid rgba(0, 0, 0, 0.12);
-  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+.formats {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl);
 }
 
-.tickerTrack {
+.formatsLabel {
+  max-width: var(--max-width);
+  margin: 0 auto var(--space-2xl);
   display: flex;
-  width: max-content;
-  animation: tickerScroll 26s linear infinite;
-}
-
-.tickerText {
+  align-items: center;
+  gap: var(--space-md);
   font-size: var(--text-small);
-  letter-spacing: 0.13em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-text-on-dark);
-  white-space: nowrap;
-  padding: 0 var(--space-lg);
+  color: var(--color-text-muted);
 }
 
-@keyframes tickerScroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+.formatsLabelRule {
+  width: 28px;
+  height: 1px;
+  background-color: var(--color-border-strong);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.formatGrid {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.formatCard {
+  display: block;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.38s ease;
+}
+
+.formatCard:nth-child(1) {
+  background-color: var(--color-terracotta);
+  transform: rotate(-1.8deg);
+}
+.formatCard:nth-child(2) {
+  background-color: var(--color-forest);
+  transform: rotate(1deg);
+}
+.formatCard:nth-child(3) {
+  background-color: var(--color-primary);
+  transform: rotate(-0.6deg);
+}
+.formatCard:nth-child(4) {
+  background-color: var(--color-olive);
+  transform: rotate(1.2deg);
+}
+
+.formatCard:hover {
+  transform: rotate(0deg) translateY(-10px);
+  box-shadow: var(--shadow-lift);
+  z-index: 2;
+}
+
+.formatCardImgReveal {
+  position: absolute;
+  inset: 0;
+}
+
+.formatCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.formatCardGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.78) 100%);
+  z-index: 1;
+}
+
+.formatCardContent {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-lg);
+}
+
+.formatCardInfo {
+  position: relative;
+}
+
+.formatCardName {
+  font-family: var(--font-body);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  color: var(--color-text-on-dark);
+  line-height: 1.2;
+}
+
+.formatCardDesc {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--space-sm);
+  font-size: var(--text-small);
+  color: var(--color-text-on-dark);
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 0.38s ease 0.1s;
+}
+
+.formatCard:hover .formatCardDesc {
+  opacity: 0.85;
 }
 
 /* ════════════════════════════════════════════════
-   ABOUT — parchment, giant watermark, asymmetric
+   ABOUT US — Parchment, Quote on Left, 6 Paragraphs
    ════════════════════════════════════════════════ */
 
 .about {
   background-color: var(--color-parchment);
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(180, 150, 100, 0.1) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(180, 150, 100, 0.1) 1px, transparent 0);
   background-size: 22px 22px;
   padding: calc(var(--space-2xl) * 2) var(--space-2xl);
   position: relative;
   overflow: hidden;
   border-top: 1px solid var(--color-border);
-}
-
-/* Giant watermark number */
-.aboutWatermark {
-  position: absolute;
-  top: -0.12em;
-  left: -0.06em;
-  font-family: var(--font-brand);
-  font-size: clamp(14rem, 32vw, 28rem);
-  line-height: 0.85;
-  color: var(--color-border);
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
 }
 
 .aboutGrid {
@@ -176,15 +226,44 @@
   font-size: var(--text-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  font-weight: 700;
   color: var(--color-terracotta);
 }
 
-.aboutHeading {
+.quoteBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  position: sticky;
+  top: 120px;
+}
+
+.quoteMark {
   font-family: var(--font-body);
-  font-size: clamp(var(--text-h3), 2.2vw, 2rem);
-  font-weight: 400;
-  line-height: 1.25;
-  color: var(--color-text);
+  font-size: 5.5rem;
+  color: var(--color-terracotta);
+  line-height: 0.6;
+  opacity: 0.35;
+  user-select: none;
+}
+
+.aboutQuoteText {
+  font-family: var(--font-body);
+  font-size: clamp(1.65rem, 2.5vw, 2.25rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.28;
+  color: var(--color-primary);
+  margin: 0;
+  quotes: none;
+}
+
+.aboutQuoteAttr {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: 4px;
 }
 
 .aboutRight {
@@ -193,209 +272,36 @@
   gap: var(--space-lg);
 }
 
+.aboutSectionHeading {
+  font-size: var(--text-small);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-terracotta);
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 6px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.aboutLead {
+  font-size: 1.2rem !important;
+  font-weight: 500;
+  line-height: 1.55 !important;
+  color: var(--color-text) !important;
+}
+
 .aboutRight p {
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--color-text-muted);
+  text-align: justify;
+  text-justify: inter-word;
+  margin: 0;
 }
 
 /* ════════════════════════════════════════════════
-   FORMATS — tall portrait cards, color-blocked
-   ════════════════════════════════════════════════ */
-
-.formats {
-  background-color: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl);
-}
-
-.formatsLabel {
-  max-width: var(--max-width);
-  margin: 0 auto var(--space-2xl);
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  font-size: var(--text-small);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-
-.formatsLabelRule {
-  width: 28px;
-  height: 1px;
-  background-color: var(--color-border-strong);
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-/* Four portrait cards in one row */
-.formatGrid {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-lg);
-  align-items: start;
-}
-
-.formatCard {
-  display: block;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 2 / 3;
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-  will-change: transform;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.38s ease;
-}
-
-/* Each card has its own background colour and slight tilt */
-.formatCard:nth-child(1) {
-  background-color: var(--color-terracotta);
-  transform: rotate(-1.8deg);
-}
-.formatCard:nth-child(2) {
-  background-color: var(--color-forest);
-  transform: rotate(1deg);
-}
-.formatCard:nth-child(3) {
-  background-color: var(--color-primary);
-  transform: rotate(-0.6deg);
-}
-.formatCard:nth-child(4) {
-  background-color: var(--color-olive);
-  transform: rotate(1.2deg);
-}
-
-/* Per-card image focal point */
-.formatCard:nth-child(1) .formatCardImg {
-  object-position: right center;
-}
-.formatCard:nth-child(2) .formatCardImg {
-  object-position: left center;
-}
-
-/* On hover: snap straight and lift */
-.formatCard:hover {
-  transform: rotate(0deg) translateY(-10px);
-  box-shadow: var(--shadow-lift);
-  z-index: 2;
-}
-
-/* Image always visible */
-.formatCardImgReveal {
-  position: absolute;
-  inset: 0;
-}
-
-.formatCardImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Gradient always on for text readability */
-.formatCardGradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.78) 100%);
-  z-index: 1;
-}
-
-/* Text always above image and gradient */
-.formatCardContent {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--space-lg);
-}
-
-
-.formatCardInfo {
-  position: relative;
-}
-
-.formatCardName {
-  font-family: var(--font-body);
-  font-size: var(--text-h3);
-  font-weight: 400;
-  color: var(--color-text-on-dark);
-  line-height: 1.2;
-}
-
-/* Description floats above the title, out of flow — title position unaffected by desc length */
-.formatCardDesc {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  padding-bottom: var(--space-sm);
-  font-size: var(--text-small);
-  color: var(--color-text-on-dark);
-  line-height: 1.55;
-  opacity: 0;
-  transition: opacity 0.38s ease 0.1s;
-}
-
-.formatCard:hover .formatCardDesc {
-  opacity: 0.85;
-}
-
-/* ════════════════════════════════════════════════
-   QUOTE — mustard, huge editorial type
-   ════════════════════════════════════════════════ */
-
-.quote {
-  background-color: var(--color-mustard);
-  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Giant decorative open-quote */
-.quoteOpenMark {
-  display: block;
-  font-family: var(--font-body);
-  font-size: clamp(8rem, 20vw, 18rem);
-  color: rgba(255, 255, 255, 0.18);
-  line-height: 0.5;
-  margin-bottom: var(--space-2xl);
-  user-select: none;
-}
-
-.quoteText {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  font-family: var(--font-body);
-  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1.15;
-  color: var(--color-bg-dark);
-  quotes: none;
-}
-
-.quoteAttr {
-  display: block;
-  max-width: var(--max-width);
-  margin: var(--space-2xl) auto 0;
-  text-align: right;
-  font-size: var(--text-small);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(42, 36, 32, 0.45);
-}
-
-/* ════════════════════════════════════════════════
-   PRESS — dark background carousel
+   PRESS — As seen in
    ════════════════════════════════════════════════ */
 
 .press {
@@ -426,20 +332,8 @@
 
 .carouselWrap {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 10%,
-    black 90%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 10%,
-    black 90%,
-    transparent
-  );
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 .carouselWrap:hover .carouselInner {
@@ -485,72 +379,53 @@
 }
 
 /* ════════════════════════════════════════════════
-   SCROLL REVEAL — progressive enhancement
+   NEWSLETTER
    ════════════════════════════════════════════════ */
 
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(32px); }
-  to   { opacity: 1; transform: translateY(0); }
+.newsletterSection {
+  background-color: var(--color-primary);
+  width: 100%;
+  padding: 0;
+  border: none;
 }
 
-@supports (animation-timeline: view()) {
-  .about,
-  .formats,
-  .quote,
-  .press {
-    animation: revealUp linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 28%;
-  }
+.newsletterInner {
+  width: 100%;
+  margin: 0;
 }
 
 /* ════════════════════════════════════════════════
-   TABLET — 2-column format grid
+   RESPONSIVE
    ════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: var(--space-2xl) var(--space-md);
+    text-align: center;
+  }
+
+  .heroLeft {
+    align-items: center;
+  }
+
+  .chalkboardHeading {
+    white-space: normal;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    text-align: center;
+  }
+
   .formatGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-lg);
   }
 
-  /* Remove tilts on tablet */
   .formatCard:nth-child(1),
   .formatCard:nth-child(2),
   .formatCard:nth-child(3),
   .formatCard:nth-child(4) {
     transform: none;
-  }
-}
-
-/* ════════════════════════════════════════════════
-   MOBILE
-   ════════════════════════════════════════════════ */
-
-@media (max-width: 768px) {
-  .hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    padding: var(--space-2xl) var(--space-md);
-    gap: var(--space-2xl);
-  }
-
-  .heroBadge {
-    width: 64px;
-    height: 64px;
-    font-size: 0.5rem;
-  }
-
-  .heroWordmark {
-    font-size: clamp(3.5rem, 18vw, 5rem);
-  }
-
-  .heroPolaroid {
-    width: min(320px, 88%);
-  }
-
-  .about {
-    padding: var(--space-2xl) var(--space-md);
   }
 
   .aboutGrid {
@@ -558,40 +433,53 @@
     gap: var(--space-2xl);
   }
 
-  .formats {
-    padding: var(--space-2xl) var(--space-md);
+  .quoteBlock {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .chalkboardHeading {
+    font-size: 1.85rem;
   }
 
+  .formats {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  /* 2x2 grid on mobile phones as requested */
   .formatGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-xl);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 100%;
+    margin: 0;
   }
 
   .formatCard {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 4 / 5;
+    transform: none !important;
+    border-radius: 6px;
   }
 
-  /* Remove tilts on mobile */
-  .formatCard:nth-child(1),
-  .formatCard:nth-child(2),
-  .formatCard:nth-child(3),
-  .formatCard:nth-child(4) {
-    transform: none;
+  .formatCardContent {
+    padding: 10px 12px;
   }
 
-  .formatCard:hover {
-    transform: translateY(-6px);
+  .formatCardName {
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
-  .quote {
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
+  .formatCardDesc {
+    display: none;
   }
 
-  .pressLabel {
-    padding: 0 var(--space-md);
+  /* Only on mobile: hide in-page About, Testimonials, Press & Archive (opened via nav or removed) */
+  .about,
+  .testimonialsWrap,
+  .press,
+  .archive {
+    display: none !important;
   }
 }

@@ -3,37 +3,90 @@ import crypto from 'crypto';
 
 const SESSION_COOKIE = 'ul_admin_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+const AUTH_SECRET = process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD || 'unlecture-auth-secret-key-2025';
+
+export type AdminRole = 'super_admin' | 'event_manager';
 
 function getAdminPassword(): string {
   return process.env.ADMIN_PASSWORD || 'unlecture2025';
 }
 
-function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
+function getManagerPassword(): string {
+  return process.env.MANAGER_PASSWORD || 'ulmanager2025';
 }
 
-/* Active sessions stored in memory -- resets on server restart, which is fine */
-const activeSessions = new Set<string>();
+function signPayload(payload: string): string {
+  const hmac = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+  return `${Buffer.from(payload).toString('base64url')}.${hmac}`;
+}
 
-export function createSession(): string {
-  const token = crypto.randomBytes(32).toString('hex');
-  activeSessions.add(hashToken(token));
-  return token;
+function verifyPayload(signedValue: string): string | null {
+  try {
+    const parts = signedValue.split('.');
+    if (parts.length !== 2) return null;
+    const [b64Payload, signature] = parts;
+    const payload = Buffer.from(b64Payload, 'base64url').toString('utf-8');
+    const expectedHmac = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expBuf = Buffer.from(expectedHmac, 'hex');
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export function validateRole(password: string): AdminRole | null {
+  if (password === getAdminPassword()) return 'super_admin';
+  if (password === getManagerPassword()) return 'event_manager';
+  return null;
 }
 
 export function validatePassword(password: string): boolean {
-  return password === getAdminPassword();
+  return validateRole(password) !== null;
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+export function createSession(role: AdminRole = 'super_admin'): string {
+  const timestamp = Date.now();
+  const payload = `${role}:${timestamp}`;
+  return signPayload(payload);
+}
+
+export async function getSessionRole(): Promise<AdminRole | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(SESSION_COOKIE)?.value;
-    if (!token) return false;
-    return activeSessions.has(hashToken(token));
+    if (!token) return null;
+
+    const payload = verifyPayload(token);
+    if (!payload) return null;
+
+    const [role, timestampStr] = payload.split(':');
+    const timestamp = parseInt(timestampStr, 10);
+    if (isNaN(timestamp) || Date.now() - timestamp > SESSION_MAX_AGE * 1000) {
+      return null;
+    }
+
+    if (role === 'super_admin' || role === 'event_manager') {
+      return role as AdminRole;
+    }
+    return null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function isAuthenticated(): Promise<boolean> {
+  const role = await getSessionRole();
+  return role !== null;
+}
+
+export async function isSuperAdmin(): Promise<boolean> {
+  const role = await getSessionRole();
+  return role === 'super_admin';
 }
 
 export async function setSessionCookie(token: string): Promise<void> {
@@ -49,13 +102,13 @@ export async function setSessionCookie(token: string): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (token) {
-    activeSessions.delete(hashToken(token));
-  }
   cookieStore.delete(SESSION_COOKIE);
 }
 
 export function unauthorizedResponse(): Response {
   return Response.json({ error: 'Unauthorized' }, { status: 401 });
+}
+
+export function forbiddenResponse(message = 'Forbidden'): Response {
+  return Response.json({ error: message }, { status: 403 });
 }

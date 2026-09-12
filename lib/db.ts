@@ -1,159 +1,130 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+/**
+ * Database Entry Point (Refactored to Bridge Pattern adhering to SOLID).
+ * Re-exports domain types, database connection, repositories, and services.
+ */
 
-const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'data', 'unlecture.db');
+export * from './types/event';
+export * from './types/testimonial';
+export * from './types/article';
+export * from './db/client';
+export * from './repositories/event.repository';
+export * from './repositories/settings.repository';
+export * from './repositories/testimonial.repository';
+export * from './repositories/article.repository';
+export * from './services/event.service';
+export * from './services/article.service';
+export * from './services/upload.service';
 
-let _db: any = null;
+import { getDatabaseConnection } from './db/client';
+import { eventService } from './services/event.service';
+import { articleService } from './services/article.service';
+import { settingsRepository } from './repositories/settings.repository';
+import { testimonialRepository } from './repositories/testimonial.repository';
+import { articleRepository } from './repositories/article.repository';
+import { EventRow, FormattedArchiveCard } from './types/event';
+import { Testimonial } from './types/testimonial';
+import { Article, ArticleRow } from './types/article';
 
-export function getDb(): any {
-  if (_db) return _db;
+export const getDb = getDatabaseConnection;
 
-  _db = new Database(DB_PATH);
-  _db.pragma('journal_mode = WAL');
-  _db.pragma('foreign_keys = ON');
-
-  initSchema(_db);
-  return _db;
+export function getAllArticles(): Article[] {
+  return articleService.getAllArticles();
 }
 
-function initSchema(db: any) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS events (
-      id              TEXT PRIMARY KEY,
-      title           TEXT NOT NULL,
-      speaker         TEXT NOT NULL,
-      venue           TEXT NOT NULL,
-      category        TEXT NOT NULL,
-      date            TEXT NOT NULL,
-      event_datetime  TEXT,
-      time            TEXT DEFAULT '',
-      price           TEXT DEFAULT '',
-      description     TEXT DEFAULT '',
-      image           TEXT NOT NULL,
-      urbanaut_url    TEXT DEFAULT '',
-
-      archive_status  TEXT NOT NULL DEFAULT 'active',
-      archive_image   TEXT,
-      archive_badge   TEXT,
-      archive_tags    TEXT DEFAULT '[]',
-
-      youtube_urls    TEXT DEFAULT '[]',
-      substack_urls   TEXT DEFAULT '[]',
-
-      created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS settings (
-      key   TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
-
-    INSERT OR IGNORE INTO settings (key, value) VALUES ('auto_archive_days', '7');
-    INSERT OR IGNORE INTO settings (key, value) VALUES ('auto_archive_action', 'archive');
-  `);
+export function getPublishedArticles(): Article[] {
+  return articleService.getPublishedArticles();
 }
 
-/* ── Shared types ── */
-
-export type EventCategory =
-  | 'unlecture'
-  | 'grounds-for-thought'
-  | 'community'
-  | 'unlecture-series';
-
-export interface Event {
-  id: string;
-  category: EventCategory;
-  title: string;
-  speaker: string;
-  venue: string;
-  date: string;
-  time: string;
-  price: string;
-  description: string;
-  image: string;
-  urbanautUrl: string;
+export function getArticleBySlug(slug: string): Article | null {
+  return articleService.getArticleBySlug(slug);
 }
 
-/* ── DB row type ── */
+export function getAdjacentArticles(slug: string) {
+  return articleService.getAdjacentArticles(slug);
+}
 
-export interface EventRow {
-  id: string;
-  title: string;
-  speaker: string;
-  venue: string;
-  category: string;
-  date: string;
-  event_datetime: string | null;
-  time: string;
-  price: string;
-  description: string;
-  image: string;
-  urbanaut_url: string;
-  archive_status: 'active' | 'archived' | 'hidden' | 'discarded';
-  archive_image: string | null;
-  archive_badge: string | null;
-  archive_tags: string;
-  youtube_urls: string;
-  substack_urls: string;
-  created_at: string;
-  updated_at: string;
+export function getAllTestimonials(): Testimonial[] {
+  return testimonialRepository.getAll();
 }
 
 export function getActiveEvents(): EventRow[] {
-  return getDb().prepare(
-    `SELECT * FROM events WHERE archive_status = 'active' ORDER BY event_datetime ASC, created_at DESC`
-  ).all() as EventRow[];
+  return eventService.getAllEvents().filter(e => e.archive_status === 'active');
+}
+
+export function getPendingArchiveEvents(): EventRow[] {
+  return eventService.getAllEvents().filter(e => e.archive_status === 'pending_archive');
 }
 
 export function getArchivedEvents(): EventRow[] {
-  return getDb().prepare(
-    `SELECT * FROM events WHERE archive_status = 'archived' ORDER BY event_datetime DESC, created_at DESC`
-  ).all() as EventRow[];
+  return eventService.getAllEvents().filter(e => e.archive_status === 'archived');
+}
+
+export function getFormattedArchivedEvents(): FormattedArchiveCard[] {
+  return eventService.getFormattedArchiveCards();
 }
 
 export function getAllEvents(): EventRow[] {
-  return getDb().prepare(
-    `SELECT * FROM events ORDER BY created_at DESC`
-  ).all() as EventRow[];
+  return eventService.getAllEvents();
 }
 
 export function getEventById(id: string): EventRow | undefined {
-  return getDb().prepare(
-    `SELECT * FROM events WHERE id = ?`
-  ).get(id) as EventRow | undefined;
+  return eventService.getEventById(id) || undefined;
+}
+
+export function getCarouselEventIds(): string[] {
+  return settingsRepository.getSettings().carouselEventIds;
+}
+
+export function setCarouselEventIds(ids: string[]): void {
+  settingsRepository.updateSettings({ carouselEventIds: ids });
+}
+
+export function getTickerText(): string {
+  return settingsRepository.getSettings().tickerText;
+}
+
+export function setTickerText(text: string): void {
+  settingsRepository.updateSettings({ tickerText: text });
 }
 
 export function getSetting(key: string): string | undefined {
-  const row = getDb().prepare(
-    `SELECT value FROM settings WHERE key = ?`
-  ).get(key) as { value: string } | undefined;
-  return row?.value;
+  const settings = settingsRepository.getSettings();
+  if (key === 'auto_archive_days') return String(settings.autoArchiveDelayDays);
+  if (key === 'auto_archive_action') return settings.defaultAction;
+  if (key === 'carousel_event_ids') return JSON.stringify(settings.carouselEventIds);
+  if (key === 'ticker_text') return settings.tickerText;
+  return undefined;
 }
 
 export function setSetting(key: string, value: string): void {
-  getDb().prepare(
-    `INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)`
-  ).run(key, value);
+  if (key === 'auto_archive_days') {
+    settingsRepository.updateSettings({ autoArchiveDelayDays: parseInt(value, 10) || 7 });
+  } else if (key === 'auto_archive_action') {
+    settingsRepository.updateSettings({ defaultAction: value as 'archive' | 'discard' });
+  } else if (key === 'carousel_event_ids') {
+    try {
+      settingsRepository.updateSettings({ carouselEventIds: JSON.parse(value) });
+    } catch {}
+  } else if (key === 'ticker_text') {
+    settingsRepository.updateSettings({ tickerText: value });
+  }
 }
 
-export function runAutoArchive(): { archived: number; discarded: number } {
-  const db = getDb();
-  const days = parseInt(getSetting('auto_archive_days') || '7', 10);
-  const action = getSetting('auto_archive_action') || 'archive';
-  const targetStatus = action === 'discard' ? 'discarded' : 'archived';
+export function runAutoArchive(): { pending: number; archived: number; discarded: number } {
+  const db = getDatabaseConnection();
+  const settings = settingsRepository.getSettings();
 
   const result = db.prepare(`
     UPDATE events
-    SET archive_status = ?, updated_at = datetime('now')
+    SET archive_status = 'pending_archive', updated_at = datetime('now')
     WHERE archive_status = 'active'
       AND event_datetime IS NOT NULL
       AND datetime(event_datetime, '+' || ? || ' days') <= datetime('now')
-  `).run(targetStatus, days);
+  `).run(settings.autoArchiveDelayDays);
 
   return {
-    archived: targetStatus === 'archived' ? result.changes : 0,
-    discarded: targetStatus === 'discarded' ? result.changes : 0,
+    pending: result.changes,
+    archived: 0,
+    discarded: 0,
   };
 }

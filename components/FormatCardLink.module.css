@@ -1,0 +1,54 @@
+/* ── Format Card Link Loading Overlay ───────────────── */
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 20, 18, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm, 8px);
+  color: var(--color-parchment, #F5EFEB);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.spinnerWrap {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(245, 239, 235, 0.2);
+  border-top-color: var(--color-terracotta, #C26540);
+  border-radius: 50%;
+  animation: cardSpin 0.75s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+.loadingText {
+  font-family: var(--font-body);
+  font-size: var(--text-small, 0.82rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-parchment, #F5EFEB);
+}
+
+@keyframes cardSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

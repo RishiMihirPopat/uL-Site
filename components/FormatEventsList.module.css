@@ -1,0 +1,106 @@
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding: var(--space-xs) 0 var(--space-sm);
+  border-bottom: 1px dashed var(--color-border);
+  flex-wrap: wrap;
+}
+
+.countBadge {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.countBadge strong {
+  color: var(--color-text);
+  font-style: normal;
+}
+
+.actionsWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.filterInput {
+  background-color: var(--color-parchment);
+  border: 1px solid var(--color-border);
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  border-radius: 4px;
+  outline: none;
+  min-width: 220px;
+  color: var(--color-text);
+  transition: border-color 0.2s ease;
+}
+
+.filterInput:focus {
+  border-color: var(--color-terracotta);
+}
+
+.sortWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sortLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sortSelect {
+  background-color: var(--color-parchment);
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.sortSelect:focus {
+  border-color: var(--color-terracotta);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+  gap: var(--space-xl);
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-md);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.clearBtn {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-terracotta);
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  border-radius: 3px;
+  cursor: pointer;
+}

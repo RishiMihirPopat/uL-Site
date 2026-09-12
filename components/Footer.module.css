@@ -3,31 +3,6 @@
   color: var(--color-text-on-dark);
 }
 
-/* Large wordmark block at top */
-
-.footerTop {
-  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl) var(--space-2xl);
-  text-align: center;
-  border-bottom: 1px solid rgba(240, 232, 220, 0.1);
-}
-
-.footerWordmark {
-  display: block;
-  font-family: var(--font-brand);
-  font-size: clamp(3rem, 9vw, 6rem);
-  color: var(--color-text-on-dark);
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.footerTagline {
-  margin-top: var(--space-md);
-  font-size: var(--text-small);
-  font-style: italic;
-  color: rgba(240, 232, 220, 0.45);
-  letter-spacing: 0.06em;
-}
-
 /* Links + socials */
 
 .inner {
@@ -103,10 +78,6 @@
 }
 
 @media (max-width: 600px) {
-  .footerTop {
-    padding: var(--space-2xl) var(--space-md) var(--space-xl);
-  }
-
   .inner {
     padding: var(--space-xl) var(--space-md);
   }
@@ -116,7 +87,17 @@
   }
 
   .footerBottom {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .footerCity {
+    text-align: left;
+  }
+
+  .copy {
+    text-align: right;
   }
 }
