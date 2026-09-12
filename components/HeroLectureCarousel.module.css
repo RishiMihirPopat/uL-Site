@@ -91,6 +91,9 @@
   height: 270px;
   overflow: hidden;
   cursor: grab;
+  /* Soft dissolve fade on the outer left and right edges */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 
 .stage:active {
@@ -131,15 +134,18 @@
   border: 1px solid rgba(240, 232, 220, 0.18);
   box-sizing: border-box;
   opacity: 0.45;
+  filter: blur(2.2px);
   cursor: pointer;
   transition:
     opacity 0.35s ease,
+    filter 0.35s ease,
     border-color 0.25s ease,
     transform 0.25s ease;
 }
 
 .activeCard {
   opacity: 1;
+  filter: none;
   border-color: rgba(240, 232, 220, 0.3);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
@@ -149,8 +155,14 @@
   border-color: var(--color-terracotta);
 }
 
+.inactiveCard {
+  opacity: 0.45;
+  filter: blur(2.2px);
+}
+
 .inactiveCard:hover {
   opacity: 0.72;
+  filter: blur(0.8px);
 }
 
 /* ── Poster Inner Content ── */
