@@ -71,7 +71,7 @@
 .stage {
   position: relative;
   width: 100%;
-  height: 285px;
+  height: 325px;
   overflow: hidden;
   cursor: grab;
   /* Soft horizontal gradient fade to prevent abrupt hard clipping on the outer edges */
@@ -114,8 +114,16 @@
   transform-origin: center center;
   opacity: 1;
   filter: none;
-  box-shadow: 0 14px 40px rgba(26, 12, 10, 0.4);
+  box-shadow:
+    0 6px 16px rgba(40, 24, 18, 0.08),
+    0 16px 36px rgba(40, 24, 18, 0.14);
   z-index: 10;
+}
+
+.activeCard:hover {
+  box-shadow:
+    0 8px 20px rgba(40, 24, 18, 0.1),
+    0 20px 42px rgba(40, 24, 18, 0.18);
 }
 
 /* ── Right Neighbor Peeking Card ── */
@@ -328,7 +336,7 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top: 0.85rem;
+  margin-top: 0.35rem;
 }
 
 .dot {
@@ -392,7 +400,7 @@
 
 @media (max-width: 768px) {
   .stage {
-    height: 235px;
+    height: 270px;
   }
 
   .posterCard {
@@ -431,7 +439,7 @@
 
 @media (max-width: 480px) {
   .stage {
-    height: 210px;
+    height: 245px;
   }
 
   .posterCard {
