@@ -88,12 +88,12 @@
 .stage {
   position: relative;
   width: 100%;
-  height: 270px;
+  height: 330px;
   overflow: hidden;
   cursor: grab;
   /* Soft dissolve fade on the outer left and right edges */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
 }
 
 .stage:active {
@@ -131,38 +131,44 @@
   border-radius: 12px;
   overflow: hidden;
   background-color: #2D0D0D;
-  border: 1px solid rgba(240, 232, 220, 0.18);
+  border: 1px solid rgba(240, 232, 220, 0.16);
   box-sizing: border-box;
-  opacity: 0.45;
-  filter: blur(2.2px);
+  opacity: 0.52;
   cursor: pointer;
   transition:
-    opacity 0.35s ease,
-    filter 0.35s ease,
-    border-color 0.25s ease,
+    opacity 0.4s ease,
+    filter 0.4s ease,
+    border-color 0.3s ease,
+    box-shadow 0.4s ease,
     transform 0.25s ease;
 }
 
 .activeCard {
   opacity: 1;
   filter: none;
-  border-color: rgba(240, 232, 220, 0.3);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-color: rgba(240, 232, 220, 0.28);
+  box-shadow:
+    0 2px 4px rgba(30, 16, 12, 0.04),
+    0 8px 18px rgba(30, 16, 12, 0.08),
+    0 16px 32px rgba(30, 16, 12, 0.08);
 }
 
 .activeCard:hover {
   transform: translateY(-2px);
-  border-color: var(--color-terracotta);
+  box-shadow:
+    0 4px 8px rgba(30, 16, 12, 0.05),
+    0 12px 24px rgba(30, 16, 12, 0.10),
+    0 22px 40px rgba(30, 16, 12, 0.12);
 }
 
 .inactiveCard {
-  opacity: 0.45;
-  filter: blur(2.2px);
+  opacity: 0.52;
+  filter: blur(0.8px);
 }
 
 .inactiveCard:hover {
-  opacity: 0.72;
-  filter: blur(0.8px);
+  opacity: 0.78;
+  filter: none;
 }
 
 /* ── Poster Inner Content ── */
@@ -341,7 +347,7 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top: 0.6rem;
+  margin-top: 0.35rem;
 }
 
 .dot {
@@ -411,7 +417,7 @@
   }
 
   .stage {
-    height: 230px;
+    height: 275px;
   }
 
   .track {
@@ -445,7 +451,7 @@
   }
 
   .stage {
-    height: 200px;
+    height: 245px;
   }
 
   .track {
