@@ -69,91 +69,45 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     return idx >= 0 ? idx : 0;
   }, [displayList]);
 
-  // Ensure base list has at least 3 items for infinite peeking clones
-  let baseList = [...displayList];
-  if (baseList.length > 0) {
-    while (baseList.length < 4 && displayList.length > 1) {
-      baseList = [...baseList, ...displayList];
-    }
-  }
-
-  const hasMultiple = displayList.length > 1;
-  const n = baseList.length;
-
-  // Extended list with 2 clones before and 2 clones after
-  // Indices:
-  // 0: clone n-2
-  // 1: clone n-1
-  // 2: real 0
-  // ...
-  // n+1: real n-1
-  // n+2: clone 0
-  // n+3: clone 1
-  const extendedList = hasMultiple
-    ? [baseList[n - 2], baseList[n - 1], ...baseList, baseList[0], baseList[1]]
-    : displayList;
-
-  // trackIndex: 2 corresponds to real item 0
-  const [trackIndex, setTrackIndex] = useState(() => (hasMultiple ? getInitialIndex() + 2 : 0));
-  const [isSnapping, setIsSnapping] = useState(false);
+  // Pure infinite page index (can increment/decrement infinitely without ever running out)
+  const [page, setPage] = useState(getInitialIndex);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<{ url: string; title: string } | null>(null);
   const [showAllEventsModal, setShowAllEventsModal] = useState(false);
 
-  // Active dot index (0..displayList.length-1)
+  const hasMultiple = displayList.length > 1;
+
+  // Active dot index (0 .. displayList.length - 1)
   const activeDotIndex = hasMultiple
-    ? ((trackIndex - 2) % displayList.length + displayList.length) % displayList.length
+    ? ((page % displayList.length) + displayList.length) % displayList.length
     : 0;
 
   // Reset if list changes
   useEffect(() => {
-    if (hasMultiple) {
-      setTrackIndex(getInitialIndex() + 2);
-    } else {
-      setTrackIndex(0);
-    }
-  }, [displayList.length, getInitialIndex, hasMultiple]);
-
-  // Infinite snap boundary reset
-  const handleAnimationComplete = useCallback(() => {
-    if (!hasMultiple) return;
-    if (trackIndex >= n + 2) {
-      // Reached clone 0 -> silently jump to real 0 (slot 2)
-      setIsSnapping(true);
-      setTrackIndex(2);
-    } else if (trackIndex <= 1) {
-      // Reached clone n-1 -> silently jump to real n-1 (slot n+1)
-      setIsSnapping(true);
-      setTrackIndex(n + 1);
-    }
-  }, [hasMultiple, n, trackIndex]);
-
-  // Turn off snapping on next tick so subsequent animations use spring
-  useEffect(() => {
-    if (isSnapping) {
-      const raf = requestAnimationFrame(() => {
-        setIsSnapping(false);
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [isSnapping]);
+    setPage(getInitialIndex());
+  }, [displayList.length, getInitialIndex]);
 
   const handleNext = useCallback(() => {
-    if (!hasMultiple || isSnapping) return;
-    setTrackIndex((prev) => prev + 1);
-  }, [hasMultiple, isSnapping]);
+    if (!hasMultiple) return;
+    setPage((prev) => prev + 1);
+  }, [hasMultiple]);
 
   const handlePrev = useCallback(() => {
-    if (!hasMultiple || isSnapping) return;
-    setTrackIndex((prev) => prev - 1);
-  }, [hasMultiple, isSnapping]);
+    if (!hasMultiple) return;
+    setPage((prev) => prev - 1);
+  }, [hasMultiple]);
 
   const goTo = useCallback(
-    (realIndex: number) => {
-      if (!hasMultiple || isSnapping || realIndex === activeDotIndex) return;
-      setTrackIndex(realIndex + 2);
+    (targetDotIndex: number) => {
+      if (!hasMultiple || targetDotIndex === activeDotIndex) return;
+      let diff = targetDotIndex - activeDotIndex;
+      // Choose the shortest circular path
+      const half = displayList.length / 2;
+      if (diff > half) diff -= displayList.length;
+      if (diff < -half) diff += displayList.length;
+      setPage((prev) => prev + diff);
     },
-    [activeDotIndex, hasMultiple, isSnapping]
+    [activeDotIndex, displayList.length, hasMultiple]
   );
 
   // Auto-slideshow every 8 seconds
@@ -187,8 +141,11 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
   }
 
   const pitch = cardDims.cardW + cardDims.gap;
-  // Calculate targetX to center slot trackIndex exactly in the middle of stage
-  const targetX = stageWidth / 2 - (trackIndex * pitch + cardDims.cardW / 2);
+  // Center the card at page index in the horizontal center of the stage
+  const targetX = stageWidth / 2 - page * pitch - cardDims.cardW / 2;
+
+  // Window of offsets rendered around the active page (guarantees infinite seamless loop)
+  const windowOffsets = [-3, -2, -1, 0, 1, 2, 3];
 
   const allActiveEventsList = allEvents && allEvents.length > 0 ? allEvents : displayList;
 
@@ -245,19 +202,14 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
             <motion.div
               className={styles.track}
               animate={{ x: isMounted ? targetX : 0 }}
-              transition={
-                isSnapping
-                  ? { duration: 0 }
-                  : {
-                      type: 'spring',
-                      stiffness: 280,
-                      damping: 30,
-                      mass: 0.8,
-                    }
-              }
-              onAnimationComplete={handleAnimationComplete}
+              transition={{
+                type: 'spring',
+                stiffness: 280,
+                damping: 30,
+                mass: 0.8,
+              }}
               drag="x"
-              dragConstraints={{ left: targetX - 50, right: targetX + 50 }}
+              dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={(_, info) => {
                 const offset = info.offset.x;
@@ -269,18 +221,22 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                 }
               }}
             >
-              {extendedList.map((ev, index) => {
-                const isCurrent = index === trackIndex;
-                const isLeftNeighbor = index === trackIndex - 1;
-                const isRightNeighbor = index === trackIndex + 1;
+              {windowOffsets.map((offset) => {
+                const itemIndex = page + offset;
+                const evIndex =
+                  ((itemIndex % displayList.length) + displayList.length) % displayList.length;
+                const ev = displayList[evIndex];
+                const isCurrent = offset === 0;
 
                 return (
                   <div
-                    key={`${ev.id}-${index}`}
+                    key={itemIndex}
                     className={styles.slide}
                     style={{
+                      position: 'absolute',
+                      left: itemIndex * pitch,
                       width: cardDims.cardW,
-                      marginRight: cardDims.gap,
+                      height: cardDims.cardH,
                     }}
                   >
                     <div
@@ -291,13 +247,10 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                       onClick={() => {
                         if (isCurrent) {
                           setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
-                        } else if (isLeftNeighbor) {
+                        } else if (offset < 0) {
                           handlePrev();
-                        } else if (isRightNeighbor) {
+                        } else if (offset > 0) {
                           handleNext();
-                        } else {
-                          const dist = index - trackIndex;
-                          setTrackIndex((prev) => prev + dist);
                         }
                       }}
                       role="button"
