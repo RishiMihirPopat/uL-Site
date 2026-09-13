@@ -69,7 +69,7 @@ export default function HomeView() {
         <FadeInItem>
           <div className={styles.manifestoBoxV2}>
             <img
-              src="/main-images/manifesto-bg.png"
+              src="/custom-assets/manifesto-bg.png"
               alt=""
               className={styles.manifestoBgImgV2}
               aria-hidden="true"
