@@ -93,22 +93,6 @@
   flex-shrink: 0;
 }
 
-.externalLink {
-  font-family: var(--font-body);
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(240, 232, 220, 0.65);
-  text-decoration: none;
-  transition: color 0.2s ease;
-  white-space: nowrap;
-  padding: 4px 8px;
-}
-
-.externalLink:hover {
-  color: var(--color-text-on-dark);
-}
-
 .closeBtn {
   background: none;
   border: none;

@@ -10,13 +10,14 @@ export function FormatCardLink({
   href,
   className,
   children,
+  ...rest
 }: {
   href: string;
   className: string;
   children: React.ReactNode;
-}) {
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className={className} {...rest}>
       {children}
     </Link>
   );

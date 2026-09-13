@@ -1,13 +1,19 @@
 # BUILDLOG.md
 
 **Project:** unLecture
-**Version:** v0.1.0
+**Version:** v0.10.0
 
 ---
 
 ## Current Status
 
-V2 complete. Vintage Indian postcard / editorial magazine aesthetic. Nav, Footer, Home+About page rebuilt and confirmed running at localhost:3000. Events and Contact pages not yet built.
+The Figma redesign is complete and is now simply **the site** — the old V1 design (and the `lib/flags.ts` `SITE_VERSION` toggle that used to switch between them) was deleted outright once V2 covered every page. See `SITE-OVERVIEW.md` for the migration note and what survived the deletion (the DB layer and `/admin` weren't touched — they're version-agnostic).
+
+Site, top to bottom: Nav (no box/border, sits on page bg; Home/Events left, Articles/Contact right), Hero (poster carousel, exact Figma card sizing/gaps/gradient/arrow placement), "How We Gather" (wavy dark section, 4 real-photo ticket cards with exact stagger, doodles), "The Manifesto (About Us)" (heading + bordered/backgrounded text block), "As Seen In" (wavy dark section, infinite logo marquee), "Newsletter" (solid-maroon section with bottom wave edge), Footer (single row, copyright + Email/Instagram/Linkedin links). Standalone pages: `/contact`, `/events` (archive/listing), `/articles` (listing) and `/articles/[slug]` (detail, self-hosted Ancizar Serif body copy).
+
+Testimonials and Ticker were dropped in the V1 deletion — no V2 replacement exists yet; see `SITE-OVERVIEW.md` before rebuilding them.
+
+Granular per-change history now lives in `DESIGN-BUILD-LOG.md` (updated after every change); this file gets a summary entry at the end of each session.
 
 ---
 
@@ -29,19 +35,39 @@ V2 complete. Vintage Indian postcard / editorial magazine aesthetic. Nav, Footer
 - `data/events.ts` — Event type + 7 placeholder events across 3 formats (Grounds for Thought, unLecture, Community)
 - `app/events/[slug]/page.tsx` + `page.module.css` — 3 static filtered event pages (/grounds-for-thought, /unlecture, /community); format cards on homepage link here; nav Events → smooth-scrolls to #formats
 - `components/NewsletterForm.tsx` + `NewsletterForm.module.css` — replaces homepage CTA; email-only form, Google Apps Script POST (no-cors), loading/success/error states, magazine subscription card aesthetic (maroon bg, cream text, underline input, parchment button); APPS_SCRIPT_URL placeholder constant with setup instructions in component
+- `lib/flags.ts` — `SITE_VERSION` (1|2) toggle driving the V1/V2 split across Nav, Footer, and the homepage; flip it to instantly revert V2 sections to V1
+- `lib/content.ts` — centralized site copy (nav labels, footer, hero, format cards, about text, press logos, contact page) for both V1 and V2, so copy edits don't require touching component code
+- `app/old/page.tsx` — reference route that always renders V1's homepage regardless of the global flag
+- V2 Nav (`components/Nav.tsx`) — Figma-exact 1120px flex row, Chivo Mono labels, no box/border, self-hosted Atelier wordmark (42px)
+- V2 global background (`app/layout.tsx`, `app/globals.css`) — cream + real grid-texture PNG at 5% opacity, `position:fixed` so it holds as the page grows
+- V2 Hero (`components/HeroLectureCarousel.tsx/.module.css`) — Figma-exact 3-card carousel (center 675×474/side 576×405 at the shipped 0.9 scale), maroon border, exact gradient stops, arrow buttons anchored to the active card's own box, no fade/shadow
+- V2 "How We Gather" (`components/HomeView.tsx`, `app/page.module.css`) — wave-shaped dark section (real PNG asset, not CSS), 4 ticket cards using the exact `Main Event Card.png` shape with real per-format photos, exact per-card vertical stagger, doodle images, infinite content-width centering
+- V2 "The Manifesto (About Us)" — heading + bordered/backgrounded (`Manifesto Bg.png`, 30% opacity) centered text block
+- V2 "As Seen In" — wave-shaped dark section, real press logos in an infinite marquee (fixed frames + contain + white-filter to normalize wildly different logo proportions, edge fade, pauses on hover)
+- V2 "Newsletter" (`NewsletterFormV2.tsx/.module.css`, `app/page.module.css`) — grid-stacked over the real `Newsletter Wavy Shape.png` (natural aspect, same technique as Gather/Press) with the Figma heading and the V1 email form (same Apps Script POST logic) restyled to the exact Figma pill input (outlined, uppercase Chivo Mono placeholder) + filled pill button
+- V2 Footer (`components/Footer.tsx`, `Footer.module.css`) — Figma node 140:545: single row, no box/border, copyright left, Email/Instagram/Linkedin links right (WhatsApp dropped, not in this design); replaces the earlier `return null` placeholder
+- V2 smooth scroll — `lenis` package (new dependency, approved) driving real inertia-smoothed wheel/trackpad scrolling (`components/SmoothScroll.tsx`, mounted in `app/layout.tsx`); Nav's anchor-jump clicks route through the same Lenis instance (`lib/lenis.ts`) instead of native scrollTo so they don't fight its smoothing loop
+- V2 custom cursor (`components/CustomCursor.tsx/.module.css`) — the real gold 3D arrow PNG spring-follows the pointer (Framer Motion), scales up 1.2x over links/buttons/inputs, native cursor hidden site-wide via a body class, fine-pointer (desktop) only; two generic opt-in attributes: `data-cursor-label` for a short pill bottom-right of the cursor (carousel's active card, "Click to Book!", node 143:560) and `data-cursor-desc` for a wider multi-line box (the 4 "How We Gather" ticket cards, nodes 146:563/566/569/572) — both use a two-step reveal (shape pops in, text fades in after)
+- V2 carousel polish — smoothly-animated (Framer Motion spring) card grow/shrink and slide movement in sync, arrows that fade out during a page turn and back in after, hover image zoom, "Check Them Out!" text-roll on the All Upcoming Events button, 3s autoplay
+- V2 landing entrance + scroll reveals — Nav wordmark → nav links → Hero carousel (center card first, then its neighbors) fade in on page load, in that order (`Nav.tsx`, `HeroLectureCarousel.tsx`); How We Gather has its own choreography (wave shape fades in on load since it's already partly visible; heading+label, then the 4 cards in random order, then the 2 doodles, all on scroll — `components/HowWeGatherSection.tsx`); Manifesto/Newsletter reveal heading-then-content on scroll (`components/FadeIn.tsx`'s `FadeInItem`); As Seen In (`components/AsSeenInSection.tsx`) waits for both the scroll trigger and the wave image's real load before revealing anything, to avoid a layout-jump; Footer fades up on scroll too
+- V2 Contact page (`app/contact/page.tsx`, `ContactFormV2.tsx/.module.css`) — real `Contact Wavy Shape.png` background (wavy top+bottom), pill-style form fields matching the Newsletter form's language, same Apps Script submit logic as V1's `ContactForm.tsx`
+- V2 Events page at `/events` (`EventsPageV2.tsx/.module.css`) — events only, no articles; TYPE/SORT custom dropdowns, search, a 3-column card grid on the real `Archive Event Card.png` shape, pagination; Nav's EVENTS link now points here instead of opening the old Archive modal
+- V2 Articles page at `/articles` (`ArticlesPageV2.tsx/.module.css`) — same two-zone layout as Events (wave band with heading/filters, card grid + pagination below on the page bg) but color-swapped (maroon wave, dark cards) and simplified (no TYPE filter, single date meta line); cards link to `/articles/[slug]`; V1's old "redirect to latest article" behavior is untouched
+- V2 Article detail page at `/articles/[slug]` (`ArticleDetailPageV2.tsx/.module.css`) — two maroon wave bands (Go Back + article switcher, top and bottom) around the article body, set in the newly self-hosted Ancizar Serif font (`public/fonts/ancizar-serif.woff2`, `--font-article` token); `MarkdownRenderer.module.css` gained `--prose-*` custom-property hooks so this page can restyle the shared markdown renderer's typography without forking it — V1's article page is unaffected since it never sets those variables
+- `public/figma-assets/` and `public/main images/` — self-hosted Figma-exported assets (wave shapes, ticket card shape, arrow icons, doodles, background texture) — no external asset URLs
+- **V1 deleted entirely** — `lib/flags.ts`, `app/old/`, and every V1-only component (`NewsletterForm`, `ContactForm`, `TestimonialsCarousel`, `TickerBanner`, `MobileAboutModal`, `PostcardArchive`) + their CSS are gone; every remaining file's `isV2` branching was collapsed to just the V2 path; every CSS module was pruned to only the classes its component still uses. `SITE-OVERVIEW.md` added as the general site-context doc (Testimonials/Ticker migration notes live there now). Verified with a full `next build`, not just `tsc`
 
 ---
 
 ## In Progress
 
-- Phase 1: finalize type scale, spacing, and border radius tokens
+- Nothing V1-related left to migrate. Testimonials/Ticker rebuild is optional future work — see `SITE-OVERVIEW.md`.
 
 ---
 
 ## Up Next
 
-- Phase 2: core components (Nav, Footer, layout shell)
-- Phase 3: Home/About, Events, Contact pages
+- Rebuild Testimonials and Ticker against the Figma design, if/when wanted — see `SITE-OVERVIEW.md` for what to pick up
 
 ---
 
@@ -49,6 +75,8 @@ V2 complete. Vintage Indian postcard / editorial magazine aesthetic. Nav, Footer
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v0.10.0 | 2026-09-13 | **V1 deleted entirely**, per instruction (DB layer + `/admin` untouched — see `SITE-OVERVIEW.md`). Removed `lib/flags.ts` and every V1-only component/CSS (`NewsletterForm`, `ContactForm`, `TestimonialsCarousel`, `TickerBanner`, `MobileAboutModal`, `PostcardArchive`, `app/old/`, the throwaway `app/temp-v1-archive-detail/` preview route); collapsed `isV2` branching to the V2-only path in `Nav.tsx` (dropped the whole V1 desktop/mobile nav + hamburger), `Footer.tsx`, `HomeView.tsx`, `HeroLectureCarousel.tsx`, `app/layout.tsx`, `app/contact/page.tsx`, `app/articles/page.tsx`, `app/articles/[slug]/page.tsx`; pruned every touched CSS module down to only the classes still referenced (`app/page.module.css` alone dropped from ~90+ classes to 30) and trimmed dead fields out of `lib/content.ts`; simplified `body`/`.v2-bg` in `globals.css` into one unconditional rule; trimmed the Google Fonts import to just Montserrat (Caveat/Kalam were V1-chalkboard-only). Testimonials/Ticker had no V2 build yet, so their context was written to a new `SITE-OVERVIEW.md` before deletion. Verified with a full `next build`. |
+| v0.9.1 | 2026-09-13 | V2 (Figma) Redesign Kickoff: introduced `lib/flags.ts` SITE_VERSION toggle and `lib/content.ts` shared copy layer, plus `/old` as a permanent V1 reference route; built V2 Nav (exact 1120px Figma layout, self-hosted Atelier wordmark, Chivo Mono labels, no box/border) and a global fixed cream+grid-texture background from the real exported PNG; rebuilt the Hero carousel to Figma-exact card/gap/gradient math (fixed two real centering bugs — wrong active-card-width term in the track's translateX, and neighbor gaps not inheriting the active card's width offset — plus removed leftover V1 fade/shadow/mask effects) with arrow buttons anchored to the active card's own box; built "How We Gather" (real wave-shape PNG background, 4 ticket cards using the exact card-shape asset with real per-format photos and exact per-card vertical stagger, doodle images, content-width auto-centering fix); built "The Manifesto (About Us)" heading + bordered/backgrounded text block; built "As Seen In" (wave background, real press logos normalized into fixed frames and turned into a slow infinite marquee with edge fade to fix wildly inconsistent logo sizing); all V2 work gated so V1 stays fully intact and untouched. Started `DESIGN-BUILD-LOG.md` for per-change granularity going forward. |
 | v0.8.9 | 2026-08-18 | Event Card Hierarchy Redesign & 2-Tab Archive with Sorting: redesigned EventCard with a 2-column metadata box for speaker and venue; added direct status selector dropdown in admin lifecycle banner; updated Archive into a 2-tab dossier ('Past Gatherings' and 'Articles & Logs') with chronological and alphabetical sorting; added interactive client-side sorting and filter search to format category pages |
 | v0.8.8 | 2026-08-17 | SOLID Principles Refactor: segregated event domain interfaces (`lib/types/event.ts`), added format registry (`lib/constants/formats.ts`) & lifecycle machine (`lib/domain/lifecycle.ts`), created repository layer (`IEventRepository`, `SqliteEventRepository`) and domain services (`eventService`, `uploadService`), and modularized admin forms into focused reusable subcomponents |
 | v0.8.7 | 2026-08-17 | Tag Normalization & Database Cleanup: added robust `normalizeTags` and `formatTagsForDisplay` helpers to strip bracket/quote remnants, sanitized tag inputs in all admin forms and API routes, and ran database cleanup migration for existing rows |

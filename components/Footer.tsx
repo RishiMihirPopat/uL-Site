@@ -1,25 +1,31 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { brand, footer as footerContent } from '../lib/content';
 import styles from './Footer.module.css';
 
+// Figma node 140:545: single row, copyright left, Email/Instagram/Linkedin
+// right, no box/border/background — sits directly on the page.
 export default function Footer() {
-  return (
-    <footer className={styles.footer}>
-      <div className={styles.inner}>
-        <div className={styles.top}>
-          <a href="mailto:teamunlecture@gmail.com" className={styles.email}>
-            teamunlecture@gmail.com
-          </a>
-          <nav className={styles.socials} aria-label="Social links">
-            <a href="https://www.instagram.com/theunlecture/" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="https://chat.whatsapp.com/Gn1sAZqtCRKHcmBvLFxiYs" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a href="https://www.linkedin.com/company/unlecture/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          </nav>
-        </div>
+  const socialsV2 = footerContent.socials.filter((s) => s.label !== 'WhatsApp');
 
-        <div className={styles.footerBottom}>
-          <span className={styles.footerCity}>Delhi NCR</span>
-          <p className={styles.copy}>© {new Date().getFullYear()} unLecture</p>
-        </div>
+  return (
+    <motion.footer
+      className={styles.footerV2}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className={styles.innerV2}>
+        <p className={styles.copyV2}>© {new Date().getFullYear()} {brand.name}. All Rights Reserved</p>
+        <nav className={styles.linksV2} aria-label="Social links">
+          <a href={`mailto:${footerContent.email}`}>Email</a>
+          {socialsV2.map((s) => (
+            <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
+          ))}
+        </nav>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

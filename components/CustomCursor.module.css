@@ -1,0 +1,53 @@
+.cursor {
+  position: fixed;
+  /* Above every known overlay/modal in the app (the archive detail view's
+     portal alone goes up to 1,000,000) — the cursor must never be paintable
+     over. */
+  z-index: 2147483000;
+  width: 34px;
+  height: auto;
+  pointer-events: none;
+  will-change: transform;
+  user-select: none;
+}
+
+/* Figma node 143:560 — bottom-right of the cursor tip. */
+/* Figma nodes 146:563/566/569/572 — "How We Gather" ticket card hovers. */
+.desc {
+  position: fixed;
+  z-index: 2147483000;
+  width: 316px;
+  padding: 18px 16px;
+  background: var(--color-olive);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--color-bg-v2);
+  text-align: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.label {
+  position: fixed;
+  z-index: 2147483000;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-olive);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--color-bg-v2);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Applied to <body> while a fine pointer is present — forces every
+   descendant's cursor off too, since links/buttons set their own
+   `cursor: pointer` via the UA stylesheet that would otherwise win. */
+.cursorNone,
+.cursorNone * {
+  cursor: none !important;
+}

@@ -115,7 +115,7 @@ All spacing uses a consistent scale via CSS custom properties.
 
 ## Component Decisions
 
-_No components defined yet._
+- **Icons:** `@phosphor-icons/react` installed and first used on the Events page cards (`Calendar`, `UserCircle`), `weight="bold"` per explicit instruction — overrides the duotone default above for that instance; duotone remains the default elsewhere until told otherwise.
 
 ---
 

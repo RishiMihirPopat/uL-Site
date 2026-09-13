@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import SmoothScroll from '@/components/SmoothScroll';
+import CustomCursor from '@/components/CustomCursor';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,6 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <SmoothScroll />
+        <CustomCursor />
+        <div className="v2-bg-texture" aria-hidden="true">
+          <img src="/figma-assets/bg-grid-texture.png" alt="" />
+        </div>
         <Nav />
         {children}
         <Footer />
