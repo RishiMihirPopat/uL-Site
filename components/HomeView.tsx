@@ -68,12 +68,15 @@ export default function HomeView() {
         </FadeInItem>
         <FadeInItem>
           <div className={styles.manifestoBoxV2}>
-            <img
-              src="/custom-assets/manifesto-bg.png"
-              alt=""
-              className={styles.manifestoBgImgV2}
-              aria-hidden="true"
-            />
+            <picture>
+              <source media="(max-width: 900px)" srcSet="/custom-assets/manifesto-bg-mobile.png" />
+              <img
+                src="/custom-assets/manifesto-bg-web.png"
+                alt=""
+                className={styles.manifestoBgImgV2}
+                aria-hidden="true"
+              />
+            </picture>
             <div className={styles.manifestoTextV2}>
               <p>{about.lead}</p>
               {about.paragraphs.map((p, i) => (
