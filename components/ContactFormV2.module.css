@@ -254,8 +254,50 @@
   cursor: pointer;
 }
 
-@media (max-width: 620px) {
+/* node 226:6159 — replaces the old 620px tier entirely (see the same
+   note in app/contact/page.module.css). Fields already stack into one
+   column below 620px via .row's own grid-template-columns fallback
+   further down in this block — this just resizes everything to the
+   exact mobile spec on top of that. */
+@media (max-width: 900px) {
   .row {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .fields {
+    gap: 14px;
+  }
+
+  .form {
+    gap: var(--space-lg);
+  }
+
+  .input,
+  .select {
+    height: 33px;
+    padding: 8px 17px;
+    font-size: 14px;
+  }
+
+  .selectArrow {
+    right: 17px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .textarea {
+    height: 135px;
+    min-height: 0;
+    padding: 8px 17px;
+    border-radius: 18px;
+    font-size: 14px;
+  }
+
+  .btn {
+    width: 100%;
+    height: 33px;
+    padding: 8px 17px;
+    font-size: 16px;
   }
 }

@@ -52,7 +52,6 @@ export const formats = [
   {
     name: 'Grounds for Thought',
     shortLabel: ['GROUNDS FOR', 'THOUGHTS'],
-    href: '/events/grounds-for-thought',
     desc: "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
     imgV2: '/category-covers/ground-for-thoughts.jpg',
     alt: 'Intimate gathering at a Grounds for Thought event with Blue Tokai',
@@ -60,7 +59,6 @@ export const formats = [
   {
     name: 'unLecture',
     shortLabel: ['UNLECTURE'],
-    href: '/events/unlecture',
     desc: 'Our flagship event. It breaks the binary that certain conversations only happen inside certain institutions. We make room for that discourse in the casual spaces we already frequent, and treat learning as something you do out in the city.',
     imgV2: '/category-covers/unlecture.jpg',
     alt: 'Speaker and audience at a flagship unLecture event',
@@ -68,7 +66,6 @@ export const formats = [
   {
     name: 'Community Events',
     shortLabel: ['COMMUNITY', 'EVENTS'],
-    href: '/events/community',
     desc: 'Unique events that build the space along with us. The formats keep evolving. This is our way of keeping the community, and the interactions that matter, accessible to most.',
     imgV2: '/category-covers/community-events.png',
     alt: 'Community gathering at an unLecture community event',
@@ -76,7 +73,6 @@ export const formats = [
   {
     name: 'unLecture Series',
     shortLabel: ['UNLECTURE', 'SERIES'],
-    href: '/events/unlecture-series',
     desc: "A chance to go deep into one topic of interest, programmed over a few weeks. By the end of it, you're sure to have grown and taken something away with you.",
     imgV2: '/category-covers/unlecture-series.jpg',
     alt: 'unLecture Series — themed multi-evening programming',
@@ -87,7 +83,7 @@ export const formatsHeadingV2 = 'How We Gather';
 export const knowEventsLabelV2 = 'Hover For More!';
 // Mobile has no hover state — the format cards are an auto-advancing
 // carousel there instead, node 174:4374 on the mobile frame.
-export const knowEventsLabelMobileV2 = '(Swipe For More)';
+export const knowEventsLabelMobileV2 = '(Tap For More)';
 
 // About section — Figma node 133:2302 (heading for the whole section).
 // Desktop renders both parts on one line; mobile (node 174:4391) breaks

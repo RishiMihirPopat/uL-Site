@@ -248,7 +248,13 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                     key={itemIndex}
                     className={styles.slide}
                     style={{ position: 'absolute' }}
-                    initial={{ opacity: entranceDone ? 1 : 0, scale: entranceDone ? 1 : 0.85 }}
+                    initial={{
+                      opacity: entranceDone ? 1 : 0,
+                      scale: entranceDone ? 1 : 0.85,
+                      left: slideLeft,
+                      width: slideW,
+                      height: slideH,
+                    }}
                     animate={{ left: slideLeft, width: slideW, height: slideH, opacity: 1, scale: 1 }}
                     transition={{
                       left: { type: 'spring', stiffness: 120, damping: 13, mass: 0.7 },

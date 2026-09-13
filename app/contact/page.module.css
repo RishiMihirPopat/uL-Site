@@ -11,6 +11,11 @@
   overflow: hidden;
 }
 
+/* Same "wrapper invisible to grid/animation" trick as elsewhere. */
+.pictureContentsV2 {
+  display: contents;
+}
+
 .waveImgV2 {
   grid-column: 1;
   grid-row: 1;
@@ -66,14 +71,31 @@
   white-space: nowrap;
 }
 
-@media (max-width: 620px) {
+/* node 226:6159 — replaces the old 620px tier entirely, which would
+   otherwise be fully shadowed once this wider 900px block (matching the
+   site's usual mobile breakpoint) takes over the same range and then some. */
+@media (max-width: 900px) {
+  .waveImgV2 {
+    aspect-ratio: 393 / 597;
+  }
+
   .innerV2 {
-    gap: var(--space-2xl);
-    padding: 0 var(--space-lg);
+    max-width: 274px;
+    gap: 48px;
+    padding: 0;
+  }
+
+  .headerV2 {
+    gap: 12px;
+  }
+
+  .headingV2 {
+    font-size: 24px;
   }
 
   .subV2 {
-    font-size: 18px;
+    font-size: 14px;
+    line-height: 1.364;
     white-space: normal;
   }
 }

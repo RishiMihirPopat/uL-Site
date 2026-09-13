@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════════════
+   MOBILE MENU OVERLAY — Figma node 188:4447
+   Dark panel dropping from the top (rounded bottom corners), 57%-black
+   backdrop behind it. Fixed 134px side padding in Figma only works for
+   its exact 393px frame — used here as a max-width + centered column
+   instead, so it holds up across real phone widths.
+   ════════════════════════════════════════════════ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999998;
+  background-color: rgba(0, 0, 0, 0.57);
+  display: none;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999999;
+  display: none;
+  justify-content: center;
+  padding: 58px var(--space-md) 57px;
+  background-color: var(--color-bg-dark);
+  border-radius: 0 0 44px 44px;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 57px;
+  width: 100%;
+  max-width: 160px;
+}
+
+.wordmark {
+  font-family: var(--font-brand);
+  font-size: 24px;
+  color: var(--color-bg-v2);
+  text-align: center;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 38px;
+  width: 100%;
+}
+
+.link {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--color-bg-v2);
+  text-decoration: none;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.linkActive {
+  opacity: 1;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 33.353px;
+  padding: 8px 17px;
+  border: 1px solid var(--color-bg-v2);
+  border-radius: 44px;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-bg-v2);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .overlay,
+  .panel {
+    display: flex;
+  }
+}

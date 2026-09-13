@@ -264,6 +264,169 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
           </div>
         )}
       </motion.div>
+
+      {/* ── Mobile (node 217:4565) — dedicated header/wave + card list +
+             pagination, sharing all the state/filtering above with the
+             desktop layout. CSS-hidden on desktop. ── */}
+      <section className={styles.headerWaveMobileV2}>
+        <img
+          src="/wavy-shapes/mobile/events-wavy-shape.png"
+          alt=""
+          className={styles.waveImgMobileV2}
+          aria-hidden="true"
+        />
+        <div className={styles.headerInnerMobileV2}>
+          <h1 className={styles.headingMobileV2}>{eventsPageV2.heading}</h1>
+          <div className={styles.filterColMobileV2}>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={eventsPageV2.searchPlaceholder}
+              className={styles.searchInputMobileV2}
+              aria-label="Search for events"
+            />
+            <div className={styles.filterRowMobileV2}>
+              <div className={`${styles.dropdownWrapMobileV2} ${styles.dropdownWrapMobileV2Type}`} ref={typeRef}>
+                <button
+                  type="button"
+                  className={styles.pillBtnMobileV2}
+                  onClick={() => setTypeOpen((v) => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={typeOpen}
+                >
+                  TYPE
+                  <img
+                    src="/custom-assets/contact-select-arrow.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className={`${styles.pillArrowMobileV2} ${typeOpen ? styles.pillArrowMobileV2Open : ''}`}
+                  />
+                </button>
+                {typeOpen && (
+                  <ul className={styles.dropdownMenuMobileV2} role="listbox">
+                    {(['upcoming', 'past'] as EventType[]).map((opt) => (
+                      <li key={opt}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={type === opt}
+                          className={styles.dropdownOptionMobileV2}
+                          onClick={() => { setType(opt); setTypeOpen(false); }}
+                        >
+                          {opt === 'upcoming' ? 'Upcoming Events' : 'Past Events'}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className={`${styles.dropdownWrapMobileV2} ${styles.dropdownWrapMobileV2Sort}`} ref={sortRef}>
+                <button
+                  type="button"
+                  className={styles.pillBtnMobileV2}
+                  onClick={() => setSortOpen((v) => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={sortOpen}
+                >
+                  SORT
+                  <img
+                    src="/custom-assets/contact-select-arrow.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className={`${styles.pillArrowMobileV2} ${sortOpen ? styles.pillArrowMobileV2Open : ''}`}
+                  />
+                </button>
+                {sortOpen && (
+                  <ul className={styles.dropdownMenuMobileV2} role="listbox">
+                    {(['newest', 'oldest'] as SortOrder[]).map((opt) => (
+                      <li key={opt}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={sort === opt}
+                          className={styles.dropdownOptionMobileV2}
+                          onClick={() => { setSort(opt); setSortOpen(false); }}
+                        >
+                          {opt === 'newest' ? 'Newest First' : 'Oldest First'}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className={styles.contentMobileV2}>
+        {pageItems.length > 0 ? (
+          <div className={styles.gridMobileV2}>
+            {pageItems.map((ev) => (
+              <div key={ev.id} className={styles.cardMobileV2}>
+                <div className={styles.cardMobileInnerV2}>
+                  <div className={styles.cardPhotoMobileV2}>
+                    {ev.image ? (
+                      <Image src={ev.image} alt={ev.title} fill sizes="351px" className={styles.cardImgMobileV2} />
+                    ) : (
+                      <div className={styles.cardImgPlaceholderMobileV2} />
+                    )}
+                  </div>
+                  <div className={styles.cardBodyMobileV2}>
+                    <p className={styles.cardTitleMobileV2}>{ev.title}</p>
+                    <div className={styles.cardMetaRowsMobileV2}>
+                      <div className={styles.cardMetaRowMobileV2}>
+                        <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
+                        <p className={`${styles.cardMetaMobileV2} ${styles.cardMetaDateRowMobileV2}`}>
+                          <span className={styles.cardMetaDateMobileV2}>{ev.date}</span>
+                          {ev.venue && ev.venue !== '—' && (
+                            <span className={styles.cardMetaVenueMobileV2}>&nbsp;@ {ev.venue}</span>
+                          )}
+                        </p>
+                      </div>
+                      {ev.speaker && ev.speaker !== '—' && (
+                        <div className={styles.cardMetaRowMobileV2}>
+                          <UserCircle weight="bold" className={styles.cardMetaIconMobileV2} />
+                          <p className={styles.cardMetaMobileV2}>BY {toTitleCase(ev.speaker)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.emptyMsgMobileV2}>No events found.</p>
+        )}
+
+        {totalPages > 1 && (
+          <div className={styles.paginationMobileV2}>
+            <button
+              type="button"
+              className={styles.pageArrowBtnMobileV2}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={clampedPage === 0}
+              aria-label="Previous page"
+            >
+              <img src="/custom-assets/arrow-prev.svg" alt="" className={styles.pageArrowPrevMobileV2} />
+            </button>
+            <span className={styles.pageIndicatorMobileV2}>
+              {String(clampedPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+            </span>
+            <button
+              type="button"
+              className={styles.pageArrowBtnMobileV2}
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={clampedPage >= totalPages - 1}
+              aria-label="Next page"
+            >
+              <img src="/custom-assets/arrow-next.svg" alt="" />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

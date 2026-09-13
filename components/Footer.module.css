@@ -45,13 +45,25 @@
   opacity: 1;
 }
 
-@media (max-width: 600px) {
+/* node 210:4564 — centered (not left-aligned), 17px gap between the
+   copyright line and the links row, 32px between each link. Side
+   padding tightened to 25px (matches the copyright text's left:25px
+   in the mobile Figma frame) — left at the desktop 48px, the
+   copyright line wraps "Reserved" onto its own line. */
+@media (max-width: 900px) {
+  .footerV2 {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
   .innerV2 {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
+    gap: 17px;
   }
 
   .linksV2 {
-    gap: var(--space-lg);
+    gap: 32px;
   }
 }

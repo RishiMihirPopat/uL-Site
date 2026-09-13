@@ -99,15 +99,27 @@
   color: var(--color-error);
 }
 
-@media (max-width: 560px) {
+/* node 197:4563 — exact mobile pill sizing, stacked input/button,
+   both full-width within a 274px-max column. Matches the site's usual
+   900px mobile breakpoint (was 560px, which didn't line up with any
+   other mobile-specific section on this page). */
+@media (max-width: 900px) {
+  .form {
+    width: 100%;
+    max-width: 274px;
+  }
+
   .row {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: var(--space-md);
+    gap: 14px;
   }
 
-  .input {
+  .input,
+  .btn {
     width: 100%;
+    height: 33px;
+    padding: 8px 17px;
   }
 }

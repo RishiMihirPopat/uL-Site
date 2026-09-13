@@ -1,10 +1,12 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { brand, navV2 } from '../lib/content';
 import { lenisRef } from '../lib/lenis';
+import MobileMenu from './MobileMenu';
 import styles from './Nav.module.css';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -14,6 +16,12 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 // opacity. No box/border — nav sits directly on the page's own background.
 export default function Nav() {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  // Stable references — MobileMenu is always mounted (not conditionally
+  // rendered), so a fresh inline function here would re-run its effects
+  // on every Nav re-render, not just when the menu actually opens/closes.
+  const openMenu = useCallback(() => setMenuOpen(true), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -74,13 +82,13 @@ export default function Nav() {
         </motion.div>
 
         {/* Mobile-only "MENU" pill (Figma node 188:4554) — CSS-hidden on
-            desktop. Deliberately not wired up to open anything yet: no
-            open-state design was provided, and the user asked to leave
-            that for later rather than guess at it. */}
+            desktop. Opens the mobile menu overlay (node 188:4447). */}
         <motion.button
           type="button"
           className={styles.menuBtnV2}
-          aria-label="Menu"
+          aria-label="Open menu"
+          aria-expanded={menuOpen}
+          onClick={openMenu}
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
@@ -88,6 +96,8 @@ export default function Nav() {
           MENU
         </motion.button>
       </nav>
+
+      <MobileMenu open={menuOpen} onClose={closeMenu} />
     </header>
   );
 }

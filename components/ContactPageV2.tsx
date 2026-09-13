@@ -30,15 +30,18 @@ const item = {
 export default function ContactPageV2() {
   return (
     <main className={styles.mainV2}>
-      <motion.img
-        src="/wavy-shapes/website/contact-wavy-shape.png"
-        alt=""
-        className={styles.waveImgV2}
-        aria-hidden="true"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: NAV_ENTRANCE_DELAY, ease: EASE }}
-      />
+      <picture className={styles.pictureContentsV2}>
+        <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/contact-wavy-shape.png" />
+        <motion.img
+          src="/wavy-shapes/website/contact-wavy-shape.png"
+          alt=""
+          className={styles.waveImgV2}
+          aria-hidden="true"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: NAV_ENTRANCE_DELAY, ease: EASE }}
+        />
+      </picture>
       <motion.div
         className={styles.innerV2}
         initial="hidden"

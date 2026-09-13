@@ -35,7 +35,7 @@ function Switcher({ prev, next }: { prev: AdjacentArticle | null; next: Adjacent
           <img src={ARROW} alt="" className={styles.arrowPrev} />
         </span>
       )}
-      <span className={styles.switchLabel}>SWITCH ARTICLES</span>
+      <span className={styles.switchLabel}>PREV / NEXT</span>
       {next ? (
         <Link href={`/articles/${next.slug}`} className={styles.circleBtn} aria-label={`Next article: ${next.title}`}>
           <img src={ARROW} alt="" className={styles.arrowNext} />
@@ -59,15 +59,18 @@ export default function ArticleDetailPageV2({ title, subtitle, coverImage, conte
   return (
     <div className={styles.pageV2}>
       <section className={styles.waveBandV2}>
-        <motion.img
-          src="/wavy-shapes/website/blog-wavy-shape.png"
-          alt=""
-          className={styles.waveImgV2}
-          aria-hidden="true"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
-        />
+        <picture className={styles.pictureContents}>
+          <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/blog-wavy-shape-up.png" />
+          <motion.img
+            src="/wavy-shapes/website/blog-wavy-shape.png"
+            alt=""
+            className={styles.waveImgV2}
+            aria-hidden="true"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+          />
+        </picture>
         <motion.div
           className={styles.waveInnerV2}
           initial={{ opacity: 0, y: 20 }}
@@ -103,12 +106,15 @@ export default function ArticleDetailPageV2({ title, subtitle, coverImage, conte
       </motion.article>
 
       <section className={styles.waveBandV2}>
-        <img
-          src="/wavy-shapes/website/blog-wavy-shape.png"
-          alt=""
-          className={styles.waveImgV2}
-          aria-hidden="true"
-        />
+        <picture className={styles.pictureContents}>
+          <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/blog-wavy-shape-bottom.png" />
+          <img
+            src="/wavy-shapes/website/blog-wavy-shape.png"
+            alt=""
+            className={`${styles.waveImgV2} ${styles.waveImgV2Bottom}`}
+            aria-hidden="true"
+          />
+        </picture>
         <div className={styles.waveInnerV2Bottom}>
           <Switcher prev={prev} next={next} />
         </div>

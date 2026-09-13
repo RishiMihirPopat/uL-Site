@@ -10,10 +10,17 @@ const DESC_SELECTOR = '[data-cursor-desc]';
 const CURSOR_SRC = '/custom-assets/custom-cursor.png';
 const CURSOR_HOVER_SRC = '/custom-assets/hover-custom-cursor.png';
 
+// Matches the site's mobile breakpoint (app/page.module.css and friends
+// all switch to mobile layouts at max-width: 900px).
+const DESKTOP_MEDIA = '(pointer: fine) and (min-width: 901px)';
+
 /** V2 only, desktop pointers only (see the matchMedia guard) — replaces the
  *  native cursor with the Figma-provided gold arrow PNG, spring-following
  *  the real pointer; swaps to a gold sparkle PNG (and scales up) over
- *  buttons, links (including Nav), inputs and other interactive elements. */
+ *  buttons, links (including Nav), inputs and other interactive elements.
+ *  Gated on viewport width in addition to pointer type — a fine pointer
+ *  (mouse) at a resized-narrow desktop window still shouldn't show it,
+ *  since every layout at that width has already switched to mobile. */
 export default function CustomCursor() {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
@@ -24,12 +31,29 @@ export default function CustomCursor() {
   const [desc, setDesc] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
 
+  // Tracks the media query itself (both directions — narrowing below
+  // 900px AND growing back past it, e.g. rotating a device or resizing a
+  // desktop window), separate from the listener-setup effect below.
+  // `visible` deliberately starts false and is only ever set here (post-
+  // mount, never in a lazy useState initializer) — matching mount state
+  // to server-rendered state avoids a hydration mismatch, since this
+  // component returns null outright while `visible` is false.
   useEffect(() => {
-    const finePointer = window.matchMedia('(pointer: fine)').matches;
-    if (!finePointer) return;
+    const mql = window.matchMedia(DESKTOP_MEDIA);
+    setVisible(mql.matches);
+    const handleChange = (e: MediaQueryListEvent) => setVisible(e.matches);
+    mql.addEventListener('change', handleChange);
+    return () => mql.removeEventListener('change', handleChange);
+  }, []);
+
+  // Only mounts the actual pointer tracking (and hides the native cursor)
+  // while `visible` is true, and fully tears it down the moment it flips
+  // false — so resizing into mobile width doesn't just hide the cursor
+  // element but also restores the native cursor and stops listening.
+  useEffect(() => {
+    if (!visible) return;
 
     document.body.classList.add(styles.cursorNone);
-    setVisible(true);
 
     // Preload so the first hover doesn't flash an unloaded image.
     const preload = new window.Image();
@@ -56,7 +80,7 @@ export default function CustomCursor() {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseover', handleOver);
     };
-  }, [x, y]);
+  }, [visible, x, y]);
 
   if (!visible) return null;
 

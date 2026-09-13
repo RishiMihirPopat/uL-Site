@@ -77,6 +77,8 @@ export default function AsSeenInSection({ heading, logos }: AsSeenInSectionProps
           onLoad={() => setWaveLoaded(true)}
         />
       </picture>
+      {/* Desktop layout — heading/marquee absolute-positioned against the
+          wide, short desktop wave band. CSS-hidden on mobile. */}
       <motion.div
         className={styles.pressInnerV2}
         initial="hidden"
@@ -112,6 +114,48 @@ export default function AsSeenInSection({ heading, logos }: AsSeenInSectionProps
             {logos.map((l) => (
               <div key={`d-${l.id}`} className={styles.pressLogoV2}>
                 <Image src={l.src} alt={l.alt} fill sizes="111px" />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Mobile layout (node 197:4560) — dedicated markup, not the
+          desktop one repositioned, since the mobile wave's proportions
+          are completely different. CSS-hidden on desktop. */}
+      <motion.div
+        className={styles.pressInnerMobileV2}
+        initial="hidden"
+        animate={revealArmed ? 'visible' : 'hidden'}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.18, delayChildren: 0.05 } } }}
+      >
+        <motion.h2
+          className={styles.pressHeadingMobileV2}
+          variants={{
+            hidden: { opacity: 0, y: 16 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+          }}
+        >
+          {heading}
+        </motion.h2>
+        <motion.div
+          className={styles.pressMarqueeWrapMobileV2}
+          variants={{
+            hidden: { opacity: 0, y: 16 },
+            // See the desktop instance above — matches .pressMarqueeWrapMobileV2's
+            // own static 0.5 opacity.
+            visible: { opacity: 0.5, y: 0, transition: { duration: 0.55, ease: EASE } },
+          }}
+        >
+          <div className={styles.pressRowMobileV2}>
+            {logos.map((l) => (
+              <div key={l.id} className={styles.pressLogoMobileV2}>
+                <Image src={l.src} alt={l.alt} fill sizes="106px" />
+              </div>
+            ))}
+            {logos.map((l) => (
+              <div key={`d-${l.id}`} className={styles.pressLogoMobileV2}>
+                <Image src={l.src} alt={l.alt} fill sizes="106px" />
               </div>
             ))}
           </div>

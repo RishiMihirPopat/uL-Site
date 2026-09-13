@@ -3,7 +3,6 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import CustomCursor from '@/components/CustomCursor';
-import ResolutionDebug from '@/components/ResolutionDebug';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SmoothScroll />
         <CustomCursor />
-        <ResolutionDebug />
         <div className="v2-bg-texture" aria-hidden="true">
           <img src="/custom-assets/bg-grid-texture.png" alt="" />
         </div>

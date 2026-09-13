@@ -78,6 +78,11 @@
   align-self: start;
   width: 100%;
   height: auto;
+  /* aspect-ratio below is overridden per breakpoint to match whichever
+     source file <picture> actually loads — object-fit: cover is a
+     safety net so a mismatch between the two (e.g. a slow/failed
+     <source> swap) crops instead of stretching/distorting the image. */
+  object-fit: cover;
   /* Reserves the correct row height immediately, before the image file
      itself has loaded — otherwise the grid row briefly collapses toward
      0 (this is a plain <img>, so the browser doesn't know its aspect
@@ -125,6 +130,7 @@
    the exact Figma-exported asset — not hand-drawn — so it's pixel-exact.
    Card + photo scaled x0.9 (mono label font-size deliberately untouched
    — only its position moves to match the smaller card). */
+/* Not clickable — plain div, no link/cursor/text-decoration reset needed. */
 .ticketCardV2 {
   position: relative;
   flex-shrink: 0;
@@ -133,7 +139,6 @@
   height: 386.1px;
   background-image: url('/card-shapes/website/main-event-card.png');
   background-size: 100% 100%;
-  text-decoration: none;
 }
 
 /* Vertical stagger — exact per-card offsets from Figma (x0.9), not a
@@ -270,8 +275,30 @@
   position: relative;
   z-index: 2;
   display: grid;
+  /* Without an explicit column size, a single implicit grid column
+     auto-sizes to fit the WIDEST content placed in it — normally
+     harmless, but .pressRowMobileV2 below is deliberately max-content
+     wide (~1700px, all 16 marquee logos in one row) for its scrolling
+     technique. The desktop marquee never hit this because it's
+     position: absolute (removed from flow, doesn't count toward track
+     sizing); the mobile one uses normal flexbox, so without this it
+     inflates the whole section (wave image included) to ~1700px
+     regardless of the real viewport. minmax(0, 1fr) is the standard
+     fix: caps the track at the container's own width instead of its
+     content's intrinsic size. */
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   margin-top: 150px;
+}
+
+@media (max-width: 900px) {
+  /* Manifesto box → As Seen In: desktop's 150px never got a mobile
+     override, leaving that gap far too wide on a narrow screen — real
+     mobile-frame gap (manifesto box bottom 2531.18 to wave top
+     2594.22) is ~63px. */
+  .pressV2 {
+    margin-top: 63px;
+  }
 }
 
 .pressWaveImgV2 {
@@ -284,6 +311,9 @@
      grid-stacked heading/marquee (positioned via top:% of this row) don't
      jump from the top edge to centered once the image file loads. */
   aspect-ratio: 1920 / 233;
+  /* See .gatherWaveImgV2 — crops instead of stretching if the loaded
+     source's real ratio ever doesn't match this breakpoint's aspect-ratio. */
+  object-fit: cover;
   pointer-events: none;
 }
 
@@ -352,7 +382,74 @@
   filter: brightness(0) invert(1);
 }
 
-/* Mobile-only "(Swipe For More)" subtitle — replaces the desktop
+/* ── As Seen In — MOBILE (node 197:4560) ──
+   A separate, dedicated layout rather than overrides on top of the
+   desktop version above — the desktop heading/marquee are positioned
+   via absolute % offsets tuned for its own very different (much wider,
+   much shorter) wave band, which proved fragile to keep patching for
+   mobile's completely different proportions. Hidden by default (grid-
+   stacked in the same cell as .pressInnerV2 and the wave image); shown
+   only at the mobile breakpoint further down, which also hides
+   .pressHeadingV2/.pressMarqueeWrapV2 instead of repositioning them. */
+.pressInnerMobileV2 {
+  display: none;
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.pressHeadingMobileV2 {
+  margin: 0;
+  padding: 0 var(--space-md);
+  text-align: center;
+  font-family: var(--font-brand);
+  font-size: 24px;
+  color: var(--color-bg-v2);
+}
+
+.pressMarqueeWrapMobileV2 {
+  width: 100%;
+  overflow: hidden;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.pressMarqueeWrapMobileV2:hover .pressRowMobileV2 {
+  animation-play-state: paused;
+}
+
+.pressRowMobileV2 {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* Scaled up ~1.6x from the exact Figma spec (43.129px/66.092x27.57px)
+     per instruction — the literal mobile-frame size read as too small. */
+  gap: 69px;
+  animation: pressMarqueeV2 36s linear infinite;
+}
+
+.pressLogoMobileV2 {
+  position: relative;
+  flex-shrink: 0;
+  width: 106px;
+  height: 44px;
+}
+
+.pressLogoMobileV2 img {
+  object-fit: contain;
+  object-position: center;
+  filter: brightness(0) invert(1);
+}
+
+/* Mobile-only "(Tap For More)" subtitle — replaces the desktop
    hover-hint text below, which doesn't apply once the cards become an
    auto-advancing carousel. Hidden by default; shown only at the mobile
    breakpoint further down. */
@@ -409,6 +506,9 @@
      grid-stacked content (centered via align-self against this row)
      doesn't jump once the image file loads. */
   aspect-ratio: 1920 / 338;
+  /* See .gatherWaveImgV2 — crops instead of stretching if the loaded
+     source's real ratio ever doesn't match this breakpoint's aspect-ratio. */
+  object-fit: cover;
   z-index: 0;
   pointer-events: none;
 }
@@ -476,22 +576,27 @@
     padding: 0 var(--space-md);
   }
 
-  /* Heading + "(Swipe For More)" — both Atelier 24px, 12px apart
-     (node 188:4550). margin-bottom: 0 overrides the <=1400px tier's
-     48px (meant for the desktop ticket-row layout below the heading) —
-     left as-is, it collapses with .gatherSubtitleMobileV2's 12px
-     margin-top into 48px instead of 12px. */
+  /* Heading + "(Tap For More)" — both Atelier 24px. margin-bottom: 0
+     overrides the <=1400px tier's 48px (meant for the desktop
+     ticket-row layout below the heading) — left as-is, it collapses
+     with .gatherSubtitleMobileV2's margin-top into 48px instead.
+     line-height: 1 on both — without it, the heading inherits h2's 1.2
+     and the subtitle (a <p>) inherits body's 1.7, both padding extra
+     leading above/below the glyphs that made the visible gap much
+     bigger than the margin-top below actually is. */
   .gatherHeadingV2 {
     font-size: 24px;
+    line-height: 1;
     margin-bottom: 0;
   }
 
   .gatherSubtitleMobileV2 {
     display: block;
-    margin: 12px 0 0;
+    margin: 8px 0 0;
     text-align: center;
     font-family: var(--font-brand);
     font-size: 24px;
+    line-height: 1;
     color: var(--color-bg-v2);
   }
 
@@ -519,13 +624,13 @@
     max-width: 298.311px;
   }
 
+  /* Not clickable — plain div, matches the desktop cards. */
   .gatherMobileCardV2 {
     position: relative;
     width: 100%;
     aspect-ratio: 293.57 / 319.618;
     background-image: url('/card-shapes/mobile/main-event-card.png');
     background-size: 100% 100%;
-    text-decoration: none;
   }
 
   /* Photo inset + label position below are percentages of the card's own
@@ -645,40 +750,43 @@
     aspect-ratio: 590 / 241;
   }
 
-  .pressInnerV2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    padding: 0 var(--space-md);
-  }
-
-  .pressHeadingV2,
-  .pressMarqueeWrapV2 {
-    position: static;
-    left: auto;
-    right: auto;
-    top: auto;
-  }
-
+  /* node 197:4560 — desktop's absolute-positioned heading/marquee are
+     hidden entirely on mobile (rather than overridden piecemeal) in
+     favor of a dedicated mobile block below, which was proving fragile
+     to patch on top of the desktop layout's own positioning/sizing. */
   .pressHeadingV2 {
-    font-size: 28px;
+    display: none;
   }
 
   .pressMarqueeWrapV2 {
-    width: 100%;
+    display: none;
   }
 
-  /* ── Newsletter: swap the wide desktop wave for the taller mobile one
-         (real asset ratio 590/406) — .newsletterInnerV2 is already a
-         centered flex column, no layout change needed ── */
+  .pressInnerV2 {
+    display: block;
+  }
+
+  .pressInnerMobileV2 {
+    display: flex;
+  }
+
+  /* ── Newsletter (node 197:4563): swap the wide desktop wave for the
+         taller mobile one (real asset ratio 590/406) — .newsletterInnerV2
+         is already a centered flex column, just needs tighter padding
+         and the exact heading/gap sizing; NewsletterFormV2.module.css
+         handles the pill sizing itself ── */
   .newsletterWaveImgV2 {
     aspect-ratio: 590 / 406;
   }
 
+  .newsletterInnerV2 {
+    gap: 30px;
+    padding: 0 var(--space-md);
+  }
+
   .newsletterHeadingV2 {
-    font-size: 28px;
+    font-size: 24px;
+    line-height: 32px;
   }
 }
 

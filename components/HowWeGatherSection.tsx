@@ -2,18 +2,15 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
 import styles from '../app/page.module.css';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const MotionLink = motion.create(Link);
 const MOBILE_AUTOPLAY_MS = 3000;
 
 interface FormatItem {
   name: string;
   shortLabel: string[];
-  href: string;
   desc: string;
   imgV2: string;
   alt: string;
@@ -87,30 +84,57 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
   // Content (heading, cards/mobile carousel, doodles) must only start
   // revealing once the wave background has actually finished appearing —
   // same "wait for the thing behind it" gate AsSeenInSection uses for its
-  // own wave (there via image-load, here via the wave's own entrance
-  // animation finishing), rather than two independent timers that could
-  // race if the user scrolls to this section quickly. `whileInView` alone
-  // can't express "and also wait for this other condition", so both
-  // triggers are tracked explicitly and combined into one `ready` flag
-  // that drives a plain `animate` instead.
+  // own wave, rather than two independent timers that could race if the
+  // user scrolls to this section quickly. `whileInView` alone can't
+  // express "and also wait for this other condition", so both triggers
+  // are tracked explicitly and combined into one `ready` flag that
+  // drives a plain `animate` instead.
+  //
+  // waveLoaded gates the fade-in itself (animate only starts once the
+  // image has real bytes to show — on mobile this file is ~865KB, easily
+  // slower than the 1.7s the animation's own timer takes, so gating only
+  // on the animation's timer previously let it "complete" and reveal the
+  // content while the image itself hadn't visually loaded/painted yet).
+  // waveAnimDone then only flips true once that gated fade-in has
+  // actually finished animating.
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.15 });
-  const [waveRevealed, setWaveRevealed] = useState(false);
-  const ready = inView && waveRevealed;
+  const waveImgRef = useRef<HTMLImageElement>(null);
+  const [waveLoaded, setWaveLoaded] = useState(false);
+  const [waveAnimDone, setWaveAnimDone] = useState(false);
+
+  useEffect(() => {
+    if (waveImgRef.current?.complete) setWaveLoaded(true);
+  }, []);
+
+  // A plain timer tied to the wave's own transition numbers below
+  // (0.9s delay + 0.8s duration), started the moment the image is
+  // actually ready to animate — not Framer's onAnimationComplete, which
+  // proved unreliable here (fired based on internal animate-prop state
+  // changes rather than a real 1.7s of wall-clock animation having
+  // played, letting the content through early on some loads).
+  useEffect(() => {
+    if (!waveLoaded) return;
+    const timer = setTimeout(() => setWaveAnimDone(true), (0.9 + 0.8) * 1000);
+    return () => clearTimeout(timer);
+  }, [waveLoaded]);
+
+  const ready = inView && waveAnimDone;
 
   return (
     <section id="formats" ref={sectionRef} className={styles.gatherV2}>
       <picture className={styles.pictureContentsV2}>
-        <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/ather-wavy-shape.png" />
+        <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/gather-wavy-shape.png" />
         <motion.img
+          ref={waveImgRef}
           src="/wavy-shapes/website/gather-wavy-shape.png"
           alt=""
           className={styles.gatherWaveImgV2}
           aria-hidden="true"
           initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={waveLoaded ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.8, delay: 0.9, ease: EASE }}
-          onAnimationComplete={() => setWaveRevealed(true)}
+          onLoad={() => setWaveLoaded(true)}
         />
       </picture>
 
@@ -149,12 +173,13 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
           {mobileLabel}
         </motion.p>
 
-        {/* Cards, in random order — desktop only, CSS-hidden on mobile */}
+        {/* Cards, in random order — desktop only, CSS-hidden on mobile.
+            Not clickable — plain divs, not links; the hover description
+            (data-cursor-desc) is the only interaction. */}
         <div className={styles.ticketRowV2}>
           {formats.map((f, i) => (
-            <MotionLink
+            <motion.div
               key={f.name}
-              href={f.href}
               className={styles.ticketCardV2}
               data-cursor-desc={f.desc}
               variants={{
@@ -178,33 +203,30 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
                   </React.Fragment>
                 ))}
               </p>
-            </MotionLink>
+            </motion.div>
           ))}
         </div>
 
         {/* Auto-advancing single card + content box — mobile only,
-            CSS-hidden on desktop. A plain div, not part of the
-            random-order reveal stagger above (it's a carousel, not a
-            static grid), but still inherits the parent's fade-in. */}
-        <div className={styles.gatherMobileWrapV2}>
+            CSS-hidden on desktop. Needs its own variants (not just the
+            parent's) — the parent's hidden/visible variants are empty
+            objects (`{}`); each reveal element is individually
+            responsible for its own opacity animation, so a plain,
+            non-motion div here never actually gets hidden and renders
+            at full visibility immediately, bypassing the wave-wait gate
+            entirely. */}
+        <motion.div
+          className={styles.gatherMobileWrapV2}
+          variants={{
+            hidden: { opacity: 0, y: 30 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+          }}
+        >
           <div className={styles.gatherMobileCardBoxGroupV2}>
-            <MotionLink
-              href={mobileFormat.href}
-              className={styles.gatherMobileCardV2}
-              aria-label={mobileFormat.name}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                const offset = info.offset.x;
-                const velocity = info.velocity.x;
-                if (offset < -40 || velocity < -400) {
-                  handleMobileNext();
-                } else if (offset > 40 || velocity > 400) {
-                  handleMobilePrev();
-                }
-              }}
-            >
+            {/* Not clickable — purely presentational, matches the
+                desktop cards above. Autoplay + the arrows below are the
+                only way to move through the formats. */}
+            <div className={styles.gatherMobileCardV2} aria-label={mobileFormat.name}>
               <div className={styles.gatherMobileCardPhotoV2}>
                 <Image src={mobileFormat.imgV2} alt={mobileFormat.alt} fill sizes="300px" />
               </div>
@@ -216,7 +238,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
                   </React.Fragment>
                 ))}
               </p>
-            </MotionLink>
+            </div>
             <div className={styles.gatherMobileContentBoxV2}>
               <p className={styles.gatherMobileContentTextV2}>{mobileFormat.desc}</p>
             </div>
@@ -239,7 +261,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
               <img src="/custom-assets/arrow-next.svg" alt="" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Doodles last */}
         <motion.img
