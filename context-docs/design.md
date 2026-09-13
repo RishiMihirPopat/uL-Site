@@ -9,27 +9,21 @@
 
 ## Color Tokens
 
-All values are CSS custom properties defined in `globals.css`.
+All values are CSS custom properties defined in `globals.css`. "Live" below means actually referenced by at least one component today (V2 site or the still-mounted V1 leftovers like `EventCard`, `AllUpcomingEventsModal`, `MarkdownRenderer`, `HeroDraggables`, `FormatEventsList`, `events/[slug]`) — not just declared.
 
 ### Backgrounds
 | Token | CSS Variable | Value | Notes |
 |-------|-------------|-------|-------|
-| Background | `--color-bg` | `#F5EFE0` | Main warm cream / paper |
+| Background | `--color-bg` | `#F5EFE0` | Warm cream / paper — V1 base |
 | Background (surface) | `--color-bg-surface` | `#EDE4D3` | Slightly deeper cream — cards, sections |
 | Background (dark) | `--color-bg-dark` | `#2A2420` | Near-black warm surface — footers, inverted blocks |
+| Background (V2) | `--color-bg-v2` | `#FFF9F2` | The actual background color of the live Figma-redesigned site |
 
 ### Brand / Primary
 | Token | CSS Variable | Value | Notes |
 |-------|-------------|-------|-------|
-| Primary | `--color-primary` | `#6B2D2D` | Deep maroon / oxblood — signature color |
+| Primary | `--color-primary` | `#6B2D2D` | Deep maroon / oxblood — signature color, used throughout V2 |
 | Primary (hover) | `--color-primary-hover` | `#7D3636` | Slightly lifted maroon for hover states |
-| Primary (light) | `--color-primary-light` | `#EAD9D9` | Faint maroon tint — subtle bg, active states |
-
-### Accent
-| Token | CSS Variable | Value | Notes |
-|-------|-------------|-------|-------|
-| Accent | `--color-accent` | `#B5562E` | Muted terracotta / rust |
-| Accent (hover) | `--color-accent-hover` | `#C96A40` | Lifted terracotta for hover |
 
 ### Text
 | Token | CSS Variable | Value | Notes |
@@ -42,21 +36,21 @@ All values are CSS custom properties defined in `globals.css`.
 | Token | CSS Variable | Value | Notes |
 |-------|-------------|-------|-------|
 | Olive | `--color-olive` | `#5A5A3C` | Muted green — tags, secondary accents |
-| Olive (light) | `--color-olive-light` | `#7A7A54` | Lifted olive for hover or subtle use |
 | Border | `--color-border` | `#D6C9B0` | Faint warm line |
 | Border (strong) | `--color-border-strong` | `#BFB09A` | Slightly darker border for emphasis |
-| Error | `--color-error` | `#A63224` | Warm deep red — fits palette, not jarring |
+| Error | `--color-error` | `#A63224` | Warm deep red — form/validation errors |
 
-### V2 Extended Palette
-| Token | CSS Variable | Value | Notes |
-|-------|-------------|-------|-------|
-| Mustard | `--color-mustard` | `#C8892A` | Warm golden — quote borders, accents |
-| Mustard (light) | `--color-mustard-light` | `#E8D08A` | Tape strips, card shadow layer |
-| Mustard (bg) | `--color-mustard-bg` | `#FAF0D0` | Pale mustard — quote section background |
-| Terracotta | `--color-terracotta` | `#C26540` | Format card 1 overlay, CTA diamond, ornaments |
-| Sage green | `--color-sage-green` | `#6B7A5A` | Format card 2 overlay |
-| Dusty rose | `--color-dusty-rose` | `#B88585` | Format card 3 overlay, tape accent |
-| Parchment | `--color-parchment` | `#FBF5E8` | About section bg, format card bg |
+### Legacy palette (still live, V1 components only)
+These are not part of the V2 Figma system — they're only kept because `EventCard.module.css`, `AllUpcomingEventsModal.module.css`, `MarkdownRenderer.module.css`, `HeroDraggables.module.css`, and `FormatEventsList.module.css` (pre-redesign components, still mounted on `events/[slug]`) still reference them. Don't design new V2 work around these.
+
+| Token | CSS Variable | Value |
+|-------|-------------|-------|
+| Mustard (light) | `--color-mustard-light` | `#E8D08A` |
+| Terracotta | `--color-terracotta` | `#C26540` |
+| Dusty rose | `--color-dusty-rose` | `#B88585` |
+| Parchment | `--color-parchment` | `#FBF5E8` |
+
+Declared but confirmed **unused** anywhere (dead — safe to remove whenever `globals.css` is next touched): `--color-primary-light`, `--color-accent`, `--color-accent-hover`, `--color-olive-light`, `--color-mustard`, `--color-mustard-bg`, `--color-sage-green`, `--color-forest`, `--color-overlay-archive`, `--shadow-card`, `--shadow-lift`, `--shadow-polaroid`.
 
 ---
 
@@ -64,58 +58,30 @@ All values are CSS custom properties defined in `globals.css`.
 
 ### Font Families
 
-| Role | Family | Notes |
-|------|--------|-------|
-| Body | `Times New Roman`, Georgia, serif | Carries most of the weight — editorial, clean |
-| Display | Berliner, `Abril Fatface`, serif | Emphasis moments only — posters, key headings |
-| Brand | Atelier | Signature punctuation — "unLecture" mark, standout callouts only |
-| Dynamic | Merriweather, serif | Visual/reel moments — secondary, restrained |
+| Role | CSS Variable | Family | Notes |
+|------|-------------|--------|-------|
+| Body | `--font-body` | `Times New Roman`, Georgia, serif | System font, no hosting needed |
+| Brand | `--font-brand` | Atelier, `Times New Roman`, serif | Self-hosted (`/fonts/atelier.woff2`). Signature punctuation — "unLecture" mark, headings |
+| Mono | `--font-mono` | `Chivo Mono`, `Courier New`, monospace | Self-hosted (`/fonts/chivo-mono.woff2`). Labels, pills, nav, form text — V2's workhorse UI font |
+| Article | `--font-article` | `Ancizar Serif`, Georgia, serif | Self-hosted (`/fonts/ancizar-serif.woff2`). Article/blog body copy |
+| Display | `--font-display` | Berliner, `Abril Fatface`, serif | **Dead** — fonts never added, falls through to system serif |
+| Dynamic | `--font-dynamic` | Merriweather, Georgia, serif | **Dead** — font never added, falls through to system serif |
 
-Self-hosting required for: Atelier, Berliner, Abril Fatface, Merriweather.
-Times New Roman and Georgia are system fonts — no hosting needed.
-
-### Type Scale
-
-Sizes are proposed editorial defaults — confirm before writing to `globals.css`.
-
-| Style | CSS Variable | Size | Weight | Line Height |
-|-------|-------------|------|--------|-------------|
-| H1 | `--text-h1` | `3rem` | 400 | 1.1 |
-| H2 | `--text-h2` | `2rem` | 400 | 1.2 |
-| H3 | `--text-h3` | `1.375rem` | 400 | 1.3 |
-| Body | `--text-body` | `1.0625rem` | 400 | 1.7 |
-| Small | `--text-small` | `0.875rem` | 400 | 1.5 |
+Only Atelier, Chivo Mono, and Ancizar Serif are actually self-hosted and live. Montserrat is also loaded (Google Fonts CDN, `globals.css` top) for the two still-live V1 components (`EventCard`, `AllUpcomingEventsModal`) — not part of the V2 system, don't use it in new work.
 
 ---
 
-## Spacing Scale
+## Spacing, Type Scale & Radius
 
-All spacing uses a consistent scale via CSS custom properties.
+Not documented as a fixed system. The mobile build introduced a lot of one-off, Figma-exact pixel values (widths, gaps, radii, font sizes) that don't map cleanly onto the `--space-*` / `--text-*` / `--radius-*` scale still declared in `globals.css` — those variables remain in the file and are fine to reach for when a value genuinely matches, but they are not a constraint on new work.
 
-| Token | CSS Variable | Value |
-|-------|-------------|-------|
-| XS | `--space-xs` | `4px` |
-| SM | `--space-sm` | `8px` |
-| MD | `--space-md` | `16px` |
-| LG | `--space-lg` | `24px` |
-| XL | `--space-xl` | `32px` |
-| 2XL | `--space-2xl` | `48px` |
-
----
-
-## Border Radius
-
-| Token | CSS Variable | Value |
-|-------|-------------|-------|
-| Fine | `--radius-fine` | `2px` |
-| Default | `--radius-md` | `4px` |
-| Full | `--radius-full` | `9999px` |
+Going forward the site is moving toward a more open-canvas layout with a lot of relative positioning and bespoke sizing per section, so we're deliberately not building out a rigid spacing/type/radius system to document here. See `developer-updated.md` for the reasoning.
 
 ---
 
 ## Component Decisions
 
-- **Icons:** `@phosphor-icons/react` installed and first used on the Events page cards (`Calendar`, `UserCircle`), `weight="bold"` per explicit instruction — overrides the duotone default above for that instance; duotone remains the default elsewhere until told otherwise.
+- **Icons:** `@phosphor-icons/react`, `weight="bold"` (Events page cards — `Calendar`, `UserCircle`). Duotone remains the nominal default per `CLAUDE.md` but hasn't actually been used anywhere yet.
 
 ---
 
