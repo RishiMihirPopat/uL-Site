@@ -616,8 +616,14 @@
     padding: 80px var(--space-md) 0;
   }
 
+  /* node 174:4391 — two lines, 24px, ~32.87px baseline-to-baseline. */
   .manifestoHeadingV2 {
-    font-size: 26px;
+    font-size: 24px;
+    line-height: 1.37;
+  }
+
+  .manifestoHeadingSubV2 {
+    display: block;
   }
 
   .manifestoBoxV2 {

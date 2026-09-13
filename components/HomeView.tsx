@@ -70,7 +70,10 @@ export default function HomeView() {
       {/* ── 3. The Manifesto (About Us) — Figma node 133:2309 ── */}
       <FadeIn id="about" className={styles.manifestoV2}>
         <FadeInItem>
-          <h2 className={styles.manifestoHeadingV2}>{about.manifestoHeadingV2}</h2>
+          <h2 className={styles.manifestoHeadingV2}>
+            {about.manifestoHeadingV2}{' '}
+            <span className={styles.manifestoHeadingSubV2}>{about.manifestoHeadingSubV2}</span>
+          </h2>
         </FadeInItem>
         <FadeInItem>
           <div className={styles.manifestoBoxV2}>

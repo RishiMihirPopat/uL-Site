@@ -90,8 +90,11 @@ export const knowEventsLabelV2 = 'Hover For More!';
 export const knowEventsLabelMobileV2 = '(Swipe For More)';
 
 // About section — Figma node 133:2302 (heading for the whole section).
+// Desktop renders both parts on one line; mobile (node 174:4391) breaks
+// them onto two — see .manifestoHeadingSubV2 in page.module.css.
 export const about = {
-  manifestoHeadingV2: 'The Manifesto (About Us)',
+  manifestoHeadingV2: 'The Manifesto',
+  manifestoHeadingSubV2: '(About Us)',
   lead: 'unLecture was created with the intention of having somewhere in the city centred around curiosity, conversation and meaningful (sometimes very niche) ideas.',
   paragraphs: [
     "Delhi has a real appetite for this. You could always chance upon people who felt the same way, but there was nothing stable or recurring to return to, no place to take an interest further and expand on what you already knew. Discourse around certain subjects felt locked up behind institutions, jargon and qualifications.",
