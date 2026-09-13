@@ -462,7 +462,7 @@
 @media (max-width: 900px) {
   .heroV2 {
     min-height: auto;
-    padding: var(--space-xl) var(--space-md);
+    padding: var(--space-xl) var(--space-md) 64px;
   }
 
   /* ── How We Gather: swap the landscape desktop wave for the tall
