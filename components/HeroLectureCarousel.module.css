@@ -234,8 +234,13 @@
    near-square 274.738x272.458 active card, no arrows, no pill label —
    "no extra elements", just the 3-card peek row + the button below. */
 @media (max-width: 480px) {
+  /* Unlike desktop (side cards bleed fully uncropped off the page edge),
+     the mobile frame crops side cards to a tight ~39px peek — the stage
+     itself must clip to the viewport here, not just let the track run
+     wide. */
   .stageV2 {
     height: 302px;
+    overflow: hidden;
   }
 
   .trackV2 {

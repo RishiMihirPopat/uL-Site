@@ -665,6 +665,16 @@
   }
 }
 
+/* Hero carousel row goes edge-to-edge at the mobile breakpoint (node
+   174:4327) — no side padding — so the side cards' peek amount matches
+   the Figma frame's math exactly (stage width = full viewport width). */
+@media (max-width: 480px) {
+  .heroV2 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 @media (max-width: 800px) {
   /* x0.9 scaled — mono label font-size below deliberately left as-is */
   .ticketCardV2 {

@@ -87,7 +87,7 @@
   .navV2 {
     justify-content: space-between;
     gap: 0;
-    padding: 0 var(--space-md);
+    padding: 0 20px;
   }
 
   .navV2GroupLeft,
