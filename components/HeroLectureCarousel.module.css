@@ -134,7 +134,12 @@
   font-size: 1rem;
 }
 
-/* Exact stops from Figma node 124:2229 "overlay" layer */
+/* Exact stops from Figma node 124:2229 "overlay" layer. No border-radius
+   here on purpose — .card already clips everything to its own radius via
+   overflow: hidden, and that radius changes per breakpoint (26px desktop,
+   10px mobile); a hardcoded radius here would only match one of them,
+   letting the plain (undarkened) image corner poke through the gradient
+   at every other breakpoint. */
 .posterGradientOverlayV2 {
   position: absolute;
   inset: 0;
@@ -145,7 +150,6 @@
   );
   pointer-events: none;
   z-index: 2;
-  border-radius: var(--radius-lg);
 }
 
 /* Bottom-anchored text block — Figma has the "Details" block starting at
