@@ -45,7 +45,12 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     return { cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 };
   }, []);
 
-  const [cardDims, setCardDims] = useState(getCardDims);
+  // Initialized to the same SSR-safe default `getCardDims` returns for
+  // `typeof window === 'undefined'` (not `getCardDims()` itself, which
+  // would read the real `window.innerWidth` during hydration and mismatch
+  // whatever width the server assumed) — the mount effect below corrects
+  // it to the real viewport-based value immediately after hydration.
+  const [cardDims, setCardDims] = useState({ cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 });
   const [stageWidth, setStageWidth] = useState(600);
   const [isMounted, setIsMounted] = useState(false);
 
