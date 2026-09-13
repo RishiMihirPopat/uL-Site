@@ -477,9 +477,13 @@
   }
 
   /* Heading + "(Swipe For More)" — both Atelier 24px, 12px apart
-     (node 188:4550) */
+     (node 188:4550). margin-bottom: 0 overrides the <=1400px tier's
+     48px (meant for the desktop ticket-row layout below the heading) —
+     left as-is, it collapses with .gatherSubtitleMobileV2's 12px
+     margin-top into 48px instead of 12px. */
   .gatherHeadingV2 {
     font-size: 24px;
+    margin-bottom: 0;
   }
 
   .gatherSubtitleMobileV2 {
