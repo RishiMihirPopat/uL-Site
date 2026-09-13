@@ -1,8 +1,11 @@
 .prose {
-  font-family: var(--font-body);
-  font-size: 1.12rem;
-  line-height: 1.8;
-  color: #2A2420;
+  /* --prose-* custom properties let a wrapping page (e.g. the V2 article
+     page) restyle this shared renderer's typography without forking its
+     markdown-parsing logic — unset here, so V1 is unaffected. */
+  font-family: var(--prose-font-family, var(--font-body));
+  font-size: var(--prose-font-size, 1.12rem);
+  line-height: var(--prose-line-height, 1.8);
+  color: var(--prose-color, #2A2420);
 }
 
 .h1 {
@@ -16,13 +19,13 @@
 }
 
 .h2 {
-  font-family: var(--font-body);
-  font-size: clamp(1.45rem, 3vw, 1.95rem);
-  font-weight: 600;
-  color: #1A1714;
+  font-family: var(--prose-font-family, var(--font-body));
+  font-size: var(--prose-h2-size, clamp(1.45rem, 3vw, 1.95rem));
+  font-weight: var(--prose-h2-weight, 600);
+  color: var(--prose-color, #1A1714);
   line-height: 1.25;
   margin: 2rem 0 0.85rem;
-  border-bottom: 1px solid rgba(42, 36, 32, 0.12);
+  border-bottom: var(--prose-h2-border, 1px solid rgba(42, 36, 32, 0.12));
   padding-bottom: 0.4rem;
 }
 

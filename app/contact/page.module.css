@@ -1,90 +1,101 @@
 /* ════════════════════════════════════════════════
-   CONTACT PAGE — Deep Maroon & Warm Beige
+   CONTACT PAGE — Figma node 152:756
+   Same grid-stack wave technique as the homepage's sections: the wave
+   shape image (real PNG, both edges wavy) renders at its natural aspect,
+   content is grid-stacked on top and centered against it.
    ════════════════════════════════════════════════ */
 
-.main {
-  background-color: #361212; /* Rich deep maroon */
-  background-image:
-    radial-gradient(ellipse at 15% 20%, rgba(245, 239, 235, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 80%, rgba(245, 239, 235, 0.03) 0%, transparent 60%);
-  min-height: calc(100vh - 70px);
-  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
-  color: #FAF5EE;
-}
-
-.inner {
-  max-width: var(--max-width-narrow, 1040px);
-  margin: 0 auto;
+.mainV2 {
+  position: relative;
   display: grid;
-  grid-template-columns: 1.1fr 1.2fr;
-  gap: calc(var(--space-2xl) * 1.5);
-  align-items: start;
+  overflow: hidden;
 }
 
-/* ── Left column: header copy ────────────────────── */
+/* Same "wrapper invisible to grid/animation" trick as elsewhere. */
+.pictureContentsV2 {
+  display: contents;
+}
 
-.header {
+.waveImgV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  /* Reserves the real row height immediately so grid-stacked content
+     doesn't jump once the image file loads (see the homepage's wave
+     sections for the same fix). */
+  aspect-ratio: 1920 / 775;
+  pointer-events: none;
+}
+
+.innerV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  position: sticky;
-  top: calc(var(--space-2xl) * 2);
-  padding-right: var(--space-lg);
+  align-items: center;
+  gap: 73px;
 }
 
-.eyebrow {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(245, 239, 235, 0.6);
-  font-weight: 700;
+.headerV2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: center;
+  width: 100%;
 }
 
-.heading {
+.headingV2 {
+  margin: 0;
   font-family: var(--font-brand);
-  font-size: clamp(2.4rem, 4.5vw, 3.6rem);
-  font-weight: 400;
-  color: #FAF5EE;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  font-size: 42px;
+  color: var(--color-bg-v2);
+}
+
+.subV2 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  line-height: 1.364;
+  color: var(--color-bg-v2);
+  opacity: 0.45;
   white-space: nowrap;
 }
 
-.sub {
-  font-family: var(--font-body);
-  font-size: 0.98rem;
-  font-style: italic;
-  color: rgba(245, 239, 235, 0.75);
-  line-height: 1.7;
-  max-width: 38ch;
-  margin-top: var(--space-xs);
-}
-
-/* ── Right column: form wrap ─────────────────────── */
-
-.formWrap {
-  padding-top: var(--space-xs);
-}
-
-/* ── Responsive ──────────────────────────────────── */
-
-@media (max-width: 860px) {
-  .main {
-    padding: var(--space-2xl) var(--space-lg);
+/* node 226:6159 — replaces the old 620px tier entirely, which would
+   otherwise be fully shadowed once this wider 900px block (matching the
+   site's usual mobile breakpoint) takes over the same range and then some. */
+@media (max-width: 900px) {
+  .waveImgV2 {
+    aspect-ratio: 393 / 597;
   }
 
-  .inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-2xl);
+  .innerV2 {
+    max-width: 274px;
+    gap: 48px;
+    padding: 0;
   }
 
-  .header {
-    position: static;
-    padding-right: 0;
+  .headerV2 {
+    gap: 12px;
   }
 
-  .heading {
+  .headingV2 {
+    font-size: 24px;
+  }
+
+  .subV2 {
+    font-size: 14px;
+    line-height: 1.364;
     white-space: normal;
   }
 }

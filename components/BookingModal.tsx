@@ -74,29 +74,6 @@ export default function BookingModal({ url, title, onClose }: Props) {
           <span className={styles.modalTitle} title={title}>{title}</span>
 
           <div className={styles.modalActions}>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.externalLink}
-            >
-              <span>Urbanaut</span>
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                style={{ marginLeft: 4, display: 'inline-block', verticalAlign: 'middle' }}
-              >
-                <line x1="7" y1="17" x2="17" y2="7" />
-                <polyline points="7 7 17 7 17 17" />
-              </svg>
-            </a>
             <button
               className={styles.closeBtn}
               onClick={onClose}

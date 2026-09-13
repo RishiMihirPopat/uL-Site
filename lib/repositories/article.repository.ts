@@ -62,7 +62,7 @@ export class SqliteArticleRepository implements IArticleRepository {
       author: article.author || 'unLecture Collective',
       author_role: article.author_role || '',
       category: article.category || 'Essay',
-      cover_image: article.cover_image || '/category-covers/unLecture-cover.jpg',
+      cover_image: article.cover_image || '/category-covers/unlecture.jpg',
       content: article.content || '',
       read_time: article.read_time || '4 min read',
       status: article.status || 'published',

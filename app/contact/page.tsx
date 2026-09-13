@@ -1,29 +1,11 @@
-import ContactForm from '../../components/ContactForm';
-import styles from './page.module.css';
+import ContactPageV2 from '../../components/ContactPageV2';
+import { contactPage } from '../../lib/content';
 
 export const metadata = {
-  title: 'Contact — unLecture',
-  description: 'Get in touch with unLecture for collaborations, speaking, hosting, and enquiries.',
+  title: contactPage.metaTitle,
+  description: contactPage.metaDescription,
 };
 
 export default function ContactPage() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.inner}>
-        {/* Left column: Header copy */}
-        <div className={styles.header}>
-          <p className={styles.eyebrow}>Get in touch</p>
-          <h1 className={styles.heading}>Contact Us</h1>
-          <p className={styles.sub}>
-            Questions, collaborations, venue suggestions, or just want to say hello &mdash; we&apos;re glad you reached out.
-          </p>
-        </div>
-
-        {/* Right column: Form */}
-        <div className={styles.formWrap}>
-          <ContactForm />
-        </div>
-      </div>
-    </main>
-  );
+  return <ContactPageV2 />;
 }

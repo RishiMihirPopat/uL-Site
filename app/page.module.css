@@ -3,483 +3,822 @@
   flex-direction: column;
 }
 
-/* ════════════════════════════════════════════════
-   HERO — Warm beige, compact breadth, split layout:
-   Left: "Lectures (+more) in unconventional spaces"
-   Right: Upcoming Lectures Carousel
-   ════════════════════════════════════════════════ */
-
-.hero {
-  background-color: #EDE5D8; /* Warm beige, slightly richer than page bg */
-  background-image:
-    radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, 0.45) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 70%, rgba(255, 255, 255, 0.35) 0%, transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(160, 130, 90, 0.08) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 20px 20px;
-  border-bottom: 1px solid var(--color-border);
-  min-height: 420px;
-  display: grid;
-  grid-template-columns: 0.95fr 1.05fr;
-  align-items: center;
-  padding: 2rem var(--space-2xl);
-  gap: var(--space-xl);
-  position: relative;
-  overflow: hidden;
-}
-
-.heroLeft {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  padding: var(--space-sm) 0;
-}
-
-.chalkboardWrap {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  max-width: 480px;
-}
-
-.chalkboardHeading {
-  font-family: 'Caveat', 'Kalam', cursive, sans-serif;
-  font-size: clamp(2.2rem, 3.6vw, 3.6rem);
-  font-weight: 700;
-  color: #1A1714; /* Dark charcoal ink for beige background */
-  line-height: 1.15;
-  letter-spacing: 0.01em;
-  margin: 0;
-  transform: rotate(-0.8deg);
-}
-
-.heroRight {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-width: 0;
+/* Wraps a responsive <picture> (desktop/mobile <source> swap) around an
+   <img> that itself participates in a CSS Grid stack (grid-column/row) or
+   Framer Motion animation — `display: contents` makes the <picture>
+   wrapper invisible to layout, so the real <img> inside still behaves as
+   a direct child of its actual parent instead of being boxed by <picture>
+   (which is `display: inline` by default and would otherwise break grid
+   item placement). */
+.pictureContentsV2 {
+  display: contents;
 }
 
 /* ════════════════════════════════════════════════
-   FORMATS — "How We Gather"
+   HERO — Full-width poster carousel on a gridded backdrop.
    ════════════════════════════════════════════════ */
 
-.formats {
-  background-color: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-  padding: calc(var(--space-2xl) * 1.5) var(--space-2xl);
-}
-
-.formatsLabel {
-  max-width: var(--max-width);
-  margin: 0 auto var(--space-2xl);
+.heroV2 {
+  /* Now that "How We Gather" exists below it, hero sizes to its own
+     content instead of force-filling the viewport (that was only needed
+     while hero was the sole section on the page). */
   display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  font-size: var(--text-small);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px var(--space-2xl) 120px;
+  position: relative;
 }
 
-.formatsLabelRule {
-  width: 28px;
+.heroV2SrOnly {
+  position: absolute;
+  width: 1px;
   height: 1px;
-  background-color: var(--color-border-strong);
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.formatGrid {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-lg);
-  align-items: start;
-}
-
-.formatCard {
-  display: block;
-  text-decoration: none;
-  position: relative;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  aspect-ratio: 2 / 3;
-  cursor: pointer;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.38s ease;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.formatCard:nth-child(1) {
-  background-color: var(--color-terracotta);
-  transform: rotate(-1.8deg);
-}
-.formatCard:nth-child(2) {
-  background-color: var(--color-forest);
-  transform: rotate(1deg);
-}
-.formatCard:nth-child(3) {
-  background-color: var(--color-primary);
-  transform: rotate(-0.6deg);
-}
-.formatCard:nth-child(4) {
-  background-color: var(--color-olive);
-  transform: rotate(1.2deg);
+.heroV2CarouselWrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.formatCard:hover {
-  transform: rotate(0deg) translateY(-10px);
-  box-shadow: var(--shadow-lift);
-  z-index: 2;
+/* ════════════════════════════════════════════════
+   HOW WE GATHER — Figma node 126:2301
+   All positions below are converted from Figma's absolute page coordinates
+   into a local coordinate system where (0,0) = the top-left of the content
+   area (page position 96.98, 1130.2 on the 1920-wide canvas) — that point
+   is exactly where both the heading and the first card column start.
+   ════════════════════════════════════════════════ */
+
+.gatherV2 {
+  position: relative;
+  /* No background-color here on purpose: the wave PNG is transparent
+     outside its own dark silhouette, so the section falls back to the
+     page's own cream background there — that contrast IS the visible
+     wave edge. Setting this to the same dark color as the image's fill
+     was making the scalloped edge invisible (both looked identical). */
+  overflow: hidden;
+  /* Grid-stacks the wave image and the content group in the same cell so
+     the content can be vertically centered against the image's actual
+     rendered height (which is fluid — width:100%, native aspect ratio —
+     not a guessed fixed padding value). */
+  display: grid;
 }
 
-.formatCardImgReveal {
+.gatherWaveImgV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  /* aspect-ratio below is overridden per breakpoint to match whichever
+     source file <picture> actually loads — object-fit: cover is a
+     safety net so a mismatch between the two (e.g. a slow/failed
+     <source> swap) crops instead of stretching/distorting the image. */
+  object-fit: cover;
+  /* Reserves the correct row height immediately, before the image file
+     itself has loaded — otherwise the grid row briefly collapses toward
+     0 (this is a plain <img>, so the browser doesn't know its aspect
+     ratio until the bytes arrive), and the content grid-stacked on top
+     of it (positioned via top:% of this row's height) visibly jumps from
+     the top edge to its real centered position once the image loads. */
+  aspect-ratio: 1920 / 958;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gatherInnerV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* Shrunk to hug the actual content group exactly (ticket row spans
+     0 to 1546.38px — 3 * (cardW 310.05 + gap 102.06) + cardW — the
+     widest element), so centering this container via margin:0 auto
+     centers the whole group horizontally, not just its old, wider box. */
+  max-width: 1642.38px;
+  margin: 0 auto;
+  padding: 0 var(--space-2xl);
+}
+
+.gatherHeadingV2 {
+  position: absolute;
+  top: 20px;
+  left: var(--space-2xl);
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 36px;
+  color: var(--color-bg-v2);
+}
+
+.ticketRowV2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 102.06px;
+}
+
+/* Card shape (cream + grid texture + dotted perforation) is baked into
+   the exact Figma-exported asset — not hand-drawn — so it's pixel-exact.
+   Card + photo scaled x0.9 (mono label font-size deliberately untouched
+   — only its position moves to match the smaller card). */
+/* Not clickable — plain div, no link/cursor/text-decoration reset needed. */
+.ticketCardV2 {
+  position: relative;
+  flex-shrink: 0;
+  display: block;
+  width: 310.05px;
+  height: 386.1px;
+  background-image: url('/card-shapes/website/main-event-card.png');
+  background-size: 100% 100%;
+}
+
+/* Vertical stagger — exact per-card offsets from Figma (x0.9), not a
+   uniform alternating zigzag (each card sits at a distinct height). */
+.ticketRowV2 > .ticketCardV2:nth-child(1) { margin-top: 148.059px; }
+.ticketRowV2 > .ticketCardV2:nth-child(2) { margin-top: 0; }
+.ticketRowV2 > .ticketCardV2:nth-child(3) { margin-top: 242.534px; }
+.ticketRowV2 > .ticketCardV2:nth-child(4) { margin-top: 41.4px; }
+
+.ticketPhotoV2 {
+  position: absolute;
+  top: 13.5px;
+  left: 14.4px;
+  width: 282.5028px;
+  height: 190.0044px;
+  border: 1.8px solid var(--color-primary);
+  border-radius: 14.4px;
+  overflow: hidden;
+}
+
+.ticketLabelV2 {
+  position: absolute;
+  top: 274.5px;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0 8px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  line-height: 1.364;
+  color: var(--color-bg-dark);
+  text-transform: uppercase;
+}
+
+/* unLecture card (2nd) — single-line label, nudged down a bit */
+.ticketRowV2 > .ticketCardV2:nth-child(2) .ticketLabelV2 {
+  top: 288.9px;
+}
+
+.doodleReadingBookV2 {
+  position: absolute;
+  /* Horizontally centered on the 3rd (Community) card: card spans
+     824.22px to 1134.27px, center 979.245, minus half this doodle's own
+     (x0.9-scaled) width (229.5/2). */
+  left: calc(var(--space-2xl) + 864.495px);
+  top: -59.24px;
+  width: 229.5px;
+  height: 217.35px;
+  /* Hover rotate + reveal transition handled by Framer Motion
+     (components/HowWeGatherSection.tsx) — not CSS, since a motion
+     component's own inline transform would win over any CSS rule here
+     anyway. */
+}
+
+.doodleShoutingV2 {
+  position: absolute;
+  /* Horizontally centered on the 2nd (unLecture) card: card spans
+     412.11px to 722.16px, center 567.135, minus half this doodle's own
+     (x0.9-scaled) width (238.95/2). */
+  left: calc(var(--space-2xl) + 447.66px);
+  top: 452.65px;
+  width: 238.95px;
+  height: 186.75px;
+}
+
+/* ════════════════════════════════════════════════
+   THE MANIFESTO (ABOUT US) — Figma node 133:2302
+   ════════════════════════════════════════════════ */
+
+.manifestoV2 {
+  padding: 150px var(--space-2xl) 0;
+  text-align: center;
+}
+
+.manifestoHeadingV2 {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 42px;
+  color: var(--color-primary);
+}
+
+/* Text block sits 150px below the heading, per instruction. Box width
+   caps at the Figma value (1499px); height is left to content (padding +
+   real paragraph text) rather than forced to Figma's fixed 844px, so
+   longer text never gets clipped. */
+.manifestoBoxV2 {
+  position: relative;
+  max-width: 1499px;
+  margin: 80px auto 0;
+  border: 3px solid var(--color-primary);
+  border-radius: 30px;
+  overflow: hidden;
+  padding: var(--space-2xl) calc(var(--space-2xl) * 1.5);
+}
+
+.manifestoBgImgV2 {
   position: absolute;
   inset: 0;
-}
-
-.formatCardImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  opacity: 0.3;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.formatCardGradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.78) 100%);
-  z-index: 1;
-}
-
-.formatCardContent {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--space-lg);
-}
-
-.formatCardInfo {
-  position: relative;
-}
-
-.formatCardName {
-  font-family: var(--font-body);
-  font-size: var(--text-h3);
-  font-weight: 400;
-  color: var(--color-text-on-dark);
-  line-height: 1.2;
-}
-
-.formatCardDesc {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  padding-bottom: var(--space-sm);
-  font-size: var(--text-small);
-  color: var(--color-text-on-dark);
-  line-height: 1.55;
-  opacity: 0;
-  transition: opacity 0.38s ease 0.1s;
-}
-
-.formatCard:hover .formatCardDesc {
-  opacity: 0.85;
-}
-
-/* ════════════════════════════════════════════════
-   ABOUT US — Parchment, Quote on Left, 6 Paragraphs
-   ════════════════════════════════════════════════ */
-
-.about {
-  background-color: var(--color-parchment);
-  background-image: radial-gradient(circle at 1px 1px, rgba(180, 150, 100, 0.1) 1px, transparent 0);
-  background-size: 22px 22px;
-  padding: calc(var(--space-2xl) * 2) var(--space-2xl);
-  position: relative;
-  overflow: hidden;
-  border-top: 1px solid var(--color-border);
-}
-
-.aboutGrid {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 5fr 7fr;
-  gap: calc(var(--space-2xl) * 2);
+.manifestoTextV2 {
   position: relative;
   z-index: 1;
-}
-
-.aboutLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-}
-
-.aboutLabel {
-  font-size: var(--text-small);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-terracotta);
-}
-
-.quoteBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  position: sticky;
-  top: 120px;
-}
-
-.quoteMark {
-  font-family: var(--font-body);
-  font-size: 5.5rem;
-  color: var(--color-terracotta);
-  line-height: 0.6;
-  opacity: 0.35;
-  user-select: none;
-}
-
-.aboutQuoteText {
-  font-family: var(--font-body);
-  font-size: clamp(1.65rem, 2.5vw, 2.25rem);
-  font-weight: 500;
-  font-style: italic;
-  line-height: 1.28;
-  color: var(--color-primary);
-  margin: 0;
-  quotes: none;
-}
-
-.aboutQuoteAttr {
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin-top: 4px;
-}
-
-.aboutRight {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  line-height: 1.364;
+  color: var(--color-bg-dark);
+  text-align: center;
 }
 
-.aboutSectionHeading {
-  font-size: var(--text-small);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-terracotta);
-  border-bottom: 2px solid var(--color-border);
-  padding-bottom: 6px;
-  display: inline-block;
-  align-self: flex-start;
-}
-
-.aboutLead {
-  font-size: 1.2rem !important;
-  font-weight: 500;
-  line-height: 1.55 !important;
-  color: var(--color-text) !important;
-}
-
-.aboutRight p {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-text-muted);
-  text-align: justify;
-  text-justify: inter-word;
+.manifestoTextV2 p {
   margin: 0;
 }
 
 /* ════════════════════════════════════════════════
-   PRESS — As seen in
+   AS SEEN IN — Figma node 133:2325
+   Wave image + content grid-stacked (same technique as "How We Gather")
+   so heading/logo positions — expressed as percentages of the 1920-wide
+   Figma canvas — scale exactly with the wave's own fluid width/height.
+   Gap above matches the Gather-wave → Manifesto-heading gap (150px).
    ════════════════════════════════════════════════ */
 
-.press {
-  background-color: var(--color-bg-dark);
-  padding: var(--space-2xl) 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xl);
-}
-
-.pressLabel {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xl);
-  padding: 0 var(--space-2xl);
-  font-size: var(--text-small);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(240, 232, 220, 0.38);
-}
-
-.pressRule {
-  flex: 1;
-  height: 1px;
-  background-color: rgba(240, 232, 220, 0.1);
-  display: inline-block;
-}
-
-.carouselWrap {
+.pressV2 {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  /* Without an explicit column size, a single implicit grid column
+     auto-sizes to fit the WIDEST content placed in it — normally
+     harmless, but .pressRowMobileV2 below is deliberately max-content
+     wide (~1700px, all 16 marquee logos in one row) for its scrolling
+     technique. The desktop marquee never hit this because it's
+     position: absolute (removed from flow, doesn't count toward track
+     sizing); the mobile one uses normal flexbox, so without this it
+     inflates the whole section (wave image included) to ~1700px
+     regardless of the real viewport. minmax(0, 1fr) is the standard
+     fix: caps the track at the container's own width instead of its
+     content's intrinsic size. */
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
+  margin-top: 150px;
+}
+
+@media (max-width: 900px) {
+  /* Manifesto box → As Seen In: desktop's 150px never got a mobile
+     override, leaving that gap far too wide on a narrow screen — real
+     mobile-frame gap (manifesto box bottom 2531.18 to wave top
+     2594.22) is ~63px. */
+  .pressV2 {
+    margin-top: 63px;
+  }
+}
+
+.pressWaveImgV2 {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* See .gatherWaveImgV2 — reserves the row's real height up front so the
+     grid-stacked heading/marquee (positioned via top:% of this row) don't
+     jump from the top edge to centered once the image file loads. */
+  aspect-ratio: 1920 / 233;
+  /* See .gatherWaveImgV2 — crops instead of stretching if the loaded
+     source's real ratio ever doesn't match this breakpoint's aspect-ratio. */
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.pressInnerV2 {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pressHeadingV2 {
+  position: absolute;
+  left: 4.7125%;
+  top: 30.575%;
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 42px;
+  color: var(--color-bg-v2);
+  white-space: nowrap;
+}
+
+/* Infinite marquee — logos have wildly different native proportions
+   (Economic Times tiny, Vogue huge, etc.), so each sits in a fixed frame
+   with object-fit:contain + a white silhouette filter to read as one
+   consistent size/color. Cycles slowly, fades at both edges, pauses on
+   hover. */
+.pressMarqueeWrapV2 {
+  position: absolute;
+  left: 22.974%;
+  right: 4.7125%;
+  top: 32.653%;
+  overflow: hidden;
+  opacity: 0.5;
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
-.carouselWrap:hover .carouselInner {
+.pressMarqueeWrapV2:hover .pressRowV2 {
   animation-play-state: paused;
 }
 
-.carouselInner {
+.pressRowV2 {
   display: flex;
+  align-items: center;
   width: max-content;
-  animation: carouselScroll 32s linear infinite;
+  gap: 72px;
+  animation: pressMarqueeV2 36s linear infinite;
 }
 
-@keyframes carouselScroll {
+@keyframes pressMarqueeV2 {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 
-.logoItem {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 var(--space-xl);
-}
-
-.logoFrame {
+.pressLogoV2 {
   position: relative;
-  width: 148px;
-  height: 52px;
   flex-shrink: 0;
-  transition: opacity 0.22s ease;
+  width: 110.334px;
+  height: 46.025px;
 }
 
-.logoImg {
+.pressLogoV2 img {
   object-fit: contain;
   object-position: center;
   filter: brightness(0) invert(1);
-  opacity: 0.45;
-  transition: opacity 0.22s ease;
 }
 
-.logoItem:hover .logoImg {
-  opacity: 0.85;
-}
-
-/* ════════════════════════════════════════════════
-   NEWSLETTER
-   ════════════════════════════════════════════════ */
-
-.newsletterSection {
-  background-color: var(--color-primary);
+/* ── As Seen In — MOBILE (node 197:4560) ──
+   A separate, dedicated layout rather than overrides on top of the
+   desktop version above — the desktop heading/marquee are positioned
+   via absolute % offsets tuned for its own very different (much wider,
+   much shorter) wave band, which proved fragile to keep patching for
+   mobile's completely different proportions. Hidden by default (grid-
+   stacked in the same cell as .pressInnerV2 and the wave image); shown
+   only at the mobile breakpoint further down, which also hides
+   .pressHeadingV2/.pressMarqueeWrapV2 instead of repositioning them. */
+.pressInnerMobileV2 {
+  display: none;
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  z-index: 1;
   width: 100%;
-  padding: 0;
-  border: none;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
 }
 
-.newsletterInner {
-  width: 100%;
+.pressHeadingMobileV2 {
   margin: 0;
+  padding: 0 var(--space-md);
+  text-align: center;
+  font-family: var(--font-brand);
+  font-size: 24px;
+  color: var(--color-bg-v2);
+}
+
+.pressMarqueeWrapMobileV2 {
+  width: 100%;
+  overflow: hidden;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.pressMarqueeWrapMobileV2:hover .pressRowMobileV2 {
+  animation-play-state: paused;
+}
+
+.pressRowMobileV2 {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* Scaled up ~1.6x from the exact Figma spec (43.129px/66.092x27.57px)
+     per instruction — the literal mobile-frame size read as too small. */
+  gap: 69px;
+  animation: pressMarqueeV2 36s linear infinite;
+}
+
+.pressLogoMobileV2 {
+  position: relative;
+  flex-shrink: 0;
+  width: 106px;
+  height: 44px;
+}
+
+.pressLogoMobileV2 img {
+  object-fit: contain;
+  object-position: center;
+  filter: brightness(0) invert(1);
+}
+
+/* Mobile-only "(Tap For More)" subtitle — replaces the desktop
+   hover-hint text below, which doesn't apply once the cards become an
+   auto-advancing carousel. Hidden by default; shown only at the mobile
+   breakpoint further down. */
+.gatherSubtitleMobileV2 {
+  display: none;
 }
 
 /* ════════════════════════════════════════════════
-   RESPONSIVE
+   HOW WE GATHER — MOBILE carousel (Figma node 174:4263, mobile frame)
+   One card+photo above, an olive content box below with the format's
+   description, auto-advancing every 3s with manual prev/next arrows.
+   Hidden by default; shown only at the mobile breakpoint further down.
    ════════════════════════════════════════════════ */
 
-@media (max-width: 900px) {
-  .hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    padding: var(--space-2xl) var(--space-md);
-    text-align: center;
-  }
-
-  .heroLeft {
-    align-items: center;
-  }
-
-  .chalkboardHeading {
-    white-space: normal;
-    font-size: clamp(2rem, 6vw, 3.2rem);
-    text-align: center;
-  }
-
-  .formatGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-lg);
-  }
-
-  .formatCard:nth-child(1),
-  .formatCard:nth-child(2),
-  .formatCard:nth-child(3),
-  .formatCard:nth-child(4) {
-    transform: none;
-  }
-
-  .aboutGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-2xl);
-  }
-
-  .quoteBlock {
-    position: static;
-  }
+.gatherMobileWrapV2 {
+  display: none;
 }
 
-@media (max-width: 768px) {
-  .chalkboardHeading {
-    font-size: 1.85rem;
+.knowEventsV2 {
+  position: absolute;
+  /* Aligned to the 4th card's left edge: 3 * (cardW 310.05 + gap 102.06) */
+  left: calc(var(--space-2xl) + 1236.33px);
+  top: 527.51px;
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 36px;
+  color: var(--color-bg-v2);
+  white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════
+   NEWSLETTER — Figma node 138:17
+   Unlike Gather/Press, the wave asset here is the WHOLE section fill
+   (solid maroon block + wavy bottom edge in one PNG), not just a thin
+   transition strip — so it's stretched to cover the section's full,
+   content-driven height with the scalloped edge pinned to the bottom.
+   ════════════════════════════════════════════════ */
+
+.newsletterV2 {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  overflow: hidden;
+  margin-top: -75px;
+}
+
+.newsletterWaveImgV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  /* See .gatherWaveImgV2 — reserves the row's real height up front so the
+     grid-stacked content (centered via align-self against this row)
+     doesn't jump once the image file loads. */
+  aspect-ratio: 1920 / 338;
+  /* See .gatherWaveImgV2 — crops instead of stretching if the loaded
+     source's real ratio ever doesn't match this breakpoint's aspect-ratio. */
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.newsletterInnerV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  position: relative;
+  top: 20px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  padding: 0 var(--space-2xl);
+  text-align: center;
+}
+
+.newsletterHeadingV2 {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 42px;
+  color: var(--color-bg-v2);
+}
+
+@media (max-width: 1400px) {
+  .ticketRowV2 {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 60px;
   }
 
-  .formats {
-    padding: var(--space-xl) var(--space-md);
+  .ticketRowV2 > .ticketCardV2:nth-child(n) {
+    margin-top: 0;
   }
 
-  /* 2x2 grid on mobile phones as requested */
-  .formatGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    max-width: 100%;
-    margin: 0;
-  }
-
-  .formatCard {
-    aspect-ratio: 4 / 5;
-    transform: none !important;
-    border-radius: 6px;
-  }
-
-  .formatCardContent {
-    padding: 10px 12px;
-  }
-
-  .formatCardName {
-    font-size: 0.92rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .formatCardDesc {
+  .doodleReadingBookV2,
+  .doodleShoutingV2,
+  .knowEventsV2 {
     display: none;
   }
 
-  /* Only on mobile: hide in-page About, Testimonials, Press & Archive (opened via nav or removed) */
-  .about,
-  .testimonialsWrap,
-  .press,
-  .archive {
-    display: none !important;
+  .gatherHeadingV2 {
+    position: static;
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+}
+
+@media (max-width: 900px) {
+  .heroV2 {
+    min-height: auto;
+    padding: var(--space-xl) var(--space-md) 64px;
+  }
+
+  /* ── How We Gather: swap the landscape desktop wave for the tall
+         portrait mobile background that covers heading+carousel+arrows
+         in one piece (real asset ratio 590/1205, not a guess) ── */
+  .gatherWaveImgV2 {
+    aspect-ratio: 590 / 1205;
+  }
+
+  .gatherInnerV2 {
+    padding: 0 var(--space-md);
+  }
+
+  /* Heading + "(Tap For More)" — both Atelier 24px. margin-bottom: 0
+     overrides the <=1400px tier's 48px (meant for the desktop
+     ticket-row layout below the heading) — left as-is, it collapses
+     with .gatherSubtitleMobileV2's margin-top into 48px instead.
+     line-height: 1 on both — without it, the heading inherits h2's 1.2
+     and the subtitle (a <p>) inherits body's 1.7, both padding extra
+     leading above/below the glyphs that made the visible gap much
+     bigger than the margin-top below actually is. */
+  .gatherHeadingV2 {
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 0;
+  }
+
+  .gatherSubtitleMobileV2 {
+    display: block;
+    margin: 8px 0 0;
+    text-align: center;
+    font-family: var(--font-brand);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--color-bg-v2);
+  }
+
+  .knowEventsV2,
+  .ticketRowV2 {
+    display: none;
+  }
+
+  /* Outer column: [card+box group] — 39px — [arrows] (node 188:4551) */
+  .gatherMobileWrapV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 39px;
+    margin-top: 39px;
+  }
+
+  /* Inner group: card — 26px — content box (node 188:4549) */
+  .gatherMobileCardBoxGroupV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    width: 100%;
+    max-width: 298.311px;
+  }
+
+  /* Not clickable — plain div, matches the desktop cards. */
+  .gatherMobileCardV2 {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 293.57 / 319.618;
+    background-image: url('/card-shapes/mobile/main-event-card.png');
+    background-size: 100% 100%;
+  }
+
+  /* Photo inset + label position below are percentages of the card's own
+     293.57x319.618 box (node 174:4353/174:4369/174:4370), so they stay
+     correct as the card scales with the viewport instead of sticking to
+     one fixed phone width. */
+  .gatherMobileCardPhotoV2 {
+    position: absolute;
+    top: 4.199%;
+    left: 4.417%;
+    width: 91.161%;
+    height: 56.325%;
+    border: 1.705px solid var(--color-primary);
+    border-radius: 13.642px;
+    overflow: hidden;
+  }
+
+  .gatherMobileCardLabelV2 {
+    position: absolute;
+    top: 76.454%;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0 8px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    line-height: 1.364;
+    color: var(--color-bg-dark);
+    text-transform: uppercase;
+  }
+
+  .gatherMobileContentBoxV2 {
+    width: 100%;
+    min-height: 176.368px;
+    border-radius: 25.98px;
+    background: var(--color-olive);
+    padding: 22.56px 14.62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gatherMobileContentTextV2 {
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-bg-v2);
+  }
+
+  .gatherMobileArrowsV2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .gatherMobileArrowBtnV2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border: 1px solid var(--color-bg-v2);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .gatherMobileArrowBtnV2 img {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* arrow-prev.svg/arrow-next.svg are the same right-pointing shape —
+     the "prev" direction is a CSS flip, not a separate asset (same
+     technique HeroLectureCarousel.module.css uses). */
+  .gatherMobileArrowBtnV2Prev img {
+    transform: scaleX(-1);
+  }
+
+  /* ── The Manifesto: shrink the desktop's 1499px-wide, 72px-padded box
+         down to the mobile column, per Figma mobile spec (321px box,
+         14px body copy) ── */
+  .manifestoV2 {
+    padding: 80px var(--space-md) 0;
+  }
+
+  /* node 174:4391 — two lines, 24px, ~32.87px baseline-to-baseline. */
+  .manifestoHeadingV2 {
+    font-size: 24px;
+    line-height: 1.37;
+  }
+
+  .manifestoHeadingSubV2 {
+    display: block;
+  }
+
+  .manifestoBoxV2 {
+    max-width: 340px;
+    margin-top: 40px;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .manifestoTextV2 {
+    gap: var(--space-md);
+    font-size: 14px;
+  }
+
+  /* ── As Seen In: swap the wide desktop wave for the mobile one (real
+         asset ratio 590/241) and drop the absolute %-positioned layout
+         (tuned for the desktop band's very different proportions) for a
+         simple centered column ── */
+  .pressWaveImgV2 {
+    aspect-ratio: 590 / 241;
+  }
+
+  /* node 197:4560 — desktop's absolute-positioned heading/marquee are
+     hidden entirely on mobile (rather than overridden piecemeal) in
+     favor of a dedicated mobile block below, which was proving fragile
+     to patch on top of the desktop layout's own positioning/sizing. */
+  .pressHeadingV2 {
+    display: none;
+  }
+
+  .pressMarqueeWrapV2 {
+    display: none;
+  }
+
+  .pressInnerV2 {
+    display: block;
+  }
+
+  .pressInnerMobileV2 {
+    display: flex;
+  }
+
+  /* ── Newsletter (node 197:4563): swap the wide desktop wave for the
+         taller mobile one (real asset ratio 590/406) — .newsletterInnerV2
+         is already a centered flex column, just needs tighter padding
+         and the exact heading/gap sizing; NewsletterFormV2.module.css
+         handles the pill sizing itself ── */
+  .newsletterWaveImgV2 {
+    aspect-ratio: 590 / 406;
+  }
+
+  .newsletterInnerV2 {
+    gap: 30px;
+    padding: 0 var(--space-md);
+  }
+
+  .newsletterHeadingV2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
+
+/* Hero carousel row goes edge-to-edge at the mobile breakpoint (node
+   174:4327) — no side padding — so the side cards' peek amount matches
+   the Figma frame's math exactly (stage width = full viewport width).
+   Matches the same <=900px "mobile" breakpoint HeroLectureCarousel's
+   own card-sizing switches at. */
+@media (max-width: 900px) {
+  .heroV2 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  /* x0.9 scaled — mono label font-size below deliberately left as-is */
+  .ticketCardV2 {
+    width: 252px;
+    height: 314.1px;
+    background-image: url('/card-shapes/mobile/main-event-card.png');
+  }
+
+  .ticketPhotoV2 {
+    top: 10.8px;
+    left: 11.7px;
+    width: 229.5px;
+    height: 154.8px;
+  }
+
+  .ticketLabelV2 {
+    top: 223.2px;
+    font-size: 26px;
   }
 }

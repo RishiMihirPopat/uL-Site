@@ -2,8 +2,8 @@
 
 ## Before Every Session
 
-1. Read `DESIGN.md` — design system, tokens, component inventory.
-2. Read `BUILDLOG.md` — what has been built, what is next, what was decided.
+1. Read `context-docs/design.md` — design system, tokens, component inventory.
+2. Read `context-docs/build-log.md` — what has been built, what is next, what was decided.
 
 Do not start work until both files have been read.
 
@@ -24,7 +24,7 @@ Work proceeds strictly in order. Never skip or merge phases.
 
 | Phase | Name | Description |
 |-------|------|-------------|
-| 0 | Read Docs | Read `DESIGN.md` and `BUILDLOG.md` |
+| 0 | Read Docs | Read `context-docs/design.md` and `context-docs/build-log.md` |
 | 1 | Tokens | Define all CSS custom properties in `globals.css` |
 | 2 | Components | Build reusable components |
 | 3 | Pages | Assemble pages from components |
@@ -67,5 +67,5 @@ Work proceeds strictly in order. Never skip or merge phases.
 
 ## Logging Rules
 
-- Update `BUILDLOG.md` after every meaningful change — new file, new component, new decision.
-- Update `DESIGN.md` after any design system change — new token, updated color, changed spacing scale.
+- Update `context-docs/build-log.md` after every meaningful change — new file, new component, new decision.
+- Update `context-docs/design.md` after any design system change — new token, updated color, changed spacing scale.

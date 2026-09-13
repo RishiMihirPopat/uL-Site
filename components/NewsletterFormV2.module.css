@@ -1,0 +1,125 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.input {
+  width: 390px;
+  height: 50px;
+  padding: 0 var(--space-lg);
+  background: transparent;
+  border: 1px solid var(--color-bg-v2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  color: var(--color-bg-v2);
+}
+
+.input::placeholder {
+  color: var(--color-bg-v2);
+  opacity: 0.31;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.btn {
+  height: 50px;
+  padding: 0 var(--space-xl);
+  background: var(--color-bg-v2);
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Text roll: on hover "Subscribe now!" slides up out of view while
+   "Pleaseeee!" slides up into its place from below. */
+.btnTextWrap {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  height: 1.2em;
+  vertical-align: middle;
+}
+
+.btnText {
+  display: block;
+  line-height: 1.2em;
+  white-space: nowrap;
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btnText:last-child {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+}
+
+.btn:hover .btnText {
+  transform: translateY(-100%);
+}
+
+.successMsg {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  color: var(--color-bg-v2);
+}
+
+.errorMsg {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--color-error);
+}
+
+/* node 197:4563 — exact mobile pill sizing, stacked input/button,
+   both full-width within a 274px-max column. Matches the site's usual
+   900px mobile breakpoint (was 560px, which didn't line up with any
+   other mobile-specific section on this page). */
+@media (max-width: 900px) {
+  .form {
+    width: 100%;
+    max-width: 274px;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 14px;
+  }
+
+  .input,
+  .btn {
+    width: 100%;
+    height: 33px;
+    padding: 8px 17px;
+  }
+}

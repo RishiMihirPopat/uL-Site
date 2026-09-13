@@ -1,0 +1,711 @@
+/* ════════════════════════════════════════════════
+   ARTICLES PAGE — V2 (Figma node 163:1980)
+   Same layout/technique as EventsPageV2 — wave band (heading+filters) on
+   top, card grid + pagination below on the plain page bg — but with the
+   wave/card colors swapped (maroon wave + dark card, vs Events' dark wave
+   + maroon card) and no TYPE filter (articles are one type) or second
+   meta row (no venue/speaker, just the publish date).
+   ════════════════════════════════════════════════ */
+
+.pageV2 {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerWaveV2 {
+  position: relative;
+  display: grid;
+  /* Not overflow:hidden — the SORT dropdown menu is absolutely positioned
+     inside this band and needs to open past its bottom edge; the wave
+     <img> itself never overflows its own box (fixed aspect-ratio +
+     width:100%), so nothing actually needed clipping here. */
+  overflow: visible;
+}
+
+.waveImgV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1920 / 329;
+  pointer-events: none;
+}
+
+.headerInnerV2 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1518px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xl);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 42px;
+  color: var(--color-bg-v2);
+  text-align: center;
+}
+
+.contentV2 {
+  width: 100%;
+  max-width: 1518px;
+  margin: 0 auto;
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xl);
+}
+
+/* ── Filter row (search + sort only, no type) ────── */
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.pillBtn {
+  height: 50px;
+  padding: 0 44px 0 var(--space-lg);
+  background: transparent;
+  border: 1px solid var(--color-bg-v2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--color-bg-v2);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.pillBtn:focus {
+  outline: none;
+}
+
+.dropdownWrap {
+  position: relative;
+}
+
+.pillArrow {
+  position: absolute;
+  right: var(--space-lg);
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.pillArrowOpen {
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: var(--space-sm);
+  list-style: none;
+  background: var(--color-primary);
+  border: 1px solid var(--color-bg-v2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.dropdownOption {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--color-bg-v2);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dropdownOption:hover,
+.dropdownOption[aria-selected="true"] {
+  background-color: rgba(255, 249, 241, 0.12);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 240px;
+  max-width: 542px;
+  height: 50px;
+  padding: 0 var(--space-lg);
+  background: transparent;
+  border: 1px solid var(--color-bg-v2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--color-bg-v2);
+}
+
+.searchInput::placeholder {
+  color: var(--color-bg-v2);
+  opacity: 0.31;
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+/* ── Card grid ────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 62px;
+  width: 100%;
+}
+
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 464.703 / 389.698;
+  background-image: url('/card-shapes/website/articles-card.png');
+  background-size: 100% 100%;
+  text-decoration: none;
+}
+
+/* Percentages measured from Figma node 166:3060 against the 464.703 x
+   389.698 card — unlike Events' cards, the meta row here just flows
+   naturally below the title (fixed 43px gap), since there's only ever
+   one line of meta text, not a fixed-offset multi-row block. */
+
+.cardPhoto {
+  position: absolute;
+  left: 3.489%;
+  top: 4.928%;
+  width: 93.826%;
+  height: 47.552%;
+  border: 2px solid var(--color-bg-dark);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cardImg {
+  object-fit: cover;
+}
+
+.cardImgPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-primary);
+}
+
+/* The text zone's meta row sits at a FIXED offset (65px within an 81px
+   zone) regardless of whether the title wraps to 1 or 2 lines — confirmed
+   against Figma node 166:3133's 2-line variant, which places the meta
+   row at the exact same y=65 as the 1-line version despite the taller
+   title, so this needs absolute-positioned children, not flow/margin
+   (same technique as EventsPageV2's cards). */
+.cardBody {
+  position: absolute;
+  left: 6.196%;
+  top: 70.442%;
+  width: 88.413%;
+  height: 20.786%;
+}
+
+.cardTitle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.364;
+  text-transform: uppercase;
+  color: var(--color-bg-v2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardMetaRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* 65px within the 81px-tall zone. */
+  top: 80.25%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  opacity: 0.6;
+}
+
+.cardMetaIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-bg-v2);
+}
+
+.cardMeta {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.364;
+  color: var(--color-bg-v2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyMsg {
+  margin: var(--space-2xl) 0;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--color-bg-dark);
+  opacity: 0.5;
+}
+
+/* ── Pagination — on the plain page bg, dark like Events'. ── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pageArrowBtn {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-bg-dark);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.pageArrowBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pageArrowPrev,
+.pageArrowNext {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%);
+}
+
+.pageArrowPrev {
+  transform: rotate(180deg);
+}
+
+.pageArrowNext {
+  transform: rotate(0deg);
+}
+
+.pageIndicator {
+  height: 50px;
+  padding: 0 var(--space-lg);
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-bg-dark);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--color-bg-dark);
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchInput {
+    min-width: 100%;
+    order: -1;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ARTICLES PAGE — MOBILE (node 217:4968)
+   Same structure as EventsPageV2's mobile block, colors swapped (maroon
+   wave, dark card, matching the desktop maroon/dark inversion), only a
+   SORT pill (no TYPE — articles are one type), and only one meta row
+   (publish date only, no venue/speaker). Hidden by default; shown only
+   at <=900px, which also hides every desktop-only class above.
+   ════════════════════════════════════════════════ */
+
+.headerWaveMobileV2 {
+  display: none;
+}
+
+.headerInnerMobileV2 {
+  display: none;
+}
+
+.contentMobileV2 {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .headerWaveV2,
+  .headerInnerV2,
+  .contentV2 {
+    display: none;
+  }
+
+  .headerWaveMobileV2 {
+    display: grid;
+    position: relative;
+  }
+
+  .waveImgMobileV2 {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 393 / 204;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .headerInnerMobileV2 {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 274px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 17px;
+  }
+
+  .headingMobileV2 {
+    margin: 0;
+    font-family: var(--font-brand);
+    font-size: 24px;
+    color: #f7efe7;
+    text-align: center;
+  }
+
+  .filterColMobileV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .searchInputMobileV2 {
+    width: 100%;
+    height: 33px;
+    padding: 8px 17px;
+    background: transparent;
+    border: 1px solid var(--color-bg-v2);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--color-bg-v2);
+  }
+
+  .searchInputMobileV2::placeholder {
+    color: var(--color-bg-v2);
+    opacity: 0.6;
+  }
+
+  .searchInputMobileV2:focus {
+    outline: none;
+  }
+
+  /* Single SORT pill, centered — no TYPE filter, so no 2-up row here. */
+  .filterRowMobileV2 {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pillBtnMobileV2 {
+    width: 130px;
+    height: 33px;
+    padding: 8px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px solid var(--color-bg-v2);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--color-bg-v2);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .pillBtnMobileV2:focus {
+    outline: none;
+  }
+
+  .dropdownWrapMobileV2 {
+    position: relative;
+  }
+
+  .pillArrowMobileV2 {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transform: rotate(90deg);
+    transition: transform 0.2s ease;
+  }
+
+  .pillArrowMobileV2Open {
+    transform: rotate(-90deg);
+  }
+
+  .dropdownMenuMobileV2 {
+    position: absolute;
+    top: calc(100% + var(--space-sm));
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin: 0;
+    padding: var(--space-sm);
+    list-style: none;
+    background: var(--color-primary);
+    border: 1px solid var(--color-bg-v2);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  }
+
+  .dropdownOptionMobileV2 {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--color-bg-v2);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .dropdownOptionMobileV2:hover,
+  .dropdownOptionMobileV2[aria-selected='true'] {
+    background-color: rgba(255, 249, 241, 0.12);
+  }
+
+  .contentMobileV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+    width: 100%;
+    padding: var(--space-xl) 20.84px 0;
+  }
+
+  .gridMobileV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  /* Card shape + photo/text inset percentages match the desktop
+     .card/.cardPhoto/.cardBody numbers (measured independently against
+     this card's own 351.061x310.419 box and landing on the same
+     percentages as Events') — only the border color (dark, not maroon,
+     since the card itself IS maroon-on-cream's inverse here) and the
+     photo->text gap (a real flex gap, not absolute offsets) differ. */
+  .cardMobileV2 {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 351.061px;
+    aspect-ratio: 351.061 / 310.419;
+    background-image: url('/card-shapes/mobile/articles-card.png');
+    background-size: 100% 100%;
+    text-decoration: none;
+  }
+
+  .cardMobileInnerV2 {
+    position: absolute;
+    left: 3.487%;
+    top: 4.684%;
+    width: 93.827%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 52.882px;
+  }
+
+  .cardPhotoMobileV2 {
+    position: relative;
+    width: 100%;
+    height: 139.994px;
+    border: 1.511px solid var(--color-bg-dark);
+    border-radius: 12.087px;
+    overflow: hidden;
+  }
+
+  .cardImgMobileV2 {
+    object-fit: cover;
+  }
+
+  .cardImgPlaceholderMobileV2 {
+    width: 100%;
+    height: 100%;
+    background: var(--color-primary);
+  }
+
+  .cardBodyMobileV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 88.41%;
+  }
+
+  .cardTitleMobileV2 {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.364;
+    text-transform: uppercase;
+    color: var(--color-bg-v2);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cardMetaRowMobileV2 {
+    display: flex;
+    align-items: flex-start;
+    gap: 7.555px;
+    min-width: 0;
+    opacity: 0.6;
+  }
+
+  .cardMetaIconMobileV2 {
+    flex-shrink: 0;
+    width: 12.087px;
+    height: 12.087px;
+    color: var(--color-bg-v2);
+  }
+
+  .cardMetaMobileV2 {
+    min-width: 0;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.364;
+    color: var(--color-bg-v2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .emptyMsgMobileV2 {
+    margin: var(--space-xl) 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--color-bg-dark);
+    opacity: 0.5;
+  }
+
+  .paginationMobileV2 {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .pageArrowBtnMobileV2 {
+    width: 36px;
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--color-bg-dark);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+  }
+
+  .pageArrowBtnMobileV2:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .pageArrowBtnMobileV2 img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .pageArrowPrevMobileV2 {
+    transform: scaleX(-1);
+  }
+
+  .pageIndicatorMobileV2 {
+    height: 33px;
+    padding: 8px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-bg-dark);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--color-bg-dark);
+    white-space: nowrap;
+  }
+}
