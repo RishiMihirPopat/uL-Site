@@ -34,7 +34,10 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
       return { cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 };
     }
     if (window.innerWidth <= 480) {
-      return { cardW: 198, gap: 18.9, cardH: 139.5, activeCardW: 232.2, activeCardH: 162.9 };
+      // Exact numbers from the mobile-specific Figma frame (node
+      // 188:4553) — near-square cards, not just a scaled-down desktop
+      // ratio like the other tiers.
+      return { cardW: 250.871, gap: 20, cardH: 248.788, activeCardW: 274.738, activeCardH: 272.458 };
     }
     if (window.innerWidth <= 768) {
       return { cardW: 315, gap: 30.6, cardH: 221.4, activeCardW: 369, activeCardH: 259.2 };

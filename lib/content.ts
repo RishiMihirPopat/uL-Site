@@ -85,6 +85,9 @@ export const formats = [
 
 export const formatsHeadingV2 = 'How We Gather';
 export const knowEventsLabelV2 = 'Hover For More!';
+// Mobile has no hover state — the format cards are an auto-advancing
+// carousel there instead, node 174:4374 on the mobile frame.
+export const knowEventsLabelMobileV2 = '(Swipe For More)';
 
 // About section — Figma node 133:2302 (heading for the whole section).
 export const about = {

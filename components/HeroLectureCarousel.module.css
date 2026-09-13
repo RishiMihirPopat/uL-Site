@@ -230,19 +230,22 @@
   }
 }
 
-/* Mobile ≤480px — active card 232.2x162.9 (x0.9) */
+/* Mobile ≤480px — exact Figma mobile-frame numbers (node 188:4553):
+   near-square 274.738x272.458 active card, no arrows, no pill label —
+   "no extra elements", just the 3-card peek row + the button below. */
 @media (max-width: 480px) {
   .stageV2 {
-    height: 189px;
+    height: 302px;
   }
 
   .trackV2 {
-    height: 162.9px;
-    margin-top: -81.45px;
+    height: 272.458px;
+    margin-top: -136.229px;
   }
 
   .cardV2 {
-    border-width: 3px;
+    border-width: 2px;
+    border-radius: 10px;
   }
 
   .posterContentV2 {
@@ -251,6 +254,12 @@
 
   .posterMetaV2 {
     font-size: 0.75rem;
+  }
+
+  /* No arrows on mobile per Figma — swipe (drag) is already wired up on
+     the track for touch, this just removes the visible overlay button. */
+  .arrowsAnchorV2 {
+    display: none;
   }
 }
 
@@ -402,24 +411,11 @@
   }
 }
 
+/* No ≤480px arrow-offset tier here — .arrowsAnchorV2 is display:none at
+   this breakpoint (see above), so the arrows never render on mobile. */
+
 @media (max-width: 480px) {
-  /* Card 232.2x162.9 — arrow offsets scaled by the same ratio, x0.9 */
-  .arrowBtnV2 {
-    width: 25.2px;
-    height: 25.2px;
-    bottom: -7.2px;
-  }
-
-  .arrowBtnV2 img {
-    width: 14.4px;
-    height: 14.4px;
-  }
-
-  .arrowBtnV2Prev {
-    left: 25.2px;
-  }
-
-  .arrowBtnV2Next {
-    right: 27.9px;
+  .allEventsBtnWrapV2 {
+    margin-top: 37px;
   }
 }

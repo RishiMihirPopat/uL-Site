@@ -3,6 +3,17 @@
   flex-direction: column;
 }
 
+/* Wraps a responsive <picture> (desktop/mobile <source> swap) around an
+   <img> that itself participates in a CSS Grid stack (grid-column/row) or
+   Framer Motion animation — `display: contents` makes the <picture>
+   wrapper invisible to layout, so the real <img> inside still behaves as
+   a direct child of its actual parent instead of being boxed by <picture>
+   (which is `display: inline` by default and would otherwise break grid
+   item placement). */
+.pictureContentsV2 {
+  display: contents;
+}
+
 /* ════════════════════════════════════════════════
    HERO — Full-width poster carousel on a gridded backdrop.
    ════════════════════════════════════════════════ */
@@ -341,6 +352,25 @@
   filter: brightness(0) invert(1);
 }
 
+/* Mobile-only "(Swipe For More)" subtitle — replaces the desktop
+   hover-hint text below, which doesn't apply once the cards become an
+   auto-advancing carousel. Hidden by default; shown only at the mobile
+   breakpoint further down. */
+.gatherSubtitleMobileV2 {
+  display: none;
+}
+
+/* ════════════════════════════════════════════════
+   HOW WE GATHER — MOBILE carousel (Figma node 174:4263, mobile frame)
+   One card+photo above, an olive content box below with the format's
+   description, auto-advancing every 3s with manual prev/next arrows.
+   Hidden by default; shown only at the mobile breakpoint further down.
+   ════════════════════════════════════════════════ */
+
+.gatherMobileWrapV2 {
+  display: none;
+}
+
 .knowEventsV2 {
   position: absolute;
   /* Aligned to the 4th card's left edge: 3 * (cardW 310.05 + gap 102.06) */
@@ -433,6 +463,205 @@
   .heroV2 {
     min-height: auto;
     padding: var(--space-xl) var(--space-md);
+  }
+
+  /* ── How We Gather: swap the landscape desktop wave for the tall
+         portrait mobile background that covers heading+carousel+arrows
+         in one piece (real asset ratio 590/1205, not a guess) ── */
+  .gatherWaveImgV2 {
+    aspect-ratio: 590 / 1205;
+  }
+
+  .gatherInnerV2 {
+    padding: 0 var(--space-md);
+  }
+
+  /* Heading + "(Swipe For More)" — both Atelier 24px, 12px apart
+     (node 188:4550) */
+  .gatherHeadingV2 {
+    font-size: 24px;
+  }
+
+  .gatherSubtitleMobileV2 {
+    display: block;
+    margin: 12px 0 0;
+    text-align: center;
+    font-family: var(--font-brand);
+    font-size: 24px;
+    color: var(--color-bg-v2);
+  }
+
+  .knowEventsV2,
+  .ticketRowV2 {
+    display: none;
+  }
+
+  /* Outer column: [card+box group] — 39px — [arrows] (node 188:4551) */
+  .gatherMobileWrapV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 39px;
+    margin-top: 39px;
+  }
+
+  /* Inner group: card — 26px — content box (node 188:4549) */
+  .gatherMobileCardBoxGroupV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    width: 100%;
+    max-width: 298.311px;
+  }
+
+  .gatherMobileCardV2 {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 293.57 / 319.618;
+    background-image: url('/card-shapes/mobile/main-event-card.png');
+    background-size: 100% 100%;
+    text-decoration: none;
+  }
+
+  /* Photo inset + label position below are percentages of the card's own
+     293.57x319.618 box (node 174:4353/174:4369/174:4370), so they stay
+     correct as the card scales with the viewport instead of sticking to
+     one fixed phone width. */
+  .gatherMobileCardPhotoV2 {
+    position: absolute;
+    top: 4.199%;
+    left: 4.417%;
+    width: 91.161%;
+    height: 56.325%;
+    border: 1.705px solid var(--color-primary);
+    border-radius: 13.642px;
+    overflow: hidden;
+  }
+
+  .gatherMobileCardLabelV2 {
+    position: absolute;
+    top: 76.454%;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0 8px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    line-height: 1.364;
+    color: var(--color-bg-dark);
+    text-transform: uppercase;
+  }
+
+  .gatherMobileContentBoxV2 {
+    width: 100%;
+    min-height: 176.368px;
+    border-radius: 25.98px;
+    background: var(--color-olive);
+    padding: 22.56px 14.62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gatherMobileContentTextV2 {
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-bg-v2);
+  }
+
+  .gatherMobileArrowsV2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .gatherMobileArrowBtnV2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border: 1px solid var(--color-bg-v2);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .gatherMobileArrowBtnV2 img {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* ── The Manifesto: shrink the desktop's 1499px-wide, 72px-padded box
+         down to the mobile column, per Figma mobile spec (321px box,
+         14px body copy) ── */
+  .manifestoV2 {
+    padding: 80px var(--space-md) 0;
+  }
+
+  .manifestoHeadingV2 {
+    font-size: 26px;
+  }
+
+  .manifestoBoxV2 {
+    max-width: 340px;
+    margin-top: 40px;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .manifestoTextV2 {
+    gap: var(--space-md);
+    font-size: 14px;
+  }
+
+  /* ── As Seen In: swap the wide desktop wave for the mobile one (real
+         asset ratio 590/241) and drop the absolute %-positioned layout
+         (tuned for the desktop band's very different proportions) for a
+         simple centered column ── */
+  .pressWaveImgV2 {
+    aspect-ratio: 590 / 241;
+  }
+
+  .pressInnerV2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: 0 var(--space-md);
+  }
+
+  .pressHeadingV2,
+  .pressMarqueeWrapV2 {
+    position: static;
+    left: auto;
+    right: auto;
+    top: auto;
+  }
+
+  .pressHeadingV2 {
+    font-size: 28px;
+  }
+
+  .pressMarqueeWrapV2 {
+    width: 100%;
+  }
+
+  /* ── Newsletter: swap the wide desktop wave for the taller mobile one
+         (real asset ratio 590/406) — .newsletterInnerV2 is already a
+         centered flex column, no layout change needed ── */
+  .newsletterWaveImgV2 {
+    aspect-ratio: 590 / 406;
+  }
+
+  .newsletterHeadingV2 {
+    font-size: 28px;
   }
 }
 

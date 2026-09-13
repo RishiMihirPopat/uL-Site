@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -8,6 +8,7 @@ import styles from '../app/page.module.css';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const MotionLink = motion.create(Link);
+const MOBILE_AUTOPLAY_MS = 3000;
 
 interface FormatItem {
   name: string;
@@ -21,6 +22,7 @@ interface FormatItem {
 interface HowWeGatherSectionProps {
   heading: string;
   hoverLabel: string;
+  mobileLabel: string;
   formats: FormatItem[];
 }
 
@@ -43,7 +45,7 @@ function shuffledOrder(count: number) {
  *  the doodles last. Kept as its own client component — HomeView is a
  *  server component (direct DB reads) and this needs per-card random
  *  delays that don't fit the generic FadeIn/FadeInItem stagger helper. */
-export default function HowWeGatherSection({ heading, hoverLabel, formats }: HowWeGatherSectionProps) {
+export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, formats }: HowWeGatherSectionProps) {
   // Maps each card's DOM index to its position in the random reveal order.
   const revealPosition = useMemo(() => {
     const order = shuffledOrder(formats.length);
@@ -52,17 +54,50 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
     return byIndex;
   }, [formats.length]);
 
+  // Mobile-only auto-advancing carousel (node 174:4263, mobile frame) —
+  // a real component state machine, not a CSS-only swap, since it needs
+  // to autoplay every 3s and also respond to manual prev/next arrows.
+  // Runs unconditionally (even while the desktop layout is showing, i.e.
+  // the markup below is just CSS-hidden above the mobile breakpoint) —
+  // simpler and safer than gating the whole carousel behind a
+  // window-width check, which is exactly the kind of client/server
+  // mismatch already fixed once this session in HeroLectureCarousel.
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const hasMultiple = formats.length > 1;
+
+  useEffect(() => {
+    if (!hasMultiple) return;
+    const timer = setInterval(() => {
+      setMobileIndex((i) => (i + 1) % formats.length);
+    }, MOBILE_AUTOPLAY_MS);
+    return () => clearInterval(timer);
+    // Restarting the 3s window on every index change (auto or manual) so a
+    // manual tap always gets a full 3s before the next auto-advance,
+    // instead of an autoplay tick landing right after a manual one.
+  }, [mobileIndex, hasMultiple, formats.length]);
+
+  const mobileFormat = formats[mobileIndex];
+  const handleMobilePrev = () => {
+    setMobileIndex((i) => (i - 1 + formats.length) % formats.length);
+  };
+  const handleMobileNext = () => {
+    setMobileIndex((i) => (i + 1) % formats.length);
+  };
+
   return (
     <section id="formats" className={styles.gatherV2}>
-      <motion.img
-        src="/wavy-shapes/website/gather-wavy-shape.png"
-        alt=""
-        className={styles.gatherWaveImgV2}
-        aria-hidden="true"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.9, ease: EASE }}
-      />
+      <picture className={styles.pictureContentsV2}>
+        <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/ather-wavy-shape.png" />
+        <motion.img
+          src="/wavy-shapes/website/gather-wavy-shape.png"
+          alt=""
+          className={styles.gatherWaveImgV2}
+          aria-hidden="true"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9, ease: EASE }}
+        />
+      </picture>
 
       <motion.div
         className={styles.gatherInnerV2}
@@ -90,8 +125,17 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
         >
           {hoverLabel}
         </motion.p>
+        <motion.p
+          className={styles.gatherSubtitleMobileV2}
+          variants={{
+            hidden: { opacity: 0, y: 16 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+          }}
+        >
+          {mobileLabel}
+        </motion.p>
 
-        {/* Cards, in random order */}
+        {/* Cards, in random order — desktop only, CSS-hidden on mobile */}
         <div className={styles.ticketRowV2}>
           {formats.map((f, i) => (
             <MotionLink
@@ -122,6 +166,53 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
               </p>
             </MotionLink>
           ))}
+        </div>
+
+        {/* Auto-advancing single card + content box — mobile only,
+            CSS-hidden on desktop. A plain div, not part of the
+            random-order reveal stagger above (it's a carousel, not a
+            static grid), but still inherits the parent's fade-in. */}
+        <div className={styles.gatherMobileWrapV2}>
+          <div className={styles.gatherMobileCardBoxGroupV2}>
+            <Link
+              href={mobileFormat.href}
+              className={styles.gatherMobileCardV2}
+              aria-label={mobileFormat.name}
+            >
+              <div className={styles.gatherMobileCardPhotoV2}>
+                <Image src={mobileFormat.imgV2} alt={mobileFormat.alt} fill sizes="300px" />
+              </div>
+              <p className={styles.gatherMobileCardLabelV2}>
+                {mobileFormat.shortLabel.map((line, li) => (
+                  <React.Fragment key={li}>
+                    {li > 0 && <br />}
+                    {line}
+                  </React.Fragment>
+                ))}
+              </p>
+            </Link>
+            <div className={styles.gatherMobileContentBoxV2}>
+              <p className={styles.gatherMobileContentTextV2}>{mobileFormat.desc}</p>
+            </div>
+          </div>
+          <div className={styles.gatherMobileArrowsV2}>
+            <button
+              type="button"
+              className={styles.gatherMobileArrowBtnV2}
+              onClick={handleMobilePrev}
+              aria-label="Previous format"
+            >
+              <img src="/custom-assets/arrow-prev.svg" alt="" />
+            </button>
+            <button
+              type="button"
+              className={styles.gatherMobileArrowBtnV2}
+              onClick={handleMobileNext}
+              aria-label="Next format"
+            >
+              <img src="/custom-assets/arrow-next.svg" alt="" />
+            </button>
+          </div>
         </div>
 
         {/* Doodles last */}

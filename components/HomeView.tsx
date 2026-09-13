@@ -10,6 +10,7 @@ import {
   formats,
   formatsHeadingV2,
   knowEventsLabelV2,
+  knowEventsLabelMobileV2,
   about,
   pressLogos,
   pressSectionLabelV2,
@@ -59,7 +60,12 @@ export default function HomeView() {
       </section>
 
       {/* ── 2. How We Gather — Figma node 126:2301 ─────────────────── */}
-      <HowWeGatherSection heading={formatsHeadingV2} hoverLabel={knowEventsLabelV2} formats={formats} />
+      <HowWeGatherSection
+        heading={formatsHeadingV2}
+        hoverLabel={knowEventsLabelV2}
+        mobileLabel={knowEventsLabelMobileV2}
+        formats={formats}
+      />
 
       {/* ── 3. The Manifesto (About Us) — Figma node 133:2309 ── */}
       <FadeIn id="about" className={styles.manifestoV2}>
@@ -68,7 +74,7 @@ export default function HomeView() {
         </FadeInItem>
         <FadeInItem>
           <div className={styles.manifestoBoxV2}>
-            <picture>
+            <picture className={styles.pictureContentsV2}>
               <source media="(max-width: 900px)" srcSet="/custom-assets/manifesto-bg-mobile.png" />
               <img
                 src="/custom-assets/manifesto-bg-web.png"
@@ -92,12 +98,15 @@ export default function HomeView() {
 
       {/* ── 5. Newsletter — Figma node 138:17 ── */}
       <FadeIn className={styles.newsletterV2}>
-        <img
-          src="/wavy-shapes/website/newsletter-wavy-shape.png"
-          alt=""
-          className={styles.newsletterWaveImgV2}
-          aria-hidden="true"
-        />
+        <picture className={styles.pictureContentsV2}>
+          <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/newsletter-wavy-shape.png" />
+          <img
+            src="/wavy-shapes/website/newsletter-wavy-shape.png"
+            alt=""
+            className={styles.newsletterWaveImgV2}
+            aria-hidden="true"
+          />
+        </picture>
         <div className={styles.newsletterInnerV2}>
           <FadeInItem>
             <h2 className={styles.newsletterHeadingV2}>{newsletterHeadingV2}</h2>

@@ -72,6 +72,21 @@ export default function Nav() {
         >
           {navV2.rightLinks.map(renderLink)}
         </motion.div>
+
+        {/* Mobile-only "MENU" pill (Figma node 188:4554) — CSS-hidden on
+            desktop. Deliberately not wired up to open anything yet: no
+            open-state design was provided, and the user asked to leave
+            that for later rather than guess at it. */}
+        <motion.button
+          type="button"
+          className={styles.menuBtnV2}
+          aria-label="Menu"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
+        >
+          MENU
+        </motion.button>
       </nav>
     </header>
   );

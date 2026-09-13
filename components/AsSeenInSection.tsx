@@ -66,14 +66,17 @@ export default function AsSeenInSection({ heading, logos }: AsSeenInSectionProps
       animate={revealArmed ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.7, ease: EASE }}
     >
-      <img
-        ref={imgRef}
-        src="/wavy-shapes/website/seen-wavy-shape.png"
-        alt=""
-        className={styles.pressWaveImgV2}
-        aria-hidden="true"
-        onLoad={() => setWaveLoaded(true)}
-      />
+      <picture className={styles.pictureContentsV2}>
+        <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/seen-wavy-shape.png" />
+        <img
+          ref={imgRef}
+          src="/wavy-shapes/website/seen-wavy-shape.png"
+          alt=""
+          className={styles.pressWaveImgV2}
+          aria-hidden="true"
+          onLoad={() => setWaveLoaded(true)}
+        />
+      </picture>
       <motion.div
         className={styles.pressInnerV2}
         initial="hidden"

@@ -6,8 +6,9 @@
    stays consistent regardless of how many links end up in each group.
    No box, no border — sits directly on the page bg.
 
-   NOTE: no mobile/responsive treatment exists yet for this nav — see
-   SITE-OVERVIEW.md.
+   Mobile (≤900px, node 188:4554): the two link groups are replaced by a
+   single "MENU" pill — that pill is a static visual only for now (see
+   .menuBtnV2 and Nav.tsx), no open/close behavior wired up yet.
    ════════════════════════════════════════════════ */
 
 .headerV2 {
@@ -60,4 +61,45 @@
 
 .linkV2Active {
   color: var(--color-bg-dark);
+}
+
+.menuBtnV2 {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  height: 33.353px;
+  padding: 0 17px;
+  border: none;
+  border-radius: 44px;
+  background: var(--color-bg-dark);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-bg-v2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .headerV2 {
+    padding: 24px 0;
+  }
+
+  .navV2 {
+    justify-content: space-between;
+    gap: 0;
+    padding: 0 var(--space-md);
+  }
+
+  .navV2GroupLeft,
+  .navV2GroupRight {
+    display: none;
+  }
+
+  .wordmarkV2 {
+    font-size: 28px;
+  }
+
+  .menuBtnV2 {
+    display: flex;
+  }
 }
