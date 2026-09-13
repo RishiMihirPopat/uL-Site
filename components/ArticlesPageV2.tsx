@@ -80,7 +80,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
     <div className={styles.pageV2}>
       <section className={styles.headerWaveV2}>
         <motion.img
-          src="/main%20images/Articles%20Wavy%20Shapes.png"
+          src="/main%20images/Wavy%20Shapes/Website/Articles%20Wavy%20Shapes.png"
           alt=""
           className={styles.waveImgV2}
           aria-hidden="true"

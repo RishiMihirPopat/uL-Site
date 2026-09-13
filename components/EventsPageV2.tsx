@@ -94,7 +94,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
     <div className={styles.pageV2}>
       <section className={styles.headerWaveV2}>
         <motion.img
-          src="/main%20images/Events%20Wavy%20Shape.png"
+          src="/main%20images/Wavy%20Shapes/Website/Events%20Wavy%20Shape.png"
           alt=""
           className={styles.waveImgV2}
           aria-hidden="true"

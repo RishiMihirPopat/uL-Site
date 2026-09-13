@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   title: 'unLecture',
   description: 'A recurring series of lectures, conversations, and gatherings in unconventional spaces across India.',
   icons: {
-    icon: [{ url: '/Favicon.png', sizes: '800x629', type: 'image/png' }],
-    apple: [{ url: '/Favicon.png', sizes: '800x629', type: 'image/png' }],
+    icon: [{ url: '/Custom%20Assets/Favicon.png', sizes: '800x629', type: 'image/png' }],
+    apple: [{ url: '/Custom%20Assets/Favicon.png', sizes: '800x629', type: 'image/png' }],
   },
 };
 

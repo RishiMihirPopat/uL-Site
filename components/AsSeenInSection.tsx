@@ -68,7 +68,7 @@ export default function AsSeenInSection({ heading, logos }: AsSeenInSectionProps
     >
       <img
         ref={imgRef}
-        src="/main%20images/Seen%20Wavy%20Shape.png"
+        src="/main%20images/Wavy%20Shapes/Website/Seen%20Wavy%20Shape.png"
         alt=""
         className={styles.pressWaveImgV2}
         aria-hidden="true"

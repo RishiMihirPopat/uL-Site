@@ -7,8 +7,8 @@ import styles from './CustomCursor.module.css';
 const INTERACTIVE_SELECTOR = 'a, button, input, textarea, [role="button"]';
 const LABEL_SELECTOR = '[data-cursor-label]';
 const DESC_SELECTOR = '[data-cursor-desc]';
-const CURSOR_SRC = '/main%20images/Custom%20Cursor.png';
-const CURSOR_HOVER_SRC = '/main%20images/Hover%20Custom%20Cursor.png';
+const CURSOR_SRC = '/Custom%20Assets/Custom%20Cursor.png';
+const CURSOR_HOVER_SRC = '/Custom%20Assets/Hover%20Custom%20Cursor.png';
 
 /** V2 only, desktop pointers only (see the matchMedia guard) — replaces the
  *  native cursor with the Figma-provided gold arrow PNG, spring-following

@@ -31,7 +31,7 @@ export default function ContactPageV2() {
   return (
     <main className={styles.mainV2}>
       <motion.img
-        src="/main%20images/Contact%20Wavy%20Shape.png"
+        src="/main%20images/Wavy%20Shapes/Website/Contact%20Wavy%20Shape.png"
         alt=""
         className={styles.waveImgV2}
         aria-hidden="true"

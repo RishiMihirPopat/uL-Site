@@ -90,7 +90,7 @@ export default function HomeView() {
       {/* ── 5. Newsletter — Figma node 138:17 ── */}
       <FadeIn className={styles.newsletterV2}>
         <img
-          src="/main%20images/Newsletter%20Wavy%20Shape.png"
+          src="/main%20images/Wavy%20Shapes/Website/Newsletter%20Wavy%20Shape.png"
           alt=""
           className={styles.newsletterWaveImgV2}
           aria-hidden="true"

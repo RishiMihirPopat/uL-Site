@@ -55,7 +55,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
   return (
     <section id="formats" className={styles.gatherV2}>
       <motion.img
-        src="/main%20images/Gather%20Wavy%20Shape.png"
+        src="/main%20images/Wavy%20Shapes/Website/Gather%20Wavy%20Shape.png"
         alt=""
         className={styles.gatherWaveImgV2}
         aria-hidden="true"
