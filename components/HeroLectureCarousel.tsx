@@ -382,7 +382,7 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                       exit={{ opacity: 0, scale: 0.75 }}
                       transition={{ type: 'spring', stiffness: 1100, damping: 30, mass: 0.15 }}
                     >
-                      <img src="/figma-assets/arrow-prev.svg" alt="" />
+                      <img src="/custom-assets/arrow-prev.svg" alt="" />
                     </motion.button>
                     <motion.button
                       key="next"
@@ -395,7 +395,7 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                       exit={{ opacity: 0, scale: 0.75 }}
                       transition={{ type: 'spring', stiffness: 1100, damping: 30, mass: 0.15 }}
                     >
-                      <img src="/figma-assets/arrow-next.svg" alt="" />
+                      <img src="/custom-assets/arrow-next.svg" alt="" />
                     </motion.button>
                   </>
                 )}

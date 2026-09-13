@@ -80,7 +80,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
     <div className={styles.pageV2}>
       <section className={styles.headerWaveV2}>
         <motion.img
-          src="/main%20images/Wavy%20Shapes/Website/Articles%20Wavy%20Shapes.png"
+          src="/wavy-shapes/website/articles-wavy-shapes.png"
           alt=""
           className={styles.waveImgV2}
           aria-hidden="true"
@@ -118,7 +118,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
                 SORT: {sort === 'newest' ? 'NEWEST FIRST' : 'OLDEST FIRST'}
               </button>
               <img
-                src="/figma-assets/contact-select-arrow.svg"
+                src="/custom-assets/contact-select-arrow.svg"
                 alt=""
                 aria-hidden="true"
                 className={`${styles.pillArrow} ${sortOpen ? styles.pillArrowOpen : ''}`}
@@ -185,7 +185,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
               disabled={clampedPage === 0}
               aria-label="Previous page"
             >
-              <img src="/figma-assets/contact-select-arrow.svg" alt="" className={styles.pageArrowPrev} />
+              <img src="/custom-assets/contact-select-arrow.svg" alt="" className={styles.pageArrowPrev} />
             </button>
             <span className={styles.pageIndicator}>
               {String(clampedPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
@@ -197,7 +197,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
               disabled={clampedPage >= totalPages - 1}
               aria-label="Next page"
             >
-              <img src="/figma-assets/contact-select-arrow.svg" alt="" className={styles.pageArrowNext} />
+              <img src="/custom-assets/contact-select-arrow.svg" alt="" className={styles.pageArrowNext} />
             </button>
           </div>
         )}

@@ -69,7 +69,7 @@ export default function HomeView() {
         <FadeInItem>
           <div className={styles.manifestoBoxV2}>
             <img
-              src="/main%20images/Manifesto%20Bg.png"
+              src="/main-images/manifesto-bg.png"
               alt=""
               className={styles.manifestoBgImgV2}
               aria-hidden="true"
@@ -90,7 +90,7 @@ export default function HomeView() {
       {/* ── 5. Newsletter — Figma node 138:17 ── */}
       <FadeIn className={styles.newsletterV2}>
         <img
-          src="/main%20images/Wavy%20Shapes/Website/Newsletter%20Wavy%20Shape.png"
+          src="/wavy-shapes/website/newsletter-wavy-shape.png"
           alt=""
           className={styles.newsletterWaveImgV2}
           aria-hidden="true"

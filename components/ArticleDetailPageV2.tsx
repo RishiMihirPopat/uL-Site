@@ -7,7 +7,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 import styles from './ArticleDetailPageV2.module.css';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const ARROW = '/figma-assets/contact-select-arrow.svg';
+const ARROW = '/custom-assets/contact-select-arrow.svg';
 
 interface AdjacentArticle {
   slug: string;
@@ -60,7 +60,7 @@ export default function ArticleDetailPageV2({ title, subtitle, coverImage, conte
     <div className={styles.pageV2}>
       <section className={styles.waveBandV2}>
         <motion.img
-          src="/main%20images/Wavy%20Shapes/Website/Blog%20Wavy%20Shape.png"
+          src="/wavy-shapes/website/blog-wavy-shape.png"
           alt=""
           className={styles.waveImgV2}
           aria-hidden="true"
@@ -104,7 +104,7 @@ export default function ArticleDetailPageV2({ title, subtitle, coverImage, conte
 
       <section className={styles.waveBandV2}>
         <img
-          src="/main%20images/Wavy%20Shapes/Website/Blog%20Wavy%20Shape.png"
+          src="/wavy-shapes/website/blog-wavy-shape.png"
           alt=""
           className={styles.waveImgV2}
           aria-hidden="true"

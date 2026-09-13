@@ -55,7 +55,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
   return (
     <section id="formats" className={styles.gatherV2}>
       <motion.img
-        src="/main%20images/Wavy%20Shapes/Website/Gather%20Wavy%20Shape.png"
+        src="/wavy-shapes/website/gather-wavy-shape.png"
         alt=""
         className={styles.gatherWaveImgV2}
         aria-hidden="true"
@@ -126,7 +126,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
 
         {/* Doodles last */}
         <motion.img
-          src="/main%20images/image%2022.png"
+          src="/category-covers/papercut-reading.png"
           alt=""
           className={styles.doodleReadingBookV2}
           aria-hidden="true"
@@ -137,7 +137,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, formats }: How
           }}
         />
         <motion.img
-          src="/main%20images/image%2021.png"
+          src="/category-covers/papercut-speaker.png"
           alt=""
           className={styles.doodleShoutingV2}
           aria-hidden="true"

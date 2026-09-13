@@ -9,7 +9,7 @@ export async function GET() {
     venue: a.readTime || 'Article',
     speaker: a.author,
     description: a.subtitle || '',
-    image: a.coverImage || '/category-covers/unLecture-cover.jpg',
+    image: a.coverImage || '/category-covers/unlecture.jpg',
     tags: ['article'],
     category: 'article',
     urbanautUrl: `/articles/${a.slug}`,

@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   title: 'unLecture',
   description: 'A recurring series of lectures, conversations, and gatherings in unconventional spaces across India.',
   icons: {
-    icon: [{ url: '/Custom%20Assets/Favicon.png', sizes: '800x629', type: 'image/png' }],
-    apple: [{ url: '/Custom%20Assets/Favicon.png', sizes: '800x629', type: 'image/png' }],
+    icon: [{ url: '/custom-assets/favicon.png', sizes: '800x629', type: 'image/png' }],
+    apple: [{ url: '/custom-assets/favicon.png', sizes: '800x629', type: 'image/png' }],
   },
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CustomCursor />
         <ResolutionDebug />
         <div className="v2-bg-texture" aria-hidden="true">
-          <img src="/figma-assets/bg-grid-texture.png" alt="" />
+          <img src="/custom-assets/bg-grid-texture.png" alt="" />
         </div>
         <div className="v2-scale-wrap">
           <Nav />

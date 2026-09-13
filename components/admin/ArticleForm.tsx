@@ -463,7 +463,7 @@ export function ArticleForm({
                 </button>
                 <button
                   type="button"
-                  onClick={() => insertFormatting('![', '](/category-covers/unLecture-cover.jpg)', 'Image description')}
+                  onClick={() => insertFormatting('![', '](/category-covers/unlecture.jpg)', 'Image description')}
                   title="Image (![alt](url))"
                   style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
                 >

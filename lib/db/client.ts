@@ -111,7 +111,7 @@ function initializeSchema(db: Database.Database): void {
         author: 'unLecture Editorial Desk',
         author_role: 'unLecture Collective',
         category: 'Culture',
-        cover_image: '/category-covers/unLecture-cover.jpg',
+        cover_image: '/category-covers/unlecture.jpg',
         content: `### The Vanishing Third Space
 
 Sociologist Ray Oldenburg coined the term **"third places"** to describe the neutral ground where people gather outside of home (*the first place*) and work (*the second place*). In mid-century public life, these were coffeehouses, bookshops, public squares, and neighborhood pubs.
@@ -146,7 +146,7 @@ At unLecture, we continue to de-pedestalise ideas across Delhi NCR, Mumbai, and 
         author: 'Yamini Aiyar',
         author_role: 'Public Policy Scholar & Former CPR President',
         category: 'Policy',
-        cover_image: '/category-covers/gft-cover.png',
+        cover_image: '/category-covers/ground-for-thoughts.jpg',
         content: `### Inside the Frontline of the Indian State
 
 India's frontline bureaucracy presents a fascinating paradox: at once omnipresent in citizens' daily lives, yet frequently incapacitated by procedural paralysis.
@@ -179,7 +179,7 @@ The conversation with Yamini traversed beyond academic policy critique into cand
         author: 'Vaibhav Dwivedi',
         author_role: 'Philosopher, St. Stephen\'s College',
         category: 'Internet & Folklore',
-        cover_image: '/category-covers/community-cover.jpg',
+        cover_image: '/category-covers/community-events.png',
         content: `### From Photoshop Contest to Collective Psyche
 
 In June 2009, an online forum poster named Eric Knudsen submitted two black-and-white photographs featuring an elongated, faceless figure in a suit lingering behind children. Within months, **Slenderman** transformed from a pixelated joke into a global folklore phenomenon.

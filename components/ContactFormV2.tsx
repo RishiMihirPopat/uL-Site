@@ -141,7 +141,7 @@ export default function ContactFormV2() {
               {reachingOutAs || contactPageV2.rolePlaceholder}
             </button>
             <img
-              src="/figma-assets/contact-select-arrow.svg"
+              src="/custom-assets/contact-select-arrow.svg"
               alt=""
               className={`${styles.selectArrow} ${roleOpen ? styles.selectArrowOpen : ''}`}
               aria-hidden="true"

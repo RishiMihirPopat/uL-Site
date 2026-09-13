@@ -5,7 +5,7 @@
  * which lives in SQLite), it belongs here. Edit this file to change what the
  * site says — no need to touch component files for copy changes.
  *
- * NOT covered here (on purpose, see Context Docs/SITE-OVERVIEW.md "content.ts scope"):
+ * NOT covered here (on purpose, see context-docs/site-overview.md "content.ts scope"):
  *  - Event & article data — that's in the database, managed via /admin
  *  - Admin panel copy (internal tool, not visitor-facing)
  *  - Small modals not yet migrated: BookingModal, AllUpcomingEventsModal
@@ -47,14 +47,14 @@ export const hero = {
 // `shortLabel` is the exact uppercase wording used on the V2 ticket cards
 // (Figma node 126:2301), as an array of lines — GFT/Community/Series wrap
 // to two lines there, unLecture stays on one. `imgV2` is the real photo
-// supplied for that section (public/main images/).
+// supplied for that section (public/category-covers/).
 export const formats = [
   {
     name: 'Grounds for Thought',
     shortLabel: ['GROUNDS FOR', 'THOUGHTS'],
     href: '/events/grounds-for-thought',
     desc: "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
-    imgV2: '/main%20images/Ground%20For%20Thoughts.jpg',
+    imgV2: '/category-covers/ground-for-thoughts.jpg',
     alt: 'Intimate gathering at a Grounds for Thought event with Blue Tokai',
   },
   {
@@ -62,7 +62,7 @@ export const formats = [
     shortLabel: ['UNLECTURE'],
     href: '/events/unlecture',
     desc: 'Our flagship event. It breaks the binary that certain conversations only happen inside certain institutions. We make room for that discourse in the casual spaces we already frequent, and treat learning as something you do out in the city.',
-    imgV2: '/main%20images/Unlecture.jpg',
+    imgV2: '/category-covers/unlecture.jpg',
     alt: 'Speaker and audience at a flagship unLecture event',
   },
   {
@@ -70,7 +70,7 @@ export const formats = [
     shortLabel: ['COMMUNITY', 'EVENTS'],
     href: '/events/community',
     desc: 'Unique events that build the space along with us. The formats keep evolving. This is our way of keeping the community, and the interactions that matter, accessible to most.',
-    imgV2: '/main%20images/Community%20Events.png',
+    imgV2: '/category-covers/community-events.png',
     alt: 'Community gathering at an unLecture community event',
   },
   {
@@ -78,7 +78,7 @@ export const formats = [
     shortLabel: ['UNLECTURE', 'SERIES'],
     href: '/events/unlecture-series',
     desc: "A chance to go deep into one topic of interest, programmed over a few weeks. By the end of it, you're sure to have grown and taken something away with you.",
-    imgV2: '/main%20images/Unlecture%20Series.jpg',
+    imgV2: '/category-covers/unlecture-series.jpg',
     alt: 'unLecture Series — themed multi-evening programming',
   },
 ];
@@ -99,16 +99,16 @@ export const about = {
 };
 
 // "As Seen In" press marquee. NOTE: every href below is a placeholder "#" —
-// nobody ever added the real article links. See Context Docs/SITE-OVERVIEW.md.
+// nobody ever added the real article links. See context-docs/site-overview.md.
 export const pressLogos = [
-  { id: 1, src: '/newsfeatureslogo/Delhi-Times.png',        alt: 'Delhi Times',        href: '#' },
-  { id: 2, src: '/newsfeatureslogo/economic-times.png',     alt: 'Economic Times',     href: '#' },
-  { id: 3, src: '/newsfeatureslogo/indian-express.png',     alt: 'Indian Express',     href: '#' },
-  { id: 4, src: '/newsfeatureslogo/local-samosa.png',       alt: 'Local Samosa',       href: '#' },
-  { id: 5, src: '/newsfeatureslogo/new-indian-express.png', alt: 'New Indian Express', href: '#' },
-  { id: 6, src: '/newsfeatureslogo/the-telegraph.png',      alt: 'The Telegraph',      href: '#' },
-  { id: 7, src: '/newsfeatureslogo/times-of-india.png',     alt: 'Times of India',     href: '#' },
-  { id: 8, src: '/newsfeatureslogo/vogue.png',              alt: 'Vogue',              href: '#' },
+  { id: 1, src: '/news-features-logo/delhi-times.png',        alt: 'Delhi Times',        href: '#' },
+  { id: 2, src: '/news-features-logo/economic-times.png',     alt: 'Economic Times',     href: '#' },
+  { id: 3, src: '/news-features-logo/indian-express.png',     alt: 'Indian Express',     href: '#' },
+  { id: 4, src: '/news-features-logo/local-samosa.png',       alt: 'Local Samosa',       href: '#' },
+  { id: 5, src: '/news-features-logo/new-indian-express.png', alt: 'New Indian Express', href: '#' },
+  { id: 6, src: '/news-features-logo/the-telegraph.png',      alt: 'The Telegraph',      href: '#' },
+  { id: 7, src: '/news-features-logo/times-of-india.png',     alt: 'Times of India',     href: '#' },
+  { id: 8, src: '/news-features-logo/vogue.png',              alt: 'Vogue',              href: '#' },
 ];
 export const pressSectionLabelV2 = 'As Seen In';
 export const allUpcomingEventsLabel = 'All Upcoming Events';
