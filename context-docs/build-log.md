@@ -1,27 +1,31 @@
 # BUILDLOG.md
 
 **Project:** unLecture
-**Version:** v0.10.0
+**Version:** v0.11.0
 
 ---
 
 ## Current Status
 
-The Figma redesign is complete and is now simply **the site** — the old V1 design (and the `lib/flags.ts` `SITE_VERSION` toggle that used to switch between them) was deleted outright once V2 covered every page. See `SITE-OVERVIEW.md` for the migration note and what survived the deletion (the DB layer and `/admin` weren't touched — they're version-agnostic).
+The Figma redesign is complete and is now simply **the site** — the old V1 design (and the `lib/flags.ts` `SITE_VERSION` toggle that used to switch between them) was deleted outright once V2 covered every page. See `site-overview.md` for the migration note and what survived the deletion (the DB layer and `/admin` weren't touched — they're version-agnostic).
 
 Site, top to bottom: Nav (no box/border, sits on page bg; Home/Events left, Articles/Contact right), Hero (poster carousel, exact Figma card sizing/gaps/gradient/arrow placement), "How We Gather" (wavy dark section, 4 real-photo ticket cards with exact stagger, doodles), "The Manifesto (About Us)" (heading + bordered/backgrounded text block), "As Seen In" (wavy dark section, infinite logo marquee), "Newsletter" (solid-maroon section with bottom wave edge), Footer (single row, copyright + Email/Instagram/Linkedin links). Standalone pages: `/contact`, `/events` (archive/listing), `/articles` (listing) and `/articles/[slug]` (detail, self-hosted Ancizar Serif body copy).
 
-Testimonials and Ticker were dropped in the V1 deletion — no V2 replacement exists yet; see `SITE-OVERVIEW.md` before rebuilding them.
+Testimonials and Ticker were dropped in the V1 deletion — no V2 replacement exists yet; see `site-overview.md` before rebuilding them.
 
-Granular per-change history now lives in `DESIGN-BUILD-LOG.md` (updated after every change); this file gets a summary entry at the end of each session.
+Desktop is scaled to fit uniformly (CSS `zoom`) between the 1400px reflow breakpoint and the 1920px design canvas, so nothing clips on in-between desktop widths without needing separate layout work. Mobile-specific layout/responsiveness is deliberately not started yet — explicitly paused for a later session.
+
+All context docs live under `context-docs/` (was the repo-root `Context Docs/`) and all `public/` asset folders now follow lowercase-kebab-case naming (`custom-assets/`, `wavy-shapes/`, `card-shapes/`, `news-features-logo/`, etc.) — see the 2026-09-13 entries in `design-build-log.md` for the full before/after mapping if a path looks unfamiliar.
+
+Granular per-change history now lives in `design-build-log.md` (updated after every change); this file gets a summary entry at the end of each session.
 
 ---
 
 ## What's Been Built
 
 - `CLAUDE.md` — project rules and phase structure
-- `DESIGN.md` — all tokens confirmed (colors, typography, spacing, border radius)
-- `BUILDLOG.md` — this file
+- `design.md` — all tokens confirmed (colors, typography, spacing, border radius)
+- `build-log.md` — this file
 - Next.js 16.2.9 scaffold — App Router, TypeScript, ESLint, no Tailwind
 - `app/globals.css` — full token system (colors, type scale, spacing, radius, max-width)
 - `components/Nav.tsx` + `Nav.module.css` — site header with wordmark and nav links
@@ -54,20 +58,24 @@ Granular per-change history now lives in `DESIGN-BUILD-LOG.md` (updated after ev
 - V2 Events page at `/events` (`EventsPageV2.tsx/.module.css`) — events only, no articles; TYPE/SORT custom dropdowns, search, a 3-column card grid on the real `Archive Event Card.png` shape, pagination; Nav's EVENTS link now points here instead of opening the old Archive modal
 - V2 Articles page at `/articles` (`ArticlesPageV2.tsx/.module.css`) — same two-zone layout as Events (wave band with heading/filters, card grid + pagination below on the page bg) but color-swapped (maroon wave, dark cards) and simplified (no TYPE filter, single date meta line); cards link to `/articles/[slug]`; V1's old "redirect to latest article" behavior is untouched
 - V2 Article detail page at `/articles/[slug]` (`ArticleDetailPageV2.tsx/.module.css`) — two maroon wave bands (Go Back + article switcher, top and bottom) around the article body, set in the newly self-hosted Ancizar Serif font (`public/fonts/ancizar-serif.woff2`, `--font-article` token); `MarkdownRenderer.module.css` gained `--prose-*` custom-property hooks so this page can restyle the shared markdown renderer's typography without forking it — V1's article page is unaffected since it never sets those variables
-- `public/figma-assets/` and `public/main images/` — self-hosted Figma-exported assets (wave shapes, ticket card shape, arrow icons, doodles, background texture) — no external asset URLs
-- **V1 deleted entirely** — `lib/flags.ts`, `app/old/`, and every V1-only component (`NewsletterForm`, `ContactForm`, `TestimonialsCarousel`, `TickerBanner`, `MobileAboutModal`, `PostcardArchive`) + their CSS are gone; every remaining file's `isV2` branching was collapsed to just the V2 path; every CSS module was pruned to only the classes its component still uses. `SITE-OVERVIEW.md` added as the general site-context doc (Testimonials/Ticker migration notes live there now). Verified with a full `next build`, not just `tsc`
+- `public/custom-assets/`, `public/wavy-shapes/`, `public/card-shapes/`, `public/news-features-logo/`, `public/category-covers/` — self-hosted assets reorganized into purpose-named, kebab-case folders (superseded the earlier `public/figma-assets/`/`public/main images/`) — no external asset URLs
+- **V1 deleted entirely** — `lib/flags.ts`, `app/old/`, and every V1-only component (`NewsletterForm`, `ContactForm`, `TestimonialsCarousel`, `TickerBanner`, `MobileAboutModal`, `PostcardArchive`) + their CSS are gone; every remaining file's `isV2` branching was collapsed to just the V2 path; every CSS module was pruned to only the classes its component still uses. `site-overview.md` added as the general site-context doc (Testimonials/Ticker migration notes live there now). Verified with a full `next build`, not just `tsc`
+- Desktop scale-to-fit (`app/layout.tsx`'s `.v2-scale-wrap`, `app/globals.css`) — `zoom: calc(100vw / 1920px)` between the 1400px reflow breakpoint and the 1920px design canvas, so the site never clips on in-between desktop widths
+- `context-docs/` — all four context docs (this file, `design.md`, `design-build-log.md`, `site-overview.md`) moved out of the repo root into one folder, kebab-cased
 
 ---
 
 ## In Progress
 
-- Nothing V1-related left to migrate. Testimonials/Ticker rebuild is optional future work — see `SITE-OVERVIEW.md`.
+- Mobile version — explicitly paused mid-session ("we will work on the mobile version in some time"). A few mobile-specific assets (`card-shapes/mobile/main-event-card.png`, `custom-assets/manifesto-bg-mobile.png`) already exist and are wired in, but broader mobile layout/responsiveness work hasn't started.
 
 ---
 
 ## Up Next
 
-- Rebuild Testimonials and Ticker against the Figma design, if/when wanted — see `SITE-OVERVIEW.md` for what to pick up
+- Mobile version — pick up here next session
+- Rebuild Testimonials and Ticker against the Figma design, if/when wanted — see `site-overview.md` for what to pick up
+- Remove `components/ResolutionDebug.tsx` (temporary viewport readout added for checking the desktop scale-to-fit range) once no longer needed
 
 ---
 
@@ -75,6 +83,7 @@ Granular per-change history now lives in `DESIGN-BUILD-LOG.md` (updated after ev
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v0.11.0 | 2026-09-13 | **Desktop scale-to-fit + full asset/docs reorg**: added `zoom`-based uniform scaling (`app/layout.tsx`'s `.v2-scale-wrap`, `app/globals.css`) for the previously-unhandled 1401–1919px desktop range, `zoom` chosen over `transform: scale` so `position: fixed` descendants and native scroll height keep working without JS compensation; fixed a real hydration mismatch this testing surfaced in `HeroLectureCarousel.tsx` (`cardDims`'s initial `useState` was reading real `window.innerWidth` during hydration instead of matching the server's window-less default); added a temporary viewport-resolution readout (`components/ResolutionDebug.tsx`) for checking the range. Separately, reorganized the whole project: `Context Docs/` → `context-docs/` (files lowercased too); audited `public/` against both source references and a direct `data/unlecture.db` query, then deleted genuinely unused assets (starter SVGs, the dead `HeroDraggables.tsx` + its `moveable/` folder, designer moodboard files, superseded Figma exports) while leaving `public/archive/`/`public/uploads/` untouched per instruction; renamed every remaining `public/` asset folder to kebab-case (`custom-assets/`, `wavy-shapes/`, `card-shapes/`, `news-features-logo/`); repurposed `public/category-covers/` to hold the "How We Gather" card photos instead of 3 old generic covers, which required repointing 3 live `articles.cover_image` DB rows (direct `UPDATE`, matched by concept) plus the matching seed/fallback code so a fresh DB still seeds correctly; wired up newly-added mobile asset variants (`card-shapes/mobile/`, `custom-assets/manifesto-bg-mobile.png`) into `app/page.module.css`'s 800px breakpoint and a new `<picture>`/900px-media-query swap in `HomeView.tsx`, rather than leaving them unreferenced. Full before/after path mapping is in `design-build-log.md`'s 2026-09-13 entries #84–92. Mobile-specific layout work is intentionally not started — paused for a later session. |
 | v0.10.0 | 2026-09-13 | **V1 deleted entirely**, per instruction (DB layer + `/admin` untouched — see `SITE-OVERVIEW.md`). Removed `lib/flags.ts` and every V1-only component/CSS (`NewsletterForm`, `ContactForm`, `TestimonialsCarousel`, `TickerBanner`, `MobileAboutModal`, `PostcardArchive`, `app/old/`, the throwaway `app/temp-v1-archive-detail/` preview route); collapsed `isV2` branching to the V2-only path in `Nav.tsx` (dropped the whole V1 desktop/mobile nav + hamburger), `Footer.tsx`, `HomeView.tsx`, `HeroLectureCarousel.tsx`, `app/layout.tsx`, `app/contact/page.tsx`, `app/articles/page.tsx`, `app/articles/[slug]/page.tsx`; pruned every touched CSS module down to only the classes still referenced (`app/page.module.css` alone dropped from ~90+ classes to 30) and trimmed dead fields out of `lib/content.ts`; simplified `body`/`.v2-bg` in `globals.css` into one unconditional rule; trimmed the Google Fonts import to just Montserrat (Caveat/Kalam were V1-chalkboard-only). Testimonials/Ticker had no V2 build yet, so their context was written to a new `SITE-OVERVIEW.md` before deletion. Verified with a full `next build`. |
 | v0.9.1 | 2026-09-13 | V2 (Figma) Redesign Kickoff: introduced `lib/flags.ts` SITE_VERSION toggle and `lib/content.ts` shared copy layer, plus `/old` as a permanent V1 reference route; built V2 Nav (exact 1120px Figma layout, self-hosted Atelier wordmark, Chivo Mono labels, no box/border) and a global fixed cream+grid-texture background from the real exported PNG; rebuilt the Hero carousel to Figma-exact card/gap/gradient math (fixed two real centering bugs — wrong active-card-width term in the track's translateX, and neighbor gaps not inheriting the active card's width offset — plus removed leftover V1 fade/shadow/mask effects) with arrow buttons anchored to the active card's own box; built "How We Gather" (real wave-shape PNG background, 4 ticket cards using the exact card-shape asset with real per-format photos and exact per-card vertical stagger, doodle images, content-width auto-centering fix); built "The Manifesto (About Us)" heading + bordered/backgrounded text block; built "As Seen In" (wave background, real press logos normalized into fixed frames and turned into a slow infinite marquee with edge fade to fix wildly inconsistent logo sizing); all V2 work gated so V1 stays fully intact and untouched. Started `DESIGN-BUILD-LOG.md` for per-change granularity going forward. |
 | v0.8.9 | 2026-08-18 | Event Card Hierarchy Redesign & 2-Tab Archive with Sorting: redesigned EventCard with a 2-column metadata box for speaker and venue; added direct status selector dropdown in admin lifecycle banner; updated Archive into a 2-tab dossier ('Past Gatherings' and 'Articles & Logs') with chronological and alphabetical sorting; added interactive client-side sorting and filter search to format category pages |
