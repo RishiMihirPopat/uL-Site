@@ -5,7 +5,7 @@
  * which lives in SQLite), it belongs here. Edit this file to change what the
  * site says — no need to touch component files for copy changes.
  *
- * NOT covered here (on purpose, see SITE-OVERVIEW.md "content.ts scope"):
+ * NOT covered here (on purpose, see Context Docs/SITE-OVERVIEW.md "content.ts scope"):
  *  - Event & article data — that's in the database, managed via /admin
  *  - Admin panel copy (internal tool, not visitor-facing)
  *  - Small modals not yet migrated: BookingModal, AllUpcomingEventsModal
@@ -99,7 +99,7 @@ export const about = {
 };
 
 // "As Seen In" press marquee. NOTE: every href below is a placeholder "#" —
-// nobody ever added the real article links. See SITE-OVERVIEW.md.
+// nobody ever added the real article links. See Context Docs/SITE-OVERVIEW.md.
 export const pressLogos = [
   { id: 1, src: '/newsfeatureslogo/Delhi-Times.png',        alt: 'Delhi Times',        href: '#' },
   { id: 2, src: '/newsfeatureslogo/economic-times.png',     alt: 'Economic Times',     href: '#' },
