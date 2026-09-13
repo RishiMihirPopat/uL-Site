@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import styles from '../app/page.module.css';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -84,8 +84,22 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
     setMobileIndex((i) => (i + 1) % formats.length);
   };
 
+  // Content (heading, cards/mobile carousel, doodles) must only start
+  // revealing once the wave background has actually finished appearing —
+  // same "wait for the thing behind it" gate AsSeenInSection uses for its
+  // own wave (there via image-load, here via the wave's own entrance
+  // animation finishing), rather than two independent timers that could
+  // race if the user scrolls to this section quickly. `whileInView` alone
+  // can't express "and also wait for this other condition", so both
+  // triggers are tracked explicitly and combined into one `ready` flag
+  // that drives a plain `animate` instead.
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef, { once: true, amount: 0.15 });
+  const [waveRevealed, setWaveRevealed] = useState(false);
+  const ready = inView && waveRevealed;
+
   return (
-    <section id="formats" className={styles.gatherV2}>
+    <section id="formats" ref={sectionRef} className={styles.gatherV2}>
       <picture className={styles.pictureContentsV2}>
         <source media="(max-width: 900px)" srcSet="/wavy-shapes/mobile/ather-wavy-shape.png" />
         <motion.img
@@ -96,14 +110,14 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9, ease: EASE }}
+          onAnimationComplete={() => setWaveRevealed(true)}
         />
       </picture>
 
       <motion.div
         className={styles.gatherInnerV2}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.15 }}
+        animate={ready ? 'visible' : 'hidden'}
         variants={{ hidden: {}, visible: { transition: { delayChildren: 0.15 } } }}
       >
         {/* Two texts, together, first */}
