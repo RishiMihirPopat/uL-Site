@@ -214,26 +214,13 @@
   }
 }
 
-/* Tablet ≤768px — active card 369x259.2 (x0.9) */
-@media (max-width: 768px) {
-  .stageV2 {
-    height: 297px;
-  }
-
-  .trackV2 {
-    height: 259.2px;
-    margin-top: -129.6px;
-  }
-
-  .posterMetaV2 {
-    font-size: 0.9rem;
-  }
-}
-
-/* Mobile ≤480px — exact Figma mobile-frame numbers (node 188:4553):
+/* Mobile <=900px — exact Figma mobile-frame numbers (node 188:4553):
    near-square 274.738x272.458 active card, no arrows, no pill label —
-   "no extra elements", just the 3-card peek row + the button below. */
-@media (max-width: 480px) {
+   "no extra elements", just the 3-card peek row + the button below.
+   Matches the 900px breakpoint every other mobile-specific section on
+   this page uses (there's no separate "tablet" Figma frame between this
+   and the 900-1400px tier above, so nothing sits between the two). */
+@media (max-width: 900px) {
   /* Unlike desktop (side cards bleed fully uncropped off the page edge),
      the mobile frame crops side cards to a tight ~39px peek — the stage
      itself must clip to the viewport here, not just let the track run
@@ -389,37 +376,16 @@
   transform: translateY(-100%);
 }
 
-@media (max-width: 768px) {
-  /* Card 369x259.2 — arrow offsets scaled by the same ratio, x0.9 */
-  .arrowBtnV2 {
-    width: 24.3px;
-    height: 24.3px;
-    bottom: -10.8px;
-  }
-
-  .arrowBtnV2 img {
-    width: 15.3px;
-    height: 15.3px;
-  }
-
-  .arrowBtnV2Prev {
-    left: 39.6px;
-  }
-
-  .arrowBtnV2Next {
-    right: 45px;
-  }
-
+/* No arrow-offset tier below this — .arrowsAnchorV2 is display:none at
+   <=900px (see above), so the arrows never render on mobile at all. */
+@media (max-width: 900px) {
   .allEventsBtnV2 {
     padding: 12px 24px;
     font-size: 0.85rem;
   }
-}
 
-/* No ≤480px arrow-offset tier here — .arrowsAnchorV2 is display:none at
-   this breakpoint (see above), so the arrows never render on mobile. */
-
-@media (max-width: 480px) {
+  /* Exact Figma mobile-frame gap (node 188:4553) between the card row
+     and the button, replacing the desktop/tablet calc(2rem + 15px). */
   .allEventsBtnWrapV2 {
     margin-top: 37px;
   }

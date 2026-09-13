@@ -33,14 +33,16 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     if (typeof window === 'undefined') {
       return { cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 };
     }
-    if (window.innerWidth <= 480) {
+    if (window.innerWidth <= 900) {
       // Exact numbers from the mobile-specific Figma frame (node
       // 188:4553) — near-square cards, not just a scaled-down desktop
-      // ratio like the other tiers.
+      // ratio like the tablet/laptop tier below. 900px matches the
+      // breakpoint every other mobile-specific section on this page
+      // uses (Nav, How We Gather, Manifesto, etc.) — this used to switch
+      // in at 480px, which left a 480–900px gap still rendering the old
+      // scaled-desktop tablet ratio (315/221.4/etc., below) instead of
+      // this exact mobile design.
       return { cardW: 250.871, gap: 20, cardH: 248.788, activeCardW: 274.738, activeCardH: 272.458 };
-    }
-    if (window.innerWidth <= 768) {
-      return { cardW: 315, gap: 30.6, cardH: 221.4, activeCardW: 369, activeCardH: 259.2 };
     }
     if (window.innerWidth <= 1400) {
       return { cardW: 414, gap: 40.5, cardH: 290.7, activeCardW: 486, activeCardH: 341.1 };
