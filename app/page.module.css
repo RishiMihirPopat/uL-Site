@@ -602,6 +602,13 @@
     height: 17px;
   }
 
+  /* arrow-prev.svg/arrow-next.svg are the same right-pointing shape —
+     the "prev" direction is a CSS flip, not a separate asset (same
+     technique HeroLectureCarousel.module.css uses). */
+  .gatherMobileArrowBtnV2Prev img {
+    transform: scaleX(-1);
+  }
+
   /* ── The Manifesto: shrink the desktop's 1499px-wide, 72px-padded box
          down to the mobile column, per Figma mobile spec (321px box,
          14px body copy) ── */

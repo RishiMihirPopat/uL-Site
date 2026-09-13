@@ -174,10 +174,22 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
             static grid), but still inherits the parent's fade-in. */}
         <div className={styles.gatherMobileWrapV2}>
           <div className={styles.gatherMobileCardBoxGroupV2}>
-            <Link
+            <MotionLink
               href={mobileFormat.href}
               className={styles.gatherMobileCardV2}
               aria-label={mobileFormat.name}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                const offset = info.offset.x;
+                const velocity = info.velocity.x;
+                if (offset < -40 || velocity < -400) {
+                  handleMobileNext();
+                } else if (offset > 40 || velocity > 400) {
+                  handleMobilePrev();
+                }
+              }}
             >
               <div className={styles.gatherMobileCardPhotoV2}>
                 <Image src={mobileFormat.imgV2} alt={mobileFormat.alt} fill sizes="300px" />
@@ -190,7 +202,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
                   </React.Fragment>
                 ))}
               </p>
-            </Link>
+            </MotionLink>
             <div className={styles.gatherMobileContentBoxV2}>
               <p className={styles.gatherMobileContentTextV2}>{mobileFormat.desc}</p>
             </div>
@@ -198,7 +210,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
           <div className={styles.gatherMobileArrowsV2}>
             <button
               type="button"
-              className={styles.gatherMobileArrowBtnV2}
+              className={`${styles.gatherMobileArrowBtnV2} ${styles.gatherMobileArrowBtnV2Prev}`}
               onClick={handleMobilePrev}
               aria-label="Previous format"
             >
