@@ -42,6 +42,7 @@ export class VercelBlobUploadService implements IUploadService {
 
     const blob = await put(pathname, file, {
       access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     return { url: blob.url, filename: pathname };
@@ -56,6 +57,14 @@ export class HybridUploadService implements IUploadService {
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       return this.blobService.saveFile(file, folderType);
     }
+
+    // On Vercel / serverless runtime, filesystem is read-only.
+    if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      throw new Error(
+        'BLOB_READ_WRITE_TOKEN is missing. Vercel serverless functions have a read-only filesystem. Please create and connect a Vercel Blob store in your Vercel Dashboard (Storage -> Blob) and redeploy your project.'
+      );
+    }
+
     return this.localService.saveFile(file, folderType);
   }
 }
