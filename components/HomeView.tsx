@@ -3,8 +3,7 @@ import NewsletterFormV2 from './NewsletterFormV2';
 import FadeIn, { FadeInItem } from './FadeIn';
 import HowWeGatherSection from './HowWeGatherSection';
 import AsSeenInSection from './AsSeenInSection';
-import { getActiveEvents, getCarouselEventIds } from '../lib/db';
-import { EventCategory } from '../lib/types/event';
+import { getActiveEvents, getCarouselEventIds, mapRowToDisplayEvent } from '../lib/db';
 import {
   hero as heroContent,
   formats,
@@ -18,24 +17,11 @@ import {
 } from '../lib/content';
 import styles from '../app/page.module.css';
 
-export default function HomeView() {
-  const activeRows = getActiveEvents();
-  const carouselIds = getCarouselEventIds();
+export default async function HomeView() {
+  const activeRows = await getActiveEvents();
+  const carouselIds = await getCarouselEventIds();
 
-  const allActiveEvents = activeRows.map((e) => ({
-    id: e.id,
-    category: e.category as EventCategory,
-    title: e.title,
-    speaker: e.speaker,
-    venue: e.venue,
-    date: e.date,
-    time: e.time,
-    price: e.price,
-    description: e.description,
-    image: e.image,
-    urbanautUrl: e.urbanaut_url,
-    badge: e.archive_badge || undefined,
-  }));
+  const allActiveEvents = activeRows.map(mapRowToDisplayEvent);
 
   // Selected carousel events or default to unlecture events
   const carouselEvents = carouselIds.length > 0

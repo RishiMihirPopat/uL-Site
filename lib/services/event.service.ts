@@ -4,66 +4,72 @@
  */
 
 import { IEventRepository, eventRepository } from '../repositories/event.repository';
-import { EventRow, Event, FormattedArchiveCard, EventArchiveStatus, EventCategory } from '../types/event';
+import { EventRow, Event, FormattedArchiveCard, EventCategory } from '../types/event';
 import { normalizeTags, validateEventLinks } from '../validators';
 import { canPerformTransition, LIFECYCLE_TRANSITIONS } from '../domain/lifecycle';
 import { AdminRole } from '../auth';
+import { slugify } from '../utils/slug';
+
+export function mapRowToDisplayEvent(e: EventRow): Event {
+  return {
+    id: e.id,
+    category: e.category as EventCategory,
+    title: e.title,
+    speaker: e.speaker,
+    venue: e.venue,
+    venueMapUrl: e.venue_map_url || undefined,
+    venue_map_url: e.venue_map_url || undefined,
+    date: e.date,
+    time: e.time,
+    price: e.price,
+    description: e.description,
+    image: e.image,
+    urbanautUrl: e.urbanaut_url,
+    badge: e.archive_badge || undefined,
+  };
+}
 
 export class EventService {
   constructor(private readonly repo: IEventRepository = eventRepository) {}
 
   public slugify(text: string): string {
-    return text
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
-      .replace(/\-\-+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '');
+    return slugify(text);
   }
 
-  public getAllEvents(): EventRow[] {
-    return this.repo.getAll();
+  public async getAllEvents(): Promise<EventRow[]> {
+    return await this.repo.getAll();
   }
 
-  public getEventById(id: string): EventRow | null {
-    return this.repo.getById(id);
+  public async getEventById(id: string): Promise<EventRow | null> {
+    return await this.repo.getById(id);
   }
 
-  public getActiveDisplayEvents(): Event[] {
-    const activeRows = this.repo.getActive();
-    return activeRows.map(e => ({
-      id: e.id,
-      category: e.category as EventCategory,
-      title: e.title,
-      speaker: e.speaker,
-      venue: e.venue,
-      date: e.date,
-      time: e.time,
-      price: e.price,
-      description: e.description,
-      image: e.image,
-      urbanautUrl: e.urbanaut_url,
-      badge: e.archive_badge || undefined,
-    }));
+  public async getActiveDisplayEvents(): Promise<Event[]> {
+    const activeRows = await this.repo.getActive();
+    return activeRows.map(mapRowToDisplayEvent);
   }
 
-  public getFormattedArchiveCards(): FormattedArchiveCard[] {
-    const archivedRows = this.repo.getArchived();
-    return archivedRows.map(event => {
+  public async getFormattedArchiveCards(): Promise<FormattedArchiveCard[]> {
+    const archivedRows = await this.repo.getArchived();
+    return archivedRows.map((event) => {
       const tags = normalizeTags(event.archive_tags);
 
       let youtubeUrls: string[] = [];
       try {
-        youtubeUrls = typeof event.youtube_urls === 'string' ? JSON.parse(event.youtube_urls) : (event.youtube_urls || []);
+        youtubeUrls =
+          typeof event.youtube_urls === 'string'
+            ? JSON.parse(event.youtube_urls)
+            : event.youtube_urls || [];
       } catch {
         youtubeUrls = [];
       }
 
       let substackUrls: string[] = [];
       try {
-        substackUrls = typeof event.substack_urls === 'string' ? JSON.parse(event.substack_urls) : (event.substack_urls || []);
+        substackUrls =
+          typeof event.substack_urls === 'string'
+            ? JSON.parse(event.substack_urls)
+            : event.substack_urls || [];
       } catch {
         substackUrls = [];
       }
@@ -73,6 +79,8 @@ export class EventService {
         date: event.date,
         title: event.title,
         venue: event.venue,
+        venueMapUrl: event.venue_map_url || undefined,
+        venue_map_url: event.venue_map_url || undefined,
         speaker: event.speaker,
         description: event.description,
         image: event.archive_image || event.image,
@@ -86,7 +94,9 @@ export class EventService {
     });
   }
 
-  public createEvent(data: Partial<EventRow>): { success: boolean; id?: string; error?: string; errors?: Record<string, string> } {
+  public async createEvent(
+    data: Partial<EventRow>
+  ): Promise<{ success: boolean; id?: string; error?: string; errors?: Record<string, string> }> {
     const validation = validateEventLinks(data);
     if (!validation.valid) {
       return {
@@ -102,17 +112,29 @@ export class EventService {
     const newEvent: Partial<EventRow> = {
       ...data,
       id,
+      venue_map_url: data.venue_map_url || '',
       archive_status: data.archive_status || 'active',
       archive_tags: JSON.stringify(tagsArray),
-      youtube_urls: data.youtube_urls ? (typeof data.youtube_urls === 'string' ? data.youtube_urls : JSON.stringify(data.youtube_urls)) : '[]',
-      substack_urls: data.substack_urls ? (typeof data.substack_urls === 'string' ? data.substack_urls : JSON.stringify(data.substack_urls)) : '[]',
+      youtube_urls: data.youtube_urls
+        ? typeof data.youtube_urls === 'string'
+          ? data.youtube_urls
+          : JSON.stringify(data.youtube_urls)
+        : '[]',
+      substack_urls: data.substack_urls
+        ? typeof data.substack_urls === 'string'
+          ? data.substack_urls
+          : JSON.stringify(data.substack_urls)
+        : '[]',
     };
 
-    this.repo.create(newEvent);
+    await this.repo.create(newEvent);
     return { success: true, id };
   }
 
-  public updateEvent(id: string, data: Partial<EventRow>): { success: boolean; error?: string; errors?: Record<string, string> } {
+  public async updateEvent(
+    id: string,
+    data: Partial<EventRow>
+  ): Promise<{ success: boolean; error?: string; errors?: Record<string, string> }> {
     const validation = validateEventLinks(data);
     if (!validation.valid) {
       return {
@@ -123,6 +145,10 @@ export class EventService {
     }
 
     const updates = { ...data };
+    delete (updates as any).id;
+    delete (updates as any).created_at;
+    delete (updates as any).updated_at;
+
     if (updates.archive_tags !== undefined) {
       updates.archive_tags = JSON.stringify(normalizeTags(updates.archive_tags));
     }
@@ -133,40 +159,50 @@ export class EventService {
       updates.substack_urls = JSON.stringify(updates.substack_urls);
     }
 
-    this.repo.update(id, updates);
+    await this.repo.update(id, updates);
     return { success: true };
   }
 
-  public transitionStatus(
+  public async transitionStatus(
     id: string,
     action: string,
     userRole: AdminRole | null
-  ): { success: boolean; error?: string; status?: number } {
+  ): Promise<{ success: boolean; error?: string; status?: number }> {
     const check = canPerformTransition(action, userRole);
     if (!check.allowed) {
       return { success: false, error: check.reason, status: 403 };
     }
 
     const transition = LIFECYCLE_TRANSITIONS[action];
-    this.repo.updateStatus(id, transition.to);
+    await this.repo.updateStatus(id, transition.to);
     return { success: true };
   }
 
-  public publishToArchive(
+  public async deleteEvent(id: string): Promise<void> {
+    await this.repo.delete(id);
+  }
+
+  public async publishToArchive(
     id: string,
-    archiveMetadata: {
+    archiveMetadata?: {
       archive_badge?: string | null;
       archive_tags?: string[] | string;
       archive_image?: string | null;
     }
-  ): { success: boolean; error?: string } {
-    const tags = normalizeTags(archiveMetadata.archive_tags);
-    this.repo.update(id, {
+  ): Promise<{ success: boolean; error?: string }> {
+    const updates: Partial<EventRow> = {
       archive_status: 'archived',
-      archive_badge: archiveMetadata.archive_badge || null,
-      archive_tags: JSON.stringify(tags),
-      archive_image: archiveMetadata.archive_image || null,
-    });
+    };
+    if (archiveMetadata?.archive_badge !== undefined) {
+      updates.archive_badge = archiveMetadata.archive_badge;
+    }
+    if (archiveMetadata?.archive_tags !== undefined) {
+      updates.archive_tags = JSON.stringify(normalizeTags(archiveMetadata.archive_tags));
+    }
+    if (archiveMetadata?.archive_image !== undefined) {
+      updates.archive_image = archiveMetadata.archive_image;
+    }
+    await this.repo.update(id, updates);
     return { success: true };
   }
 }

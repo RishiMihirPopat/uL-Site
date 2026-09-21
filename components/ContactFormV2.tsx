@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { contactPageV2 } from '../lib/content';
+import { useOutsideClose } from '../lib/hooks/useOutsideClose';
 import styles from './ContactFormV2.module.css';
 
 const ROLE_OPTIONS = ['Speaker', 'Venue', 'Partner', 'Sponsor', 'Volunteer', 'Team member', 'Other'];
@@ -21,25 +22,7 @@ export default function ContactFormV2() {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [roleOpen, setRoleOpen] = useState(false);
-  const roleRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!roleOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
-        setRoleOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setRoleOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [roleOpen]);
+  const roleRef = useOutsideClose(roleOpen, () => setRoleOpen(false));
 
   function resetError() {
     if (status === 'error') setStatus('idle');

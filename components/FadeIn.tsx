@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { EASE } from '@/lib/constants/animation';
 
 interface FadeInProps {
   id?: string;

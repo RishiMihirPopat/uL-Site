@@ -10,7 +10,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     body = await request.json();
   } catch {}
 
-  const result = eventService.publishToArchive(id, {
+  const result = await eventService.publishToArchive(id, {
     archive_badge: body.archive_badge !== undefined ? body.archive_badge : body.badge,
     archive_tags: body.archive_tags !== undefined ? body.archive_tags : body.tags,
     archive_image: body.archive_image !== undefined ? body.archive_image : body.image,

@@ -6,7 +6,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!role) return unauthorizedResponse();
 
   const { id } = await params;
-  const result = eventService.transitionStatus(id, 'restore', role);
+  const result = await eventService.transitionStatus(id, 'restore', role);
   if (!result.success) {
     return result.status === 403 ? forbiddenResponse(result.error) : Response.json({ error: result.error }, { status: 400 });
   }

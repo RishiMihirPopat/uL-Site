@@ -6,10 +6,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { brand, navV2 } from '../lib/content';
 import { lenisRef } from '../lib/lenis';
+import { EASE } from '@/lib/constants/animation';
 import MobileMenu from './MobileMenu';
 import styles from './Nav.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 // Figma nodes 123:2057 / 123:2058 — 1120px-wide content group, Chivo Mono
 // 16px, no letter-spacing, active link solid #2A2420, inactive at 54%
@@ -17,11 +16,16 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 export default function Nav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
   // Stable references — MobileMenu is always mounted (not conditionally
   // rendered), so a fresh inline function here would re-run its effects
   // on every Nav re-render, not just when the menu actually opens/closes.
   const openMenu = useCallback(() => setMenuOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';

@@ -8,8 +8,8 @@ export const metadata = {
   description: 'Read unLecture\'s articles and dispatches.',
 };
 
-export default function ArticlesIndexPage() {
-  const published = getPublishedArticles();
+export default async function ArticlesIndexPage() {
+  const published = await getPublishedArticles();
   const articles = published.map((a) => ({
     id: a.id,
     slug: a.slug,

@@ -1,20 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calendar } from '@phosphor-icons/react';
 import { articlesPageV2 } from '../lib/content';
+import { EASE } from '../lib/constants/animation';
+import { formatArticleDate } from '../lib/utils/dateTime';
+import { useOutsideClose } from '../lib/hooks/useOutsideClose';
 import styles from './ArticlesPageV2.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-}
 
 export interface ArticlesPageCard {
   id: string;
@@ -29,26 +24,6 @@ interface ArticlesPageV2Props {
 }
 
 type SortOrder = 'newest' | 'oldest';
-
-function useOutsideClose(open: boolean, onClose: () => void) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [open, onClose]);
-  return ref;
-}
 
 export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
   const [sort, setSort] = useState<SortOrder>('newest');
@@ -166,7 +141,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
                   <p className={styles.cardTitle}>{a.title}</p>
                   <div className={styles.cardMetaRow}>
                     <Calendar weight="bold" className={styles.cardMetaIcon} />
-                    <p className={styles.cardMeta}>{formatDate(a.publishedAt)}</p>
+                    <p className={styles.cardMeta}>{formatArticleDate(a.publishedAt)}</p>
                   </div>
                 </div>
               </Link>
@@ -286,7 +261,7 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
                     <p className={styles.cardTitleMobileV2}>{a.title}</p>
                     <div className={styles.cardMetaRowMobileV2}>
                       <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
-                      <p className={styles.cardMetaMobileV2}>{formatDate(a.publishedAt)}</p>
+                      <p className={styles.cardMetaMobileV2}>{formatArticleDate(a.publishedAt)}</p>
                     </div>
                   </div>
                 </div>

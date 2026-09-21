@@ -5,13 +5,13 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   if (!article || article.status !== 'published') {
     return Response.json({ error: 'Article not found' }, { status: 404 });
   }
 
-  const adjacent = getAdjacentArticles(slug);
+  const adjacent = await getAdjacentArticles(slug);
 
   return Response.json({
     article,

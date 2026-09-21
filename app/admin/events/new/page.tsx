@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../../admin.module.css';
 import { validateEventLinks, normalizeTags } from '@/lib/validators';
+import { parseEventDateTime } from '@/lib/utils/dateTime';
+import { uploadImageFile } from '@/lib/utils/upload';
 import { EventSessionFields } from '@/components/admin/EventSessionFields';
 import { EventScheduleFields } from '@/components/admin/EventScheduleFields';
 import { EventMediaFields } from '@/components/admin/EventMediaFields';
@@ -12,7 +14,7 @@ import { EventMediaFields } from '@/components/admin/EventMediaFields';
 export default function NewEventPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    title: '', speaker: '', venue: '', category: '',
+    title: '', speaker: '', venue: '', venue_map_url: '', category: '',
     date: '', event_datetime: '', time: '', price: '',
     description: '', image: '', urbanaut_url: '',
     archive_badge: '', archive_tags: ''
@@ -62,33 +64,22 @@ export default function NewEventPage() {
   };
 
   const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setUploading(true);
-    const data = new FormData();
-    data.append('file', e.target.files[0]);
-    data.append('type', 'posters');
 
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data,
+    const result = await uploadImageFile(file, 'posters');
+    if (result.success && result.url) {
+      setFormData(prev => ({ ...prev, image: result.url! }));
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next.image;
+        return next;
       });
-      const result = await res.json();
-      if (res.ok && result.url) {
-        setFormData(prev => ({ ...prev, image: result.url }));
-        setValidationErrors(prev => {
-          const next = { ...prev };
-          delete next.image;
-          return next;
-        });
-      } else {
-        alert(result.error || 'Failed to upload poster image');
-      }
-    } catch {
-      alert('Network error uploading poster image');
-    } finally {
-      setUploading(false);
+    } else {
+      alert(result.error || 'Failed to upload poster image');
     }
+    setUploading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -102,24 +93,16 @@ export default function NewEventPage() {
     }
 
     if (name === 'event_datetime' && value) {
-      try {
-        const dt = new Date(value);
-        if (!isNaN(dt.getTime())) {
-          const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' });
-          const day = dt.getDate();
-          const month = dt.toLocaleDateString('en-US', { month: 'short' });
-          const dateFormatted = `${weekday}, ${day} ${month}`;
-          const timeFormatted = dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-          setFormData(prev => ({
-            ...prev,
-            event_datetime: value,
-            date: dateFormatted,
-            time: timeFormatted,
-          }));
-          return;
-        }
-      } catch {}
+      const parsed = parseEventDateTime(value);
+      if (parsed) {
+        setFormData(prev => ({
+          ...prev,
+          event_datetime: value,
+          date: parsed.date,
+          time: parsed.time,
+        }));
+        return;
+      }
     }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -137,7 +120,7 @@ export default function NewEventPage() {
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        <EventSessionFields formData={formData} onChange={handleChange} />
+        <EventSessionFields formData={formData} validationErrors={validationErrors} onChange={handleChange} />
         
         <EventScheduleFields formData={formData} onChange={handleChange} />
 

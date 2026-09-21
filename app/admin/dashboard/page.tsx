@@ -19,10 +19,8 @@ export default function DashboardPage() {
   const [selectedCarouselIds, setSelectedCarouselIds] = useState<string[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [articlesCount, setArticlesCount] = useState(0);
-  const [tickerText, setTickerText] = useState('');
   const [role, setRole] = useState<string | null>(null);
   const [carouselSaving, setCarouselSaving] = useState(false);
-  const [tickerSaving, setTickerSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const showToast = (type: 'success' | 'error', text: string) => {
@@ -75,14 +73,6 @@ export default function DashboardPage() {
       .then((data) => {
         if (Array.isArray(data)) {
           setArticlesCount(data.length);
-        }
-      });
-
-    fetch('/api/admin/settings')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.ticker_text) {
-          setTickerText(data.ticker_text);
         }
       });
   };
@@ -141,27 +131,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSaveTicker = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTickerSaving(true);
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticker_text: tickerText }),
-      });
-      if (res.ok) {
-        showToast('success', 'Moving orange banner updated');
-      } else {
-        showToast('error', 'Failed to save ticker banner');
-      }
-    } catch {
-      showToast('error', 'Network error');
-    } finally {
-      setTickerSaving(false);
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -207,20 +176,20 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Pending Archive Alert Banner */}
-      {counts.pending > 0 && (
+      {/* Hidden Drafts / Concluded Events Alert Banner */}
+      {counts.hidden > 0 && (
         <div className={styles.card} style={{ borderLeft: '5px solid #C26540', background: '#FFF8F4' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
             <div>
               <h3 style={{ color: '#C26540', margin: 0, fontSize: '1.15rem' }}>
-                Action Needed: {counts.pending} Completed Event{counts.pending > 1 ? 's' : ''} Ready for Archive
+                Concluded / Draft Events: {counts.hidden} Event{counts.hidden > 1 ? 's' : ''} in Hidden Drafts
               </h3>
               <p style={{ margin: '6px 0 0', color: '#554a40', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Events whose dates have passed are waiting for high-res recap photos, Substack notes, and YouTube recordings before moving to the public Postcard Archive.
+                Events that have concluded are moved to Hidden Drafts. Review each event to send it to the public archive or discard it.
               </p>
             </div>
-            <Link href="/admin/events?filter=Pending+Archive" className={`${styles.btn} ${styles.btnPrimary}`}>
-              Review & Archive ({counts.pending}) &rarr;
+            <Link href="/admin/events?filter=Hidden" className={`${styles.btn} ${styles.btnPrimary}`}>
+              Review Concluded Events ({counts.hidden}) &rarr;
             </Link>
           </div>
         </div>
@@ -236,9 +205,9 @@ export default function DashboardPage() {
           <span className={styles.statLabel}>Active & Booking</span>
           <span className={styles.statValue} style={{ color: '#2E7D32' }}>{counts.active}</span>
         </Link>
-        <Link href="/admin/events?filter=Pending+Archive" className={styles.statCard} style={{ borderTop: '3px solid #E65100' }}>
-          <span className={styles.statLabel}>Pending Archive</span>
-          <span className={styles.statValue} style={{ color: '#E65100' }}>{counts.pending}</span>
+        <Link href="/admin/events?filter=Hidden" className={styles.statCard} style={{ borderTop: '3px solid #E65100' }}>
+          <span className={styles.statLabel}>Hidden Drafts</span>
+          <span className={styles.statValue} style={{ color: '#E65100' }}>{counts.hidden}</span>
         </Link>
         <Link href="/admin/events?filter=Archived" className={styles.statCard} style={{ borderTop: '3px solid #1565C0' }}>
           <span className={styles.statLabel}>Postcard Archive</span>
@@ -287,7 +256,7 @@ export default function DashboardPage() {
             {carouselSaving && <span style={{ fontSize: '0.8rem', color: '#C26540' }}>Saving changes...</span>}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
             {activeEvents.length === 0 ? (
               <p style={{ color: '#666', fontStyle: 'italic', margin: 0 }}>No active events found. Create an event to include it in the carousel.</p>
             ) : (
@@ -373,35 +342,6 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* ── Section: Moving Orange Ticker Banner ─────────────────────── */}
-      <div className={styles.card} style={{ marginBottom: '2rem' }}>
-        <div className={styles.cardHeader}>
-          <div>
-            <h2 className={styles.cardTitle}>Homepage Moving Orange Ticker Banner</h2>
-            <p className={styles.cardDesc}>
-              Update the announcement text scrolling across the orange marquee bar on the homepage.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSaveTicker} style={{ padding: '0 1.25rem 1.25rem' }}>
-          <div className={styles.formGroup}>
-            <textarea
-              rows={2}
-              className={styles.textarea}
-              value={tickerText}
-              onChange={(e) => setTickerText(e.target.value)}
-              placeholder="e.g. Next Gathering: Intimate Lectures in Unconventional Spaces • Limited Capacity • Book on Urbanaut"
-            />
-          </div>
-          <div className={styles.actions} style={{ marginTop: '0.75rem' }}>
-            <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={tickerSaving}>
-              {tickerSaving ? 'Saving...' : 'Update Moving Banner'}
-            </button>
-          </div>
-        </form>
       </div>
 
       {/* ── Section: Articles & Editorial Dispatches ────────────────── */}

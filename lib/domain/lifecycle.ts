@@ -16,11 +16,11 @@ export interface StatusTransitionConfig {
 
 export const LIFECYCLE_TRANSITIONS: Record<string, StatusTransitionConfig> = {
   archive: {
-    from: 'active',
+    from: 'hidden',
     to: 'archived',
     actionName: 'archive',
     label: 'Archive Event',
-    description: 'Moves event from active booking into the archive.',
+    description: 'Moves event into the public archive.',
   },
   hide: {
     from: 'active',
@@ -37,12 +37,11 @@ export const LIFECYCLE_TRANSITIONS: Record<string, StatusTransitionConfig> = {
     description: 'Restores a hidden or discarded event back to active status.',
   },
   discard: {
-    from: 'active',
+    from: 'hidden',
     to: 'discarded',
     actionName: 'discard',
     label: 'Discard Event',
-    requiredRole: 'super_admin',
-    description: 'Moves event to trash. Only accessible by Super Admins.',
+    description: 'Moves event to trash.',
   },
 };
 

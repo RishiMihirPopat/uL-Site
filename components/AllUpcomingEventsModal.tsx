@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { formatEventPrice } from '../lib/utils/formatPrice';
 import { Event } from '../lib/types/event';
+import { ALL_FORMATS } from '../lib/constants/formats';
+import { EASE } from '../lib/constants/animation';
+import { useModalDismiss } from '../lib/hooks/useModalDismiss';
 import styles from './AllUpcomingEventsModal.module.css';
 
 interface AllUpcomingEventsModalProps {
@@ -21,26 +24,13 @@ export default function AllUpcomingEventsModal({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Close on Escape key
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = '';
-    };
-  }, [onClose]);
+  // Lock scroll and close on Escape key
+  useModalDismiss(true, onClose);
 
   const categories = useMemo(() => {
     return [
       { id: 'all', label: 'All Formats' },
-      { id: 'unlecture', label: 'unLecture' },
-      { id: 'grounds-for-thought', label: 'Grounds for Thought' },
-      { id: 'community', label: 'Community' },
-      { id: 'unlecture-series', label: 'Series' },
+      ...ALL_FORMATS.map((f) => ({ id: f.id, label: f.badgeLabel })),
     ];
   }, []);
 
@@ -80,7 +70,7 @@ export default function AllUpcomingEventsModal({
         initial={{ opacity: 0, scale: 0.97, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97, y: 16 }}
-        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.28, ease: EASE }}
       >
         {/* Header Bar */}
         <div className={styles.modalHeader}>
@@ -179,7 +169,15 @@ export default function AllUpcomingEventsModal({
 
                     <div className={styles.cardMetaRow}>
                       {ev.venue && ev.venue !== '—' && (
-                        <span className={styles.cardVenue}>{ev.venue}</span>
+                        <a
+                          href={ev.venueMapUrl || (ev as any).venue_map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.venue)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.cardVenue}
+                          title={`View ${ev.venue} on Google Maps`}
+                        >
+                          📍 {ev.venue}
+                        </a>
                       )}
                       {ev.price && (
                         <span className={styles.cardPrice}>{formatEventPrice(ev.price)}</span>

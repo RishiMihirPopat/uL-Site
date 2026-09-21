@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
-import { motion, useInView } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { EASE } from '@/lib/constants/animation';
 import styles from '../app/page.module.css';
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 const MOBILE_AUTOPLAY_MS = 3000;
 
 interface FormatItem {
+  id?: string;
   name: string;
   shortLabel: string[];
   desc: string;
@@ -51,35 +54,307 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
     return byIndex;
   }, [formats.length]);
 
-  // Mobile-only auto-advancing carousel (node 174:4263, mobile frame) —
-  // a real component state machine, not a CSS-only swap, since it needs
-  // to autoplay every 3s and also respond to manual prev/next arrows.
-  // Runs unconditionally (even while the desktop layout is showing, i.e.
-  // the markup below is just CSS-hidden above the mobile breakpoint) —
-  // simpler and safer than gating the whole carousel behind a
-  // window-width check, which is exactly the kind of client/server
-  // mismatch already fixed once this session in HeroLectureCarousel.
-  const [mobileIndex, setMobileIndex] = useState(0);
-  const hasMultiple = formats.length > 1;
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stageWidth, setStageWidth] = useState(390);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Responsive card dimensions for mobile carousel
+  const getCardDims = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return { cardW: 232, gap: 16, cardH: 252.6, activeCardW: 260, activeCardH: 283.1 };
+    }
+    if (window.innerWidth <= 380) {
+      return { cardW: 220, gap: 14, cardH: 239.5, activeCardW: 248, activeCardH: 270.0 };
+    }
+    if (window.innerWidth <= 480) {
+      return { cardW: 232, gap: 16, cardH: 252.6, activeCardW: 260, activeCardH: 283.1 };
+    }
+    return { cardW: 248, gap: 20, cardH: 270.0, activeCardW: 278, activeCardH: 302.7 };
+  }, []);
+
+  const router = useRouter();
+
+  const [cardDims, setCardDims] = useState({ cardW: 232, gap: 16, cardH: 252.6, activeCardW: 260, activeCardH: 283.1 });
+
+  // Pure infinite page index
+  const [page, setPage] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [touchOffset, setTouchOffset] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
+  const [tappedIndex, setTappedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!hasMultiple) return;
+    if (!isMoving) return;
+    const timer = setTimeout(() => setIsMoving(false), 420);
+    return () => clearTimeout(timer);
+  }, [isMoving]);
+
+  // Gesture refs
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+  const touchDiffX = useRef(0);
+  const isSwiping = useRef(false);
+  const isScrolling = useRef(false);
+  const didSwipe = useRef(false);
+  const rafRef = useRef<number | null>(null);
+
+  // Mouse drag refs
+  const mouseStartX = useRef(0);
+  const mouseStartTime = useRef(0);
+  const mouseDiffX = useRef(0);
+  const isMouseDown = useRef(false);
+  const isMouseDragging = useRef(false);
+
+  const hasMultiple = formats && formats.length > 1;
+
+  // Measure stage width and window resize
+  useEffect(() => {
+    setIsMounted(true);
+    setCardDims(getCardDims());
+
+    const updateDimensions = () => {
+      setCardDims(getCardDims());
+      if (stageRef.current) {
+        setStageWidth(stageRef.current.offsetWidth);
+      }
+    };
+
+    updateDimensions();
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setStageWidth(entry.contentRect.width);
+      }
+    });
+
+    if (stageRef.current) {
+      ro.observe(stageRef.current);
+    }
+
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, [getCardDims]);
+
+  // Clean up RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  const handleNext = useCallback(
+    (count = 1) => {
+      if (!hasMultiple) return;
+      setIsMoving(true);
+      setPage((prev) => prev + count);
+    },
+    [hasMultiple]
+  );
+
+  const handlePrev = useCallback(
+    (count = 1) => {
+      if (!hasMultiple) return;
+      setIsMoving(true);
+      setPage((prev) => prev - count);
+    },
+    [hasMultiple]
+  );
+
+  // Touch handlers for mobile swipe
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!hasMultiple || e.touches.length > 1 || isMoving) return;
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      touchStartTime.current = Date.now();
+      touchDiffX.current = 0;
+      isSwiping.current = false;
+      isScrolling.current = false;
+      didSwipe.current = false;
+      setIsPaused(true);
+    },
+    [hasMultiple, isMoving]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!hasMultiple || e.touches.length > 1 || isScrolling.current) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - touchStartX.current;
+      const diffY = currentY - touchStartY.current;
+
+      if (!isSwiping.current) {
+        // If vertical scroll detected, let native browser scroll take over
+        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+          isScrolling.current = true;
+          return;
+        }
+        // If horizontal swipe detected, lock into swiping mode
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+          isSwiping.current = true;
+          didSwipe.current = true;
+        }
+      }
+
+      if (isSwiping.current) {
+        touchDiffX.current = diffX;
+        if (rafRef.current === null) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTouchOffset(touchDiffX.current);
+            rafRef.current = null;
+          });
+        }
+      }
+    },
+    [hasMultiple]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setIsPaused(false);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    if (isSwiping.current) {
+      const elapsed = Math.max(Date.now() - touchStartTime.current, 1);
+      const diffX = touchDiffX.current;
+      const velocity = diffX / elapsed;
+      const pitch = cardDims.cardW + cardDims.gap;
+      const count = Math.max(1, Math.round(Math.abs(diffX) / pitch));
+
+      if (diffX < -40 || velocity < -0.3) {
+        setIsMoving(true);
+        handleNext(count);
+      } else if (diffX > 40 || velocity > 0.3) {
+        setIsMoving(true);
+        handlePrev(count);
+      }
+
+      setTouchOffset(0);
+      touchDiffX.current = 0;
+      isSwiping.current = false;
+      setTimeout(() => {
+        didSwipe.current = false;
+      }, 400);
+    } else {
+      setTouchOffset(0);
+      touchDiffX.current = 0;
+      didSwipe.current = false;
+    }
+    isScrolling.current = false;
+  }, [cardDims.cardW, cardDims.gap, handleNext, handlePrev]);
+
+  const handleTouchCancel = useCallback(() => {
+    setIsPaused(false);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setTouchOffset(0);
+    touchDiffX.current = 0;
+    isSwiping.current = false;
+    isScrolling.current = false;
+    setTimeout(() => {
+      didSwipe.current = false;
+    }, 400);
+  }, []);
+
+  // Desktop/mouse drag handlers
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hasMultiple || e.button !== 0 || isMoving) return;
+      isMouseDown.current = true;
+      isMouseDragging.current = false;
+      mouseStartX.current = e.clientX;
+      mouseStartTime.current = Date.now();
+      mouseDiffX.current = 0;
+      didSwipe.current = false;
+      setIsPaused(true);
+    },
+    [hasMultiple, isMoving]
+  );
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMouseDown.current) return;
+      const diffX = e.clientX - mouseStartX.current;
+      if (!isMouseDragging.current && Math.abs(diffX) > 6) {
+        isMouseDragging.current = true;
+        didSwipe.current = true;
+      }
+      if (isMouseDragging.current) {
+        mouseDiffX.current = diffX;
+        if (rafRef.current === null) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTouchOffset(mouseDiffX.current);
+            rafRef.current = null;
+          });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!isMouseDown.current) return;
+      isMouseDown.current = false;
+      setIsPaused(false);
+
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      if (isMouseDragging.current) {
+        const elapsed = Math.max(Date.now() - mouseStartTime.current, 1);
+        const diffX = mouseDiffX.current;
+        const velocity = diffX / elapsed;
+        const pitch = cardDims.cardW + cardDims.gap;
+        const count = Math.max(1, Math.round(Math.abs(diffX) / pitch));
+
+        if (diffX < -40 || velocity < -0.3) {
+          setIsMoving(true);
+          handleNext(count);
+        } else if (diffX > 40 || velocity > 0.3) {
+          setIsMoving(true);
+          handlePrev(count);
+        }
+
+        setTouchOffset(0);
+        mouseDiffX.current = 0;
+        isMouseDragging.current = false;
+        setTimeout(() => {
+          didSwipe.current = false;
+        }, 400);
+      } else {
+        setTouchOffset(0);
+        mouseDiffX.current = 0;
+        didSwipe.current = false;
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [cardDims.cardW, cardDims.gap, handleNext, handlePrev]);
+
+  // Autoplay every 3s — restarts interval cleanly on page changes
+  useEffect(() => {
+    if (!hasMultiple || isPaused) return;
     const timer = setInterval(() => {
-      setMobileIndex((i) => (i + 1) % formats.length);
+      handleNext();
     }, MOBILE_AUTOPLAY_MS);
     return () => clearInterval(timer);
-    // Restarting the 3s window on every index change (auto or manual) so a
-    // manual tap always gets a full 3s before the next auto-advance,
-    // instead of an autoplay tick landing right after a manual one.
-  }, [mobileIndex, hasMultiple, formats.length]);
-
-  const mobileFormat = formats[mobileIndex];
-  const handleMobilePrev = () => {
-    setMobileIndex((i) => (i - 1 + formats.length) % formats.length);
-  };
-  const handleMobileNext = () => {
-    setMobileIndex((i) => (i + 1) % formats.length);
-  };
+  }, [page, handleNext, hasMultiple, isPaused]);
 
   // Content (heading, cards/mobile carousel, doodles) must only start
   // revealing once the wave background has actually finished appearing —
@@ -89,14 +364,6 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
   // express "and also wait for this other condition", so both triggers
   // are tracked explicitly and combined into one `ready` flag that
   // drives a plain `animate` instead.
-  //
-  // waveLoaded gates the fade-in itself (animate only starts once the
-  // image has real bytes to show — on mobile this file is ~865KB, easily
-  // slower than the 1.7s the animation's own timer takes, so gating only
-  // on the animation's timer previously let it "complete" and reveal the
-  // content while the image itself hadn't visually loaded/painted yet).
-  // waveAnimDone then only flips true once that gated fade-in has
-  // actually finished animating.
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.15 });
   const waveImgRef = useRef<HTMLImageElement>(null);
@@ -107,12 +374,6 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
     if (waveImgRef.current?.complete) setWaveLoaded(true);
   }, []);
 
-  // A plain timer tied to the wave's own transition numbers below
-  // (0.9s delay + 0.8s duration), started the moment the image is
-  // actually ready to animate — not Framer's onAnimationComplete, which
-  // proved unreliable here (fired based on internal animate-prop state
-  // changes rather than a real 1.7s of wall-clock animation having
-  // played, letting the content through early on some loads).
   useEffect(() => {
     if (!waveLoaded) return;
     const timer = setTimeout(() => setWaveAnimDone(true), (0.9 + 0.8) * 1000);
@@ -120,6 +381,13 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
   }, [waveLoaded]);
 
   const ready = inView && waveAnimDone;
+
+  const pitch = cardDims.cardW + cardDims.gap;
+  const targetX = stageWidth / 2 - page * pitch - cardDims.cardW / 2;
+
+  const windowOffsets = [-3, -2, -1, 0, 1, 2, 3];
+  const activeIndex = ((page % formats.length) + formats.length) % formats.length;
+  const activeFormat = formats[activeIndex];
 
   return (
     <section id="formats" ref={sectionRef} className={styles.gatherV2}>
@@ -174,8 +442,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
         </motion.p>
 
         {/* Cards, in random order — desktop only, CSS-hidden on mobile.
-            Not clickable — plain divs, not links; the hover description
-            (data-cursor-desc) is the only interaction. */}
+            Clicking a card routes to /events filtered for that format's upcoming events. */}
         <div className={styles.ticketRowV2}>
           {formats.map((f, i) => (
             <motion.div
@@ -191,30 +458,31 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
                   transition: { duration: 0.55, ease: EASE, delay: 0.35 + revealPosition[i] * 0.15 },
                 },
               }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 17 }}
             >
-              <div className={styles.ticketPhotoV2}>
-                <Image src={f.imgV2} alt={f.alt} fill sizes="345px" />
-              </div>
-              <p className={styles.ticketLabelV2}>
-                {f.shortLabel.map((line, li) => (
-                  <React.Fragment key={li}>
-                    {li > 0 && <br />}
-                    {line}
-                  </React.Fragment>
-                ))}
-              </p>
+              <Link
+                href={`/events?type=upcoming&format=${f.id || ''}`}
+                className={styles.ticketCardLinkV2}
+                aria-label={`${f.name} upcoming events`}
+              >
+                <div className={styles.ticketPhotoV2}>
+                  <Image src={f.imgV2} alt={f.alt} fill sizes="345px" />
+                </div>
+                <p className={styles.ticketLabelV2}>
+                  {f.shortLabel.map((line, li) => (
+                    <React.Fragment key={li}>
+                      {li > 0 && <br />}
+                      {line}
+                    </React.Fragment>
+                  ))}
+                </p>
+              </Link>
             </motion.div>
           ))}
         </div>
 
-        {/* Auto-advancing single card + content box — mobile only,
-            CSS-hidden on desktop. Needs its own variants (not just the
-            parent's) — the parent's hidden/visible variants are empty
-            objects (`{}`); each reveal element is individually
-            responsible for its own opacity animation, so a plain,
-            non-motion div here never actually gets hidden and renders
-            at full visibility immediately, bypassing the wave-wait gate
-            entirely. */}
+        {/* Multi-card peek carousel — mobile only, CSS-hidden on desktop. */}
         <motion.div
           className={styles.gatherMobileWrapV2}
           variants={{
@@ -222,32 +490,142 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
             visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
           }}
         >
-          <div className={styles.gatherMobileCardBoxGroupV2}>
-            {/* Not clickable — purely presentational, matches the
-                desktop cards above. Autoplay + the arrows below are the
-                only way to move through the formats. */}
-            <div className={styles.gatherMobileCardV2} aria-label={mobileFormat.name}>
-              <div className={styles.gatherMobileCardPhotoV2}>
-                <Image src={mobileFormat.imgV2} alt={mobileFormat.alt} fill sizes="300px" />
-              </div>
-              <p className={styles.gatherMobileCardLabelV2}>
-                {mobileFormat.shortLabel.map((line, li) => (
-                  <React.Fragment key={li}>
-                    {li > 0 && <br />}
-                    {line}
-                  </React.Fragment>
-                ))}
-              </p>
-            </div>
-            <div className={styles.gatherMobileContentBoxV2}>
-              <p className={styles.gatherMobileContentTextV2}>{mobileFormat.desc}</p>
-            </div>
+          {/* Carousel Stage (multi-card peek track) */}
+          <div
+            ref={stageRef}
+            className={styles.gatherMobileStage}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchCancel}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onDragStart={(e) => e.preventDefault()}
+            aria-roledescription="carousel"
+            aria-label="How We Gather Formats Carousel"
+          >
+            <motion.div
+              className={styles.gatherMobileTrack}
+              animate={{ x: isMounted ? targetX + touchOffset : 0 }}
+              transition={
+                touchOffset !== 0
+                  ? { duration: 0 }
+                  : {
+                      type: 'spring',
+                      stiffness: 120,
+                      damping: 13,
+                      mass: 0.7,
+                    }
+              }
+            >
+              {windowOffsets.map((offset) => {
+                const itemIndex = page + offset;
+                const fIndex =
+                  ((itemIndex % formats.length) + formats.length) % formats.length;
+                const f = formats[fIndex];
+                const isCurrent = offset === 0;
+
+                const slideW = isCurrent ? cardDims.activeCardW : cardDims.cardW;
+                const slideH = isCurrent ? cardDims.activeCardH : cardDims.cardH;
+                const halfExtra = (cardDims.activeCardW - cardDims.cardW) / 2;
+                const slideLeft = itemIndex * pitch + (offset <= 0 ? -halfExtra : halfExtra);
+
+                return (
+                  <motion.div
+                    key={itemIndex}
+                    className={styles.gatherMobileSlide}
+                    style={{ position: 'absolute' }}
+                    initial={{
+                      left: slideLeft,
+                      width: slideW,
+                      height: slideH,
+                    }}
+                    animate={{ left: slideLeft, width: slideW, height: slideH }}
+                    transition={{
+                      left: { type: 'spring', stiffness: 120, damping: 13, mass: 0.7 },
+                      width: { type: 'spring', stiffness: 120, damping: 13, mass: 0.7 },
+                      height: { type: 'spring', stiffness: 120, damping: 13, mass: 0.7 },
+                    }}
+                  >
+                    <motion.div
+                      style={{ width: '100%', height: '100%' }}
+                      animate={{ scale: tappedIndex === itemIndex ? 0.93 : 1 }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 17 }}
+                    >
+                      <Link
+                        href={`/events?type=upcoming&format=${f.id || ''}`}
+                        className={`${styles.gatherMobileCardV2} ${
+                          isCurrent ? styles.gatherMobileCardActiveV2 : styles.gatherMobileCardInactiveV2
+                        }`}
+                        onClick={(e) => {
+                          if (didSwipe.current) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                          }
+                          e.preventDefault();
+                          setTappedIndex(itemIndex);
+                          if (offset < 0) {
+                            setTimeout(() => {
+                              setTappedIndex(null);
+                              handlePrev();
+                            }, 180);
+                          } else if (offset > 0) {
+                            setTimeout(() => {
+                              setTappedIndex(null);
+                              handleNext();
+                            }, 180);
+                          } else {
+                            setTimeout(() => {
+                              setTappedIndex(null);
+                              router.push(`/events?type=upcoming&format=${f.id || ''}`);
+                            }, 180);
+                          }
+                        }}
+                        aria-label={`${f.name} upcoming events`}
+                      >
+                        <div className={styles.gatherMobileCardPhotoV2}>
+                          <Image src={f.imgV2} alt={f.alt} fill sizes="300px" />
+                        </div>
+                        <p className={styles.gatherMobileCardLabelV2}>
+                          {f.shortLabel.map((line, li) => (
+                            <React.Fragment key={li}>
+                              {li > 0 && <br />}
+                              {line}
+                            </React.Fragment>
+                          ))}
+                        </p>
+                      </Link>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
+
+          {/* Format description box synced to active card */}
+          <div className={styles.gatherMobileContentBoxV2}>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={activeFormat.id || activeIndex}
+                className={styles.gatherMobileContentTextV2}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: EASE }}
+              >
+                {activeFormat.desc}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+
+          {/* Prev / Next circular arrow buttons */}
           <div className={styles.gatherMobileArrowsV2}>
             <button
               type="button"
               className={`${styles.gatherMobileArrowBtnV2} ${styles.gatherMobileArrowBtnV2Prev}`}
-              onClick={handleMobilePrev}
+              onClick={() => handlePrev()}
               aria-label="Previous format"
             >
               <img src="/custom-assets/arrow-prev.svg" alt="" />
@@ -255,7 +633,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
             <button
               type="button"
               className={styles.gatherMobileArrowBtnV2}
-              onClick={handleMobileNext}
+              onClick={() => handleNext()}
               aria-label="Next format"
             >
               <img src="/custom-assets/arrow-next.svg" alt="" />

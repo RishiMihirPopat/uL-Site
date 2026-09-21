@@ -141,6 +141,15 @@
   background-size: 100% 100%;
 }
 
+.ticketCardLinkV2 {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 /* Vertical stagger — exact per-card offsets from Figma (x0.9), not a
    uniform alternating zigzag (each card sits at a distinct height). */
 .ticketRowV2 > .ticketCardV2:nth-child(1) { margin-top: 148.059px; }
@@ -605,38 +614,71 @@
     display: none;
   }
 
-  /* Outer column: [card+box group] — 39px — [arrows] (node 188:4551) */
+  /* Outer column: [carousel stage] — [content box] — [arrows] */
   .gatherMobileWrapV2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 39px;
-    margin-top: 39px;
-  }
-
-  /* Inner group: card — 26px — content box (node 188:4549) */
-  .gatherMobileCardBoxGroupV2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 26px;
+    gap: 22px;
+    margin-top: 32px;
     width: 100%;
-    max-width: 298.311px;
   }
 
-  /* Not clickable — plain div, matches the desktop cards. */
+  /* Carousel stage — bleed across screen width, clip side cards */
+  .gatherMobileStage {
+    position: relative;
+    width: calc(100% + 2 * var(--space-md));
+    margin-left: calc(-1 * var(--space-md));
+    margin-right: calc(-1 * var(--space-md));
+    height: 310px;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .gatherMobileStage:active {
+    cursor: grabbing;
+  }
+
+  .gatherMobileTrack {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 302.7px;
+    margin-top: -151.35px;
+    will-change: transform;
+    touch-action: pan-y;
+  }
+
+  .gatherMobileSlide {
+    flex-shrink: 0;
+  }
+
   .gatherMobileCardV2 {
     position: relative;
+    display: block;
     width: 100%;
-    aspect-ratio: 293.57 / 319.618;
+    height: 100%;
     background-image: url('/card-shapes/mobile/main-event-card.png');
     background-size: 100% 100%;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
   }
 
-  /* Photo inset + label position below are percentages of the card's own
-     293.57x319.618 box (node 174:4353/174:4369/174:4370), so they stay
-     correct as the card scales with the viewport instead of sticking to
-     one fixed phone width. */
+  .gatherMobileCardActiveV2 {
+    opacity: 1;
+  }
+
+  .gatherMobileCardInactiveV2 {
+    opacity: 0.88;
+  }
+
+  /* Photo inset + label position below are percentages of the card's box */
   .gatherMobileCardPhotoV2 {
     position: absolute;
     top: 4.199%;
@@ -646,6 +688,10 @@
     border: 1.705px solid var(--color-primary);
     border-radius: 13.642px;
     overflow: hidden;
+  }
+
+  .gatherMobileCardPhotoV2 img {
+    object-fit: cover;
   }
 
   .gatherMobileCardLabelV2 {
@@ -665,10 +711,11 @@
 
   .gatherMobileContentBoxV2 {
     width: 100%;
-    min-height: 176.368px;
+    max-width: 320px;
+    min-height: 168px;
     border-radius: 25.98px;
     background: var(--color-olive);
-    padding: 22.56px 14.62px;
+    padding: 22px 18px;
     display: flex;
     align-items: center;
     justify-content: center;

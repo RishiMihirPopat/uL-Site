@@ -50,6 +50,7 @@ export const hero = {
 // supplied for that section (public/category-covers/).
 export const formats = [
   {
+    id: 'grounds-for-thought',
     name: 'Grounds for Thought',
     shortLabel: ['GROUNDS FOR', 'THOUGHTS'],
     desc: "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
@@ -57,6 +58,7 @@ export const formats = [
     alt: 'Intimate gathering at a Grounds for Thought event with Blue Tokai',
   },
   {
+    id: 'unlecture',
     name: 'unLecture',
     shortLabel: ['UNLECTURE'],
     desc: 'Our flagship event. It breaks the binary that certain conversations only happen inside certain institutions. We make room for that discourse in the casual spaces we already frequent, and treat learning as something you do out in the city.',
@@ -64,6 +66,7 @@ export const formats = [
     alt: 'Speaker and audience at a flagship unLecture event',
   },
   {
+    id: 'community',
     name: 'Community Events',
     shortLabel: ['COMMUNITY', 'EVENTS'],
     desc: 'Unique events that build the space along with us. The formats keep evolving. This is our way of keeping the community, and the interactions that matter, accessible to most.',
@@ -71,6 +74,7 @@ export const formats = [
     alt: 'Community gathering at an unLecture community event',
   },
   {
+    id: 'unlecture-series',
     name: 'unLecture Series',
     shortLabel: ['UNLECTURE', 'SERIES'],
     desc: "A chance to go deep into one topic of interest, programmed over a few weeks. By the end of it, you're sure to have grown and taken something away with you.",
@@ -83,7 +87,7 @@ export const formatsHeadingV2 = 'How We Gather';
 export const knowEventsLabelV2 = 'Hover For More!';
 // Mobile has no hover state — the format cards are an auto-advancing
 // carousel there instead, node 174:4374 on the mobile frame.
-export const knowEventsLabelMobileV2 = '(Tap For More)';
+export const knowEventsLabelMobileV2 = '(Swipe For More)';
 
 // About section — Figma node 133:2302 (heading for the whole section).
 // Desktop renders both parts on one line; mobile (node 174:4391) breaks

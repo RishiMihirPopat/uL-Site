@@ -1,13 +1,16 @@
 'use client';
 
 import { useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, useInView } from 'framer-motion';
 import { brand, footer as footerContent } from '../lib/content';
+import { EASE } from '@/lib/constants/animation';
 import styles from './Footer.module.css';
 
 // Figma node 140:545: single row, copyright left, Email/Instagram/Linkedin
 // right, no box/border/background — sits directly on the page.
 export default function Footer() {
+  const pathname = usePathname();
   const socialsV2 = footerContent.socials.filter((s) => s.label !== 'WhatsApp');
 
   // useInView + a plain `animate`, not bare `whileInView` — this exact
@@ -19,13 +22,17 @@ export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const inView = useInView(footerRef, { once: true, amount: 0.3 });
 
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <motion.footer
       ref={footerRef}
       className={styles.footerV2}
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.7, ease: EASE }}
     >
       <div className={styles.innerV2}>
         <p className={styles.copyV2}>© {new Date().getFullYear()} {brand.name}. All Rights Reserved</p>

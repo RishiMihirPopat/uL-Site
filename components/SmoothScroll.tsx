@@ -1,13 +1,24 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
 import { lenisRef } from '../lib/lenis';
 
 /** V2 only — real inertia-smoothed scrolling (Lenis) instead of native
- *  wheel scroll. See app/globals.css for the anchor-jump CSS fallback. */
+ *  wheel scroll. Disabled on /admin routes. See app/globals.css for the anchor-jump CSS fallback. */
 export default function SmoothScroll() {
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (pathname?.startsWith('/admin')) {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+        lenisRef.current = null;
+      }
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 1.3,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -29,7 +40,7 @@ export default function SmoothScroll() {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

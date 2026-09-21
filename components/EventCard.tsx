@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import BookingModal from './BookingModal';
 import { formatEventPrice } from '../lib/utils/formatPrice';
+import { EASE } from '@/lib/constants/animation';
 import type { Event } from '../lib/db';
 import styles from './EventCard.module.css';
 
@@ -40,7 +41,7 @@ export default function EventCard({ event, index = 0 }: { event: Event; index?: 
         transition={{
           duration: 0.55,
           delay: index * 0.08 + 0.1,
-          ease: [0.16, 1, 0.3, 1],
+          ease: EASE,
         }}
       >
         {/* Tape strip */}
@@ -89,7 +90,7 @@ export default function EventCard({ event, index = 0 }: { event: Event; index?: 
             <div className={styles.cardMeta}>
               {event.venue && event.venue !== '—' ? (
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`}
+                  href={event.venueMapUrl || event.venue_map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.cardVenueLink}

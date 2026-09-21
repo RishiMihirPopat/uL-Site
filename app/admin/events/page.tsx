@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../admin.module.css';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -77,23 +78,6 @@ export default function EventsPage() {
     });
   }, [events, filter, categoryFilter, searchQuery]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>;
-      case 'pending_archive':
-        return <span className={`${styles.badge} ${styles.badgePending}`}>Pending Archive</span>;
-      case 'archived':
-        return <span className={`${styles.badge} ${styles.badgeArchived}`}>Archived</span>;
-      case 'hidden':
-        return <span className={`${styles.badge} ${styles.badgeHidden}`}>Hidden Draft</span>;
-      case 'discarded':
-        return <span className={`${styles.badge} ${styles.badgeDiscarded}`}>Discarded</span>;
-      default:
-        return <span className={styles.badge}>{status}</span>;
-    }
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -114,10 +98,10 @@ export default function EventsPage() {
           {[
             { label: 'All', key: 'All', count: counts.all },
             { label: 'Active', key: 'Active', count: counts.active },
-            { label: 'Pending Archive', key: 'Pending Archive', count: counts.pending },
+            { label: 'Hidden Drafts', key: 'Hidden', count: counts.hidden },
             { label: 'Archived', key: 'Archived', count: counts.archived },
-            { label: 'Hidden', key: 'Hidden', count: counts.hidden },
-            ...(role === 'super_admin' ? [{ label: 'Discarded', key: 'Discarded', count: counts.discarded }] : []),
+            ...(counts.pending > 0 ? [{ label: 'Pending Archive', key: 'Pending Archive', count: counts.pending }] : []),
+            { label: 'Discarded', key: 'Discarded', count: counts.discarded },
           ].map(t => (
             <button
               key={t.key}
@@ -130,10 +114,9 @@ export default function EventsPage() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className={styles.searchFilterRow}>
           <select
             className={styles.select}
-            style={{ width: 'auto', padding: '5px 10px', fontSize: '0.85rem' }}
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value)}
           >
@@ -166,7 +149,7 @@ export default function EventsPage() {
       </div>
 
       {/* Events Table Card */}
-      <div className={styles.card} style={{ padding: 0 }}>
+      <div className={`${styles.card} ${styles.tableCard}`} style={{ padding: 0 }}>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -235,7 +218,9 @@ export default function EventsPage() {
                       <div>{e.date}</div>
                       {e.time && <div style={{ fontSize: '0.8rem', color: '#777' }}>{e.time}</div>}
                     </td>
-                    <td>{getStatusBadge(e.archive_status)}</td>
+                    <td>
+                      <StatusBadge status={e.archive_status} />
+                    </td>
                     <td style={{ textAlign: 'right' }}>
                       <div className={styles.actions} style={{ justifyContent: 'flex-end' }}>
                         {e.archive_status === 'active' && (
@@ -249,6 +234,9 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'hide')}>
                               Hide
                             </button>
+                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                              Discard
+                            </button>
                           </>
                         )}
                         {e.archive_status === 'pending_archive' && (
@@ -259,14 +247,15 @@ export default function EventsPage() {
                             >
                               Review & Publish
                             </button>
+                            <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'archive')}>
+                              Archive
+                            </button>
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'hide')}>
                               Hide
                             </button>
-                            {role === 'super_admin' && (
-                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                                Discard
-                              </button>
-                            )}
+                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                              Discard
+                            </button>
                           </>
                         )}
                         {e.archive_status === 'archived' && (
@@ -284,14 +273,15 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => router.push(`/admin/events/${e.id}`)}>
                               Edit
                             </button>
+                            <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'archive')}>
+                              Archive
+                            </button>
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'restore')}>
                               Restore
                             </button>
-                            {role === 'super_admin' && (
-                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                                Discard
-                              </button>
-                            )}
+                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                              Discard
+                            </button>
                           </>
                         )}
                         {e.archive_status === 'discarded' && (

@@ -1,9 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import SmoothScroll from '@/components/SmoothScroll';
 import CustomCursor from '@/components/CustomCursor';
+import ScaleWrap from '@/components/ScaleWrap';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: 'unLecture',
@@ -20,14 +26,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SmoothScroll />
         <CustomCursor />
-        <div className="v2-bg-texture" aria-hidden="true">
-          <img src="/custom-assets/bg-grid-texture.png" alt="" />
-        </div>
-        <div className="v2-scale-wrap">
+        <ScaleWrap>
           <Nav />
           {children}
           <Footer />
-        </div>
+        </ScaleWrap>
       </body>
     </html>
   );

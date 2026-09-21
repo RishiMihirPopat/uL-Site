@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   if (!(await isAuthenticated())) return unauthorizedResponse();
   const body = await request.json();
 
-  const result = eventService.createEvent(body);
+  const result = await eventService.createEvent(body);
   if (!result.success) {
     return Response.json({ error: result.error, errors: result.errors }, { status: 400 });
   }

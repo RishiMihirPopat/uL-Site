@@ -7,13 +7,22 @@ interface EventSessionFieldsProps {
     title?: string;
     speaker?: string;
     venue?: string;
+    venue_map_url?: string;
     category?: string;
     description?: string;
   };
+  validationErrors?: Record<string, string>;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
-export function EventSessionFields({ formData, onChange }: EventSessionFieldsProps) {
+export function EventSessionFields({ formData, validationErrors, onChange }: EventSessionFieldsProps) {
+  const activeMapUrl =
+    formData.venue_map_url && formData.venue_map_url.trim() !== ''
+      ? formData.venue_map_url.trim()
+      : formData.venue && formData.venue.trim() !== ''
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.venue.trim())}`
+      : null;
+
   return (
     <div className={styles.formSection}>
       <div className={styles.formSectionHeader}>
@@ -78,7 +87,7 @@ export function EventSessionFields({ formData, onChange }: EventSessionFieldsPro
             style={{ flex: 1, minWidth: '240px' }}
             value={formData.venue || ''}
             onChange={onChange}
-            placeholder="Type or select a venue..."
+            placeholder="Type or select a venue name..."
             required
           />
           <datalist id="venue-suggestions">
@@ -94,22 +103,41 @@ export function EventSessionFields({ formData, onChange }: EventSessionFieldsPro
             <option value="Dr. Marwah Clinic, Defence Colony, Delhi" />
             <option value="Studio 8, Vasant Kunj, Delhi" />
           </datalist>
-          {formData.venue && (
+          {activeMapUrl && (
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.venue)}`}
+              href={activeMapUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={`${styles.btn} ${styles.btnSmall}`}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-              title="Test Google Maps link"
+              title="Test Google Maps location link"
             >
               📍 Test Map ↗
             </a>
           )}
         </div>
-        <span className={styles.formGroupHelper}>
-          Visitors clicking this venue on event cards will be directed straight to Google Maps.
-        </span>
+      </div>
+
+      <div className={styles.formGroup}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <label style={{ margin: 0 }}>Google Maps Link (Optional)</label>
+          <span style={{ fontSize: '0.76rem', color: '#888' }}>Direct pin or share link</span>
+        </div>
+        <input
+          name="venue_map_url"
+          type="url"
+          className={`${styles.input} ${validationErrors?.venue_map_url ? styles.inputError : ''}`}
+          value={formData.venue_map_url || ''}
+          onChange={onChange}
+          placeholder="e.g. https://maps.app.goo.gl/... or https://google.com/maps/place/..."
+        />
+        {validationErrors?.venue_map_url ? (
+          <span className={styles.errorText}>{validationErrors.venue_map_url}</span>
+        ) : (
+          <span className={styles.formGroupHelper}>
+            Attach an exact Google Maps pin link. If left blank, visitors clicking the venue will search Google Maps for the venue name automatically.
+          </span>
+        )}
       </div>
 
       <div className={styles.formGroup}>

@@ -1,166 +1,305 @@
-/* ════════════════════════════════════════════════
-   BOOKING MODAL — Dedicated booking page / overlay
-   ════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   BOOKING MODAL (V2 Brand Design System)
+   Literary salon editorial aesthetic, Atelier serif, Chivo Mono,
+   oxblood (--color-primary), warm cream (--color-bg), picture-frame border.
+   ══════════════════════════════════════════════════════════════════════════ */
 
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 999999;
-  background-color: rgba(26, 23, 20, 0.82);
+  background-color: rgba(42, 36, 32, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-lg);
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  overflow: hidden;
 }
 
 .modal {
+  position: relative;
   width: 100%;
-  max-width: 880px;
-  height: min(90vh, 840px);
+  max-width: 1140px;
+  height: min(92vh, 920px);
+  max-height: min(92vh, 920px);
+  margin: auto;
   background-color: var(--color-bg);
+  border: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 28px 84px rgba(42, 36, 32, 0.55), 0 6px 24px rgba(107, 45, 45, 0.15);
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
-  border-radius: 4px;
+  color: var(--color-text);
 }
 
-@keyframes slideUp {
-  from { transform: translateY(24px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-/* ── Header bar ──────────────────────────────────── */
-
+/* ── Archival Header Bar ── */
 .modalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-lg);
-  border-bottom: 1px solid rgba(240, 232, 220, 0.15);
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1.5px solid var(--color-border);
+  background-color: var(--color-bg);
   flex-shrink: 0;
-  background-color: var(--color-bg-dark);
 }
 
 .modalBackBtn {
-  background: rgba(240, 232, 220, 0.08);
-  border: 1px solid rgba(240, 232, 220, 0.2);
-  color: var(--color-text-on-dark);
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 3px;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
   transition: all 0.2s ease;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
 .modalBackBtn:hover {
-  background: rgba(240, 232, 220, 0.16);
-  border-color: rgba(240, 232, 220, 0.45);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: rgba(107, 45, 45, 0.08);
+}
+
+.backArrow {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.headerCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  line-height: 1.2;
 }
 
 .modalTitle {
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  letter-spacing: 0.04em;
-  color: var(--color-text-on-dark);
+  font-family: var(--font-brand);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  text-align: center;
-  font-weight: 600;
+  max-width: 100%;
+  line-height: 1.3;
 }
 
 .modalActions {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: 10px;
   flex-shrink: 0;
 }
 
+.externalBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-v2);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.externalBtn:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-v2);
+}
+
 .closeBtn {
-  background: none;
-  border: none;
-  color: rgba(240, 232, 220, 0.6);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-  transition: color 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .closeBtn:hover {
-  color: var(--color-text-on-dark);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg-v2);
 }
 
-/* ── Iframe ──────────────────────────────────────── */
+.closeText {
+  display: inline;
+}
+
+.closeIcon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* ── Scalloped Wave Edge Strip ── */
+.waveDivider {
+  width: 100%;
+  height: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+
+.waveSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Iframe Frame with Loading State ── */
+.iframeContainer {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background-color: #FFFFFF;
+  overflow: hidden;
+}
 
 .iframe {
-  flex: 1;
   width: 100%;
   height: 100%;
   border: none;
   background-color: #FFFFFF;
+  display: block;
+}
+
+.loadingSkeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background-color: var(--color-bg);
+  z-index: 5;
+}
+
+.loadingSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(107, 45, 45, 0.15);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin: 0;
 }
 
 /* ══════════════════════════════════════════════════
-   MOBILE VIEW — Dedicated Full-Screen Page
+   MOBILE VIEW (<= 768px) — Dedicated Full-Screen Sheet
    ══════════════════════════════════════════════════ */
-
 @media (max-width: 768px) {
   .overlay {
     padding: 0;
     align-items: stretch;
     justify-content: stretch;
-    background-color: var(--color-bg);
   }
 
   .modal {
-    max-width: 100vw;
     width: 100vw;
+    max-width: 100vw;
     height: 100dvh;
     max-height: 100dvh;
     border: none;
     border-radius: 0;
-    box-shadow: none;
-    animation: none;
   }
 
   .modalHeader {
-    padding: 10px 12px;
+    padding: 10px 14px;
     gap: 8px;
   }
 
+  .backBtnText {
+    display: none;
+  }
+
   .modalBackBtn {
-    font-size: 0.85rem;
-    padding: 6px 12px;
-    font-weight: 600;
+    padding: 6px 10px;
+    font-size: 11px;
   }
 
   .modalTitle {
-    font-size: 0.82rem;
-    text-align: left;
+    font-size: 14px;
+  }
+
+  .externalBtn {
+    padding: 6px 10px;
+  }
+
+  .externalBtnText {
+    display: none;
+  }
+
+  .closeText {
+    display: none;
   }
 
   .closeBtn {
-    display: none; /* Back button replaces it cleanly on mobile for native feel */
+    padding: 6px 10px;
   }
 }

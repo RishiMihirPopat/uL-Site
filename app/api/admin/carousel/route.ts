@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   if (!(await isAuthenticated())) return unauthorizedResponse();
 
-  const activeEvents = getActiveEvents();
-  const selectedIds = getCarouselEventIds();
+  const activeEvents = await getActiveEvents();
+  const selectedIds = await getCarouselEventIds();
 
   return Response.json({
     activeEvents,
@@ -24,7 +24,7 @@ export async function PUT(request: Request) {
       return Response.json({ error: 'selectedIds must be an array of event IDs' }, { status: 400 });
     }
 
-    setCarouselEventIds(body.selectedIds);
+    await setCarouselEventIds(body.selectedIds);
     return Response.json({ success: true, selectedIds: body.selectedIds });
   } catch {
     return Response.json({ error: 'Failed to update carousel events' }, { status: 500 });

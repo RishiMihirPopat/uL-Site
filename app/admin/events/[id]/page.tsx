@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../../admin.module.css';
 import { validateEventLinks, normalizeTags, formatTagsForDisplay } from '@/lib/validators';
+import { parseEventDateTime } from '@/lib/utils/dateTime';
+import { uploadImageFile } from '@/lib/utils/upload';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { EventLifecycleBanner } from '@/components/admin/EventLifecycleBanner';
 import { EventSessionFields } from '@/components/admin/EventSessionFields';
@@ -26,26 +28,28 @@ export default function EditEventPage() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const loadEvent = () => {
-    fetch('/api/admin/events/all')
-      .then(res => res.json())
-      .then(events => {
-        if (!Array.isArray(events)) return;
-        const found = events.find((e: any) => e.id.toString() === id);
-        if (found) {
-          setEvent({
-            ...found,
-            archive_tags: formatTagsForDisplay(found.archive_tags),
-          });
-          try {
-            setYoutubeUrls(typeof found.youtube_urls === 'string' ? JSON.parse(found.youtube_urls || '[]') : (found.youtube_urls || []));
-          } catch {
-            setYoutubeUrls([]);
-          }
-          try {
-            setSubstackUrls(typeof found.substack_urls === 'string' ? JSON.parse(found.substack_urls || '[]') : (found.substack_urls || []));
-          } catch {
-            setSubstackUrls([]);
-          }
+    fetch(`/api/admin/events/${id}`)
+      .then(res => {
+        if (res.ok) return res.json();
+        return fetch('/api/admin/events/all').then(r => r.json()).then(events => {
+          return Array.isArray(events) ? events.find((e: any) => e.id.toString() === id) : null;
+        });
+      })
+      .then(found => {
+        if (!found) return;
+        setEvent({
+          ...found,
+          archive_tags: formatTagsForDisplay(found.archive_tags),
+        });
+        try {
+          setYoutubeUrls(typeof found.youtube_urls === 'string' ? JSON.parse(found.youtube_urls || '[]') : (found.youtube_urls || []));
+        } catch {
+          setYoutubeUrls([]);
+        }
+        try {
+          setSubstackUrls(typeof found.substack_urls === 'string' ? JSON.parse(found.substack_urls || '[]') : (found.substack_urls || []));
+        } catch {
+          setSubstackUrls([]);
         }
       });
   };
@@ -192,65 +196,43 @@ export default function EditEventPage() {
   };
 
   const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setUploadingPoster(true);
-    const data = new FormData();
-    data.append('file', e.target.files[0]);
-    data.append('type', 'posters');
 
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data,
+    const result = await uploadImageFile(file, 'posters');
+    if (result.success && result.url) {
+      setEvent((prev: any) => ({ ...prev, image: result.url! }));
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next.image;
+        return next;
       });
-      const result = await res.json();
-      if (res.ok && result.url) {
-        setEvent((prev: any) => ({ ...prev, image: result.url }));
-        setValidationErrors(prev => {
-          const next = { ...prev };
-          delete next.image;
-          return next;
-        });
-        showToast('success', 'Poster image uploaded');
-      } else {
-        showToast('error', result.error || 'Failed to upload poster');
-      }
-    } catch {
-      showToast('error', 'Network error uploading poster');
-    } finally {
-      setUploadingPoster(false);
+      showToast('success', 'Poster image uploaded');
+    } else {
+      showToast('error', result.error || 'Failed to upload poster');
     }
+    setUploadingPoster(false);
   };
 
   const handleArchiveImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setUploadingArchive(true);
-    const data = new FormData();
-    data.append('file', e.target.files[0]);
-    data.append('type', 'archive');
 
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data,
+    const result = await uploadImageFile(file, 'archive');
+    if (result.success && result.url) {
+      setEvent((prev: any) => ({ ...prev, archive_image: result.url! }));
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next.archive_image;
+        return next;
       });
-      const result = await res.json();
-      if (res.ok && result.url) {
-        setEvent((prev: any) => ({ ...prev, archive_image: result.url }));
-        setValidationErrors(prev => {
-          const next = { ...prev };
-          delete next.archive_image;
-          return next;
-        });
-        showToast('success', 'Archive recap photo uploaded');
-      } else {
-        showToast('error', result.error || 'Failed to upload archive photo');
-      }
-    } catch {
-      showToast('error', 'Network error uploading archive photo');
-    } finally {
-      setUploadingArchive(false);
+      showToast('success', 'Archive recap photo uploaded');
+    } else {
+      showToast('error', result.error || 'Failed to upload archive photo');
     }
+    setUploadingArchive(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -264,24 +246,16 @@ export default function EditEventPage() {
     }
 
     if (name === 'event_datetime' && value) {
-      try {
-        const dt = new Date(value);
-        if (!isNaN(dt.getTime())) {
-          const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' });
-          const day = dt.getDate();
-          const month = dt.toLocaleDateString('en-US', { month: 'short' });
-          const dateFormatted = `${weekday}, ${day} ${month}`;
-          const timeFormatted = dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-          setEvent((prev: any) => ({
-            ...prev,
-            event_datetime: value,
-            date: dateFormatted,
-            time: timeFormatted,
-          }));
-          return;
-        }
-      } catch {}
+      const parsed = parseEventDateTime(value);
+      if (parsed) {
+        setEvent((prev: any) => ({
+          ...prev,
+          event_datetime: value,
+          date: parsed.date,
+          time: parsed.time,
+        }));
+        return;
+      }
     }
     setEvent((prev: any) => ({ ...prev, [name]: value }));
   };
@@ -332,7 +306,7 @@ export default function EditEventPage() {
 
       {/* Main Unified Form */}
       <form onSubmit={handleSaveAll} className={styles.form}>
-        <EventSessionFields formData={event} onChange={handleChange} />
+        <EventSessionFields formData={event} validationErrors={validationErrors} onChange={handleChange} />
         
         <EventScheduleFields formData={event} onChange={handleChange} />
 

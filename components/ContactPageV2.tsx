@@ -1,11 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { EASE } from '@/lib/constants/animation';
 import ContactFormV2 from './ContactFormV2';
 import { contactPageV2 } from '../lib/content';
 import styles from '../app/contact/page.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 // Sequenced to land after Nav's own wordmark/links entrance finishes
 // (~0.35s + its own transition) — same base delay the homepage's Hero
 // carousel uses (see HeroLectureCarousel.tsx's ENTRANCE_BASE_DELAY).

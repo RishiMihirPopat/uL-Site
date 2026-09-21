@@ -20,6 +20,7 @@ export interface EventIdentity {
   title: string;
   speaker: string;
   venue: string;
+  venue_map_url?: string | null;
   category: EventCategory;
 }
 
@@ -73,6 +74,8 @@ export interface Event {
   title: string;
   speaker: string;
   venue: string;
+  venueMapUrl?: string;
+  venue_map_url?: string;
   date: string;
   time: string;
   price: string;
@@ -90,6 +93,8 @@ export interface FormattedArchiveCard {
   date: string;
   title: string;
   venue: string;
+  venueMapUrl?: string;
+  venue_map_url?: string;
   speaker: string;
   description: string;
   image: string;

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useModalDismiss } from '@/lib/hooks/useModalDismiss';
+import { EASE } from '@/lib/constants/animation';
 import { brand, navV2 } from '../lib/content';
 import styles from './MobileMenu.module.css';
 
@@ -11,8 +12,6 @@ interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
 }
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** Mobile "MENU" overlay (Figma node 188:4447) — dark panel dropping from
  *  the top with the wordmark, all 4 nav links, and a CLOSE pill, over a
@@ -36,20 +35,7 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
   const links = [...navV2.leftLinks, ...navV2.rightLinks];
 
   /* Close on Escape, lock body scroll while open. */
-  useEffect(() => {
-    if (!open) return;
-
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = '';
-    };
-  }, [open, onClose]);
+  useModalDismiss(open, onClose);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';

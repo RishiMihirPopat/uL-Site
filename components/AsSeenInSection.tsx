@@ -3,9 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
+import { EASE } from '@/lib/constants/animation';
 import styles from '../app/page.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 interface PressLogo {
   id: number;

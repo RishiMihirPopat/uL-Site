@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, UserCircle } from '@phosphor-icons/react';
 import { eventsPageV2 } from '../lib/content';
+import { FORMAT_REGISTRY } from '../lib/constants/formats';
+import { EASE } from '../lib/constants/animation';
+import { useOutsideClose } from '../lib/hooks/useOutsideClose';
+import ArchiveEventModal from './ArchiveEventModal';
+import BookingModal from './BookingModal';
 import styles from './EventsPageV2.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 function toTitleCase(text: string) {
   return text
@@ -24,66 +27,87 @@ export interface EventsPageCard {
   venue: string;
   date: string;
   image: string;
+  archiveImage?: string;
+  category: string;
+  urbanautUrl?: string;
+  specialBadge?: string;
+  tags?: string[];
+  youtubeUrls?: string[];
+  substackUrls?: string[];
+  description?: string;
 }
 
-interface EventsPageV2Props {
+export interface EventsPageV2Props {
   upcoming: EventsPageCard[];
-  past: EventsPageCard[];
+  archived?: EventsPageCard[];
+  past?: EventsPageCard[];
+  initialType?: EventType;
+  initialFormat?: FormatFilter;
 }
 
-type EventType = 'upcoming' | 'past';
-type SortOrder = 'newest' | 'oldest';
+export type EventType = 'upcoming' | 'archived' | 'past';
+export type FormatFilter = 'all' | 'unlecture' | 'unlecture-series' | 'community' | 'grounds-for-thought';
 
-function useOutsideClose(open: boolean, onClose: () => void) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [open, onClose]);
-  return ref;
-}
+const FORMAT_OPTIONS: { value: FormatFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'unlecture', label: FORMAT_REGISTRY['unlecture'].name },
+  { value: 'unlecture-series', label: FORMAT_REGISTRY['unlecture-series'].name },
+  { value: 'community', label: FORMAT_REGISTRY['community'].name },
+  { value: 'grounds-for-thought', label: FORMAT_REGISTRY['grounds-for-thought'].name },
+];
 
-export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
-  const [type, setType] = useState<EventType>('upcoming');
-  const [sort, setSort] = useState<SortOrder>('newest');
+export default function EventsPageV2({
+  upcoming,
+  archived,
+  past,
+  initialType = 'upcoming',
+  initialFormat = 'all',
+}: EventsPageV2Props) {
+  const archiveList = archived ?? past ?? [];
+  const normalizedInitialType: 'upcoming' | 'archived' =
+    initialType === 'past' || initialType === 'archived' ? 'archived' : 'upcoming';
+  const [type, setType] = useState<'upcoming' | 'archived'>(normalizedInitialType);
+  const [formatFilter, setFormatFilter] = useState<FormatFilter>(initialFormat);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [selectedArchivedEvent, setSelectedArchivedEvent] = useState<EventsPageCard | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<{ url: string; title: string } | null>(null);
 
   const [typeOpen, setTypeOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+  const [formatOpen, setFormatOpen] = useState(false);
   const typeRef = useOutsideClose(typeOpen, () => setTypeOpen(false));
-  const sortRef = useOutsideClose(sortOpen, () => setSortOpen(false));
+  const formatRef = useOutsideClose(formatOpen, () => setFormatOpen(false));
+
+  useEffect(() => {
+    if (initialType) {
+      setType(initialType === 'past' || initialType === 'archived' ? 'archived' : 'upcoming');
+    }
+  }, [initialType]);
+
+  useEffect(() => {
+    if (initialFormat) setFormatFilter(initialFormat);
+  }, [initialFormat]);
 
   useEffect(() => {
     setPage(0);
-  }, [type, sort, search]);
+  }, [type, formatFilter, search]);
 
   const filtered = useMemo(() => {
-    const base = type === 'upcoming' ? upcoming : past;
+    const base = type === 'upcoming' ? upcoming : archiveList;
+    let matched = formatFilter === 'all'
+      ? base
+      : base.filter((e) => e.category === formatFilter);
     const q = search.trim().toLowerCase();
-    const matched = q
-      ? base.filter((e) =>
-          e.title.toLowerCase().includes(q) ||
-          e.speaker.toLowerCase().includes(q) ||
-          e.venue.toLowerCase().includes(q)
-        )
-      : base;
-    // Each source array already arrives in the DB's natural order
-    // (upcoming: soonest first; past: most recently happened first) —
-    // "newest first" keeps that order, "oldest first" reverses it.
-    return sort === 'newest' ? matched : [...matched].reverse();
-  }, [type, sort, search, upcoming, past]);
+    if (q) {
+      matched = matched.filter((e) =>
+        e.title.toLowerCase().includes(q) ||
+        e.speaker.toLowerCase().includes(q) ||
+        e.venue.toLowerCase().includes(q) ||
+        (e.specialBadge && e.specialBadge.toLowerCase().includes(q))
+      );
+    }
+    return matched;
+  }, [type, formatFilter, search, upcoming, archiveList]);
 
   const perPage = eventsPageV2.perPage;
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -120,7 +144,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
                 aria-haspopup="listbox"
                 aria-expanded={typeOpen}
               >
-                TYPE: {type === 'upcoming' ? 'UPCOMING EVENTS' : 'PAST EVENTS'}
+                {type === 'upcoming' ? 'UPCOMING EVENTS' : 'ARCHIVED EVENTS'}
               </button>
               <img
                 src="/custom-assets/contact-select-arrow.svg"
@@ -130,7 +154,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
               />
               {typeOpen && (
                 <ul className={styles.dropdownMenu} role="listbox">
-                  {(['upcoming', 'past'] as EventType[]).map((opt) => (
+                  {(['upcoming', 'archived'] as const).map((opt) => (
                     <li key={opt}>
                       <button
                         type="button"
@@ -139,7 +163,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
                         className={styles.dropdownOption}
                         onClick={() => { setType(opt); setTypeOpen(false); }}
                       >
-                        {opt === 'upcoming' ? 'Upcoming Events' : 'Past Events'}
+                        {opt === 'upcoming' ? 'Upcoming Events' : 'Archived Events'}
                       </button>
                     </li>
                   ))}
@@ -156,34 +180,34 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
               aria-label="Search for events"
             />
 
-            <div className={styles.dropdownWrap} ref={sortRef}>
+            <div className={styles.dropdownWrap} ref={formatRef}>
               <button
                 type="button"
                 className={styles.pillBtn}
-                onClick={() => setSortOpen((v) => !v)}
+                onClick={() => setFormatOpen((v) => !v)}
                 aria-haspopup="listbox"
-                aria-expanded={sortOpen}
+                aria-expanded={formatOpen}
               >
-                SORT: {sort === 'newest' ? 'NEWEST FIRST' : 'OLDEST FIRST'}
+                TYPE: {FORMAT_OPTIONS.find((o) => o.value === formatFilter)?.label.toUpperCase() ?? 'ALL'}
               </button>
               <img
                 src="/custom-assets/contact-select-arrow.svg"
                 alt=""
                 aria-hidden="true"
-                className={`${styles.pillArrow} ${sortOpen ? styles.pillArrowOpen : ''}`}
+                className={`${styles.pillArrow} ${formatOpen ? styles.pillArrowOpen : ''}`}
               />
-              {sortOpen && (
+              {formatOpen && (
                 <ul className={styles.dropdownMenu} role="listbox">
-                  {(['newest', 'oldest'] as SortOrder[]).map((opt) => (
-                    <li key={opt}>
+                  {FORMAT_OPTIONS.map((opt) => (
+                    <li key={opt.value}>
                       <button
                         type="button"
                         role="option"
-                        aria-selected={sort === opt}
+                        aria-selected={formatFilter === opt.value}
                         className={styles.dropdownOption}
-                        onClick={() => { setSort(opt); setSortOpen(false); }}
+                        onClick={() => { setFormatFilter(opt.value); setFormatOpen(false); }}
                       >
-                        {opt === 'newest' ? 'Newest First' : 'Oldest First'}
+                        {opt.label}
                       </button>
                     </li>
                   ))}
@@ -202,37 +226,113 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
       >
         {pageItems.length > 0 ? (
           <div className={styles.grid}>
-            {pageItems.map((ev) => (
-              <div key={ev.id} className={styles.card}>
-                <div className={styles.cardPhoto}>
-                  {ev.image ? (
-                    <Image src={ev.image} alt={ev.title} fill sizes="465px" className={styles.cardImg} />
-                  ) : (
-                    <div className={styles.cardImgPlaceholder} />
-                  )}
-                </div>
-                <div className={styles.cardBody}>
-                  <p className={styles.cardTitle}>{ev.title}</p>
-                  <div className={styles.cardMetaRows}>
-                    <div className={styles.cardMetaRow}>
-                      <Calendar weight="bold" className={styles.cardMetaIcon} />
-                      <p className={`${styles.cardMeta} ${styles.cardMetaDateRow}`}>
-                        <span className={styles.cardMetaDate}>{ev.date}</span>
-                        {ev.venue && ev.venue !== '—' && (
-                          <span className={styles.cardMetaVenue}>&nbsp;@ {ev.venue}</span>
-                        )}
-                      </p>
-                    </div>
-                    {ev.speaker && ev.speaker !== '—' && (
-                      <div className={styles.cardMetaRow}>
-                        <UserCircle weight="bold" className={styles.cardMetaIcon} />
-                        <p className={styles.cardMeta}>BY {toTitleCase(ev.speaker)}</p>
-                      </div>
+            {pageItems.map((ev) => {
+              const isUpcomingLink = type === 'upcoming' && Boolean(ev.urbanautUrl);
+              const displayImage = type === 'archived' && ev.archiveImage ? ev.archiveImage : ev.image;
+              const badgeText = ev.specialBadge || FORMAT_REGISTRY[ev.category as keyof typeof FORMAT_REGISTRY]?.name || 'ARCHIVE';
+
+              const cardContent = (
+                <>
+                  <div className={styles.cardPhoto}>
+                    {displayImage ? (
+                      <Image src={displayImage} alt={ev.title} fill sizes="465px" className={styles.cardImg} />
+                    ) : (
+                      <div className={styles.cardImgPlaceholder} />
                     )}
                   </div>
+                  <div className={styles.cardBody}>
+                    <p className={styles.cardTitle}>{ev.title}</p>
+                    <div className={`${styles.cardMetaRows} ${type === 'archived' ? styles.cardMetaRowsArchived : ''}`}>
+                      {type === 'archived' ? (
+                        badgeText ? (
+                          <div className={styles.specialBadgeCard}>
+                            {badgeText}
+                          </div>
+                        ) : ev.speaker && ev.speaker !== '—' ? (
+                          <div className={styles.cardMetaRow}>
+                            <UserCircle weight="bold" className={styles.cardMetaIcon} />
+                            <p className={styles.cardMeta}>BY {toTitleCase(ev.speaker)}</p>
+                          </div>
+                        ) : null
+                      ) : (
+                        <>
+                          <div className={styles.cardMetaRow}>
+                            <Calendar weight="bold" className={styles.cardMetaIcon} />
+                            <p className={`${styles.cardMeta} ${styles.cardMetaDateRow}`}>
+                              <span className={styles.cardMetaDate}>{ev.date}</span>
+                              {ev.venue && ev.venue !== '—' && (
+                                <a
+                                  href={(ev as any).venueMapUrl || (ev as any).venue_map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.venue)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.cardMetaVenue}
+                                  onClick={(e) => e.stopPropagation()}
+                                  title={`View ${ev.venue} on Google Maps`}
+                                >
+                                  &nbsp;@ {ev.venue}
+                                </a>
+                              )}
+                            </p>
+                          </div>
+                          {ev.speaker && ev.speaker !== '—' && (
+                            <div className={styles.cardMetaRow}>
+                              <UserCircle weight="bold" className={styles.cardMetaIcon} />
+                              <p className={styles.cardMeta}>BY {toTitleCase(ev.speaker)}</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              );
+
+              if (type === 'archived') {
+                return (
+                  <div
+                    key={ev.id}
+                    className={`${styles.card} ${styles.cardClickable}`}
+                    data-cursor-label="View Archive"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedArchivedEvent(ev)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedArchivedEvent(ev);
+                      }
+                    }}
+                    aria-label={`View archive for ${ev.title}`}
+                  >
+                    {cardContent}
+                  </div>
+                );
+              }
+
+              return isUpcomingLink ? (
+                <div
+                  key={ev.id}
+                  className={`${styles.card} ${styles.cardClickable}`}
+                  data-cursor-label="Click to Book!"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title });
+                    }
+                  }}
+                  aria-label={`Book tickets for ${ev.title}`}
+                >
+                  {cardContent}
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div key={ev.id} className={styles.card}>
+                  {cardContent}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={styles.emptyMsg}>No events found.</p>
@@ -295,7 +395,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
                   aria-haspopup="listbox"
                   aria-expanded={typeOpen}
                 >
-                  TYPE
+                  {type === 'upcoming' ? 'UPCOMING' : 'ARCHIVED'}
                   <img
                     src="/custom-assets/contact-select-arrow.svg"
                     alt=""
@@ -305,7 +405,7 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
                 </button>
                 {typeOpen && (
                   <ul className={styles.dropdownMenuMobileV2} role="listbox">
-                    {(['upcoming', 'past'] as EventType[]).map((opt) => (
+                    {(['upcoming', 'archived'] as const).map((opt) => (
                       <li key={opt}>
                         <button
                           type="button"
@@ -314,41 +414,41 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
                           className={styles.dropdownOptionMobileV2}
                           onClick={() => { setType(opt); setTypeOpen(false); }}
                         >
-                          {opt === 'upcoming' ? 'Upcoming Events' : 'Past Events'}
+                          {opt === 'upcoming' ? 'Upcoming Events' : 'Archived Events'}
                         </button>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
-              <div className={`${styles.dropdownWrapMobileV2} ${styles.dropdownWrapMobileV2Sort}`} ref={sortRef}>
+              <div className={`${styles.dropdownWrapMobileV2} ${styles.dropdownWrapMobileV2Format}`} ref={formatRef}>
                 <button
                   type="button"
                   className={styles.pillBtnMobileV2}
-                  onClick={() => setSortOpen((v) => !v)}
+                  onClick={() => setFormatOpen((v) => !v)}
                   aria-haspopup="listbox"
-                  aria-expanded={sortOpen}
+                  aria-expanded={formatOpen}
                 >
-                  SORT
+                  TYPE
                   <img
                     src="/custom-assets/contact-select-arrow.svg"
                     alt=""
                     aria-hidden="true"
-                    className={`${styles.pillArrowMobileV2} ${sortOpen ? styles.pillArrowMobileV2Open : ''}`}
+                    className={`${styles.pillArrowMobileV2} ${formatOpen ? styles.pillArrowMobileV2Open : ''}`}
                   />
                 </button>
-                {sortOpen && (
+                {formatOpen && (
                   <ul className={styles.dropdownMenuMobileV2} role="listbox">
-                    {(['newest', 'oldest'] as SortOrder[]).map((opt) => (
-                      <li key={opt}>
+                    {FORMAT_OPTIONS.map((opt) => (
+                      <li key={opt.value}>
                         <button
                           type="button"
                           role="option"
-                          aria-selected={sort === opt}
+                          aria-selected={formatFilter === opt.value}
                           className={styles.dropdownOptionMobileV2}
-                          onClick={() => { setSort(opt); setSortOpen(false); }}
+                          onClick={() => { setFormatFilter(opt.value); setFormatOpen(false); }}
                         >
-                          {opt === 'newest' ? 'Newest First' : 'Oldest First'}
+                          {opt.label}
                         </button>
                       </li>
                     ))}
@@ -363,39 +463,111 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
       <div className={styles.contentMobileV2}>
         {pageItems.length > 0 ? (
           <div className={styles.gridMobileV2}>
-            {pageItems.map((ev) => (
-              <div key={ev.id} className={styles.cardMobileV2}>
+            {pageItems.map((ev) => {
+              const isUpcomingLink = type === 'upcoming' && Boolean(ev.urbanautUrl);
+              const displayImage = type === 'archived' && ev.archiveImage ? ev.archiveImage : ev.image;
+              const badgeText = ev.specialBadge || FORMAT_REGISTRY[ev.category as keyof typeof FORMAT_REGISTRY]?.name || 'ARCHIVE';
+
+              const cardMobileContent = (
                 <div className={styles.cardMobileInnerV2}>
                   <div className={styles.cardPhotoMobileV2}>
-                    {ev.image ? (
-                      <Image src={ev.image} alt={ev.title} fill sizes="351px" className={styles.cardImgMobileV2} />
+                    {displayImage ? (
+                      <Image src={displayImage} alt={ev.title} fill sizes="351px" className={styles.cardImgMobileV2} />
                     ) : (
                       <div className={styles.cardImgPlaceholderMobileV2} />
                     )}
                   </div>
                   <div className={styles.cardBodyMobileV2}>
                     <p className={styles.cardTitleMobileV2}>{ev.title}</p>
-                    <div className={styles.cardMetaRowsMobileV2}>
-                      <div className={styles.cardMetaRowMobileV2}>
-                        <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
-                        <p className={`${styles.cardMetaMobileV2} ${styles.cardMetaDateRowMobileV2}`}>
-                          <span className={styles.cardMetaDateMobileV2}>{ev.date}</span>
-                          {ev.venue && ev.venue !== '—' && (
-                            <span className={styles.cardMetaVenueMobileV2}>&nbsp;@ {ev.venue}</span>
+                    <div className={`${styles.cardMetaRowsMobileV2} ${type === 'archived' ? styles.cardMetaRowsMobileV2Archived : ''}`}>
+                      {type === 'archived' ? (
+                        badgeText ? (
+                          <div className={styles.specialBadgeCardMobile}>
+                            {badgeText}
+                          </div>
+                        ) : ev.speaker && ev.speaker !== '—' ? (
+                          <div className={styles.cardMetaRowMobileV2}>
+                            <UserCircle weight="bold" className={styles.cardMetaIconMobileV2} />
+                            <p className={styles.cardMetaMobileV2}>BY {toTitleCase(ev.speaker)}</p>
+                          </div>
+                        ) : null
+                      ) : (
+                        <>
+                          <div className={styles.cardMetaRowMobileV2}>
+                            <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
+                            <p className={`${styles.cardMetaMobileV2} ${styles.cardMetaDateRowMobileV2}`}>
+                              <span className={styles.cardMetaDateMobileV2}>{ev.date}</span>
+                              {ev.venue && ev.venue !== '—' && (
+                                <a
+                                  href={(ev as any).venueMapUrl || (ev as any).venue_map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.venue)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.cardMetaVenueMobileV2}
+                                  onClick={(e) => e.stopPropagation()}
+                                  title={`View ${ev.venue} on Google Maps`}
+                                >
+                                  &nbsp;@ {ev.venue}
+                                </a>
+                              )}
+                            </p>
+                          </div>
+                          {ev.speaker && ev.speaker !== '—' && (
+                            <div className={styles.cardMetaRowMobileV2}>
+                              <UserCircle weight="bold" className={styles.cardMetaIconMobileV2} />
+                              <p className={styles.cardMetaMobileV2}>BY {toTitleCase(ev.speaker)}</p>
+                            </div>
                           )}
-                        </p>
-                      </div>
-                      {ev.speaker && ev.speaker !== '—' && (
-                        <div className={styles.cardMetaRowMobileV2}>
-                          <UserCircle weight="bold" className={styles.cardMetaIconMobileV2} />
-                          <p className={styles.cardMetaMobileV2}>BY {toTitleCase(ev.speaker)}</p>
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+
+              if (type === 'archived') {
+                return (
+                  <div
+                    key={ev.id}
+                    className={`${styles.cardMobileV2} ${styles.cardMobileClickableV2}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedArchivedEvent(ev)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedArchivedEvent(ev);
+                      }
+                    }}
+                    aria-label={`View archive for ${ev.title}`}
+                  >
+                    {cardMobileContent}
+                  </div>
+                );
+              }
+
+              return isUpcomingLink ? (
+                <div
+                  key={ev.id}
+                  className={`${styles.cardMobileV2} ${styles.cardMobileClickableV2}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title });
+                    }
+                  }}
+                  aria-label={`Book tickets for ${ev.title}`}
+                >
+                  {cardMobileContent}
+                </div>
+              ) : (
+                <div key={ev.id} className={styles.cardMobileV2}>
+                  {cardMobileContent}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={styles.emptyMsgMobileV2}>No events found.</p>
@@ -427,6 +599,16 @@ export default function EventsPageV2({ upcoming, past }: EventsPageV2Props) {
           </div>
         )}
       </div>
+
+      <ArchiveEventModal
+        event={selectedArchivedEvent}
+        onClose={() => setSelectedArchivedEvent(null)}
+      />
+
+      <BookingModal
+        booking={selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+      />
     </div>
   );
 }

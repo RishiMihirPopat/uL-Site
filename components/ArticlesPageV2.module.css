@@ -14,6 +14,7 @@
 
 .headerWaveV2 {
   position: relative;
+  z-index: 10;
   display: grid;
   /* Not overflow:hidden — the SORT dropdown menu is absolutely positioned
      inside this band and needs to open past its bottom edge; the wave
@@ -119,7 +120,8 @@
   position: absolute;
   top: calc(100% + var(--space-sm));
   left: 0;
-  right: 0;
+  min-width: 100%;
+  width: max-content;
   z-index: 20;
   margin: 0;
   padding: var(--space-sm);
@@ -509,7 +511,8 @@
     position: absolute;
     top: calc(100% + var(--space-sm));
     left: 0;
-    right: 0;
+    min-width: 100%;
+    width: max-content;
     z-index: 20;
     margin: 0;
     padding: var(--space-sm);

@@ -47,7 +47,7 @@ export function EventLifecycleBanner({
                   <option value="pending_archive">Pending Archive Review</option>
                   <option value="archived">Published to Archive</option>
                   <option value="hidden">Hidden Draft</option>
-                  {role === 'super_admin' && <option value="discarded">Discarded (Trash)</option>}
+                  <option value="discarded">Discarded (Trash)</option>
                 </select>
               </div>
             )}
@@ -57,7 +57,7 @@ export function EventLifecycleBanner({
             {status === 'active' && 'This event is currently active, scheduled, and visible to visitors on the live website.'}
             {status === 'pending_archive' && 'This event has concluded. Add recap photos and media below, then click "Publish to Postcard Archive".'}
             {status === 'archived' && 'This event is featured in the public Postcard Archive interactive dossier on the website.'}
-            {status === 'hidden' && 'This event is currently hidden from all public website pages.'}
+            {status === 'hidden' && 'This event has concluded or is saved as a hidden draft. You can send it to the public archive, discard it, or restore it to active.'}
             {status === 'discarded' && 'This event is in the trash bin.'}
           </p>
         </div>
@@ -99,15 +99,13 @@ export function EventLifecycleBanner({
               >
                 Hide
               </button>
-              {role === 'super_admin' && (
-                <button
-                  type="button"
-                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                  onClick={() => onStatusChange('discard')}
-                >
-                  Discard
-                </button>
-              )}
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                onClick={() => onStatusChange('discard')}
+              >
+                Discard
+              </button>
             </>
           )}
 
@@ -131,19 +129,24 @@ export function EventLifecycleBanner({
               <button
                 type="button"
                 className={`${styles.btn} ${styles.btnSmall} ${styles.btnPrimary}`}
+                onClick={onPublishArchive}
+              >
+                Send to Archive
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSmall}`}
                 onClick={() => onStatusChange('restore')}
               >
                 Restore to Active
               </button>
-              {role === 'super_admin' && (
-                <button
-                  type="button"
-                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                  onClick={() => onStatusChange('discard')}
-                >
-                  Discard
-                </button>
-              )}
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                onClick={() => onStatusChange('discard')}
+              >
+                Discard
+              </button>
             </>
           )}
 

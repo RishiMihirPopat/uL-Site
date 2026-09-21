@@ -10,6 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const isLoginPage = pathname === '/admin';
 
@@ -66,30 +67,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </span>
           )}
         </div>
-        <nav className={styles.nav}>
+        <button
+          className={styles.mobileToggle}
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          aria-label="Toggle navigation"
+        >
+          {mobileNavOpen ? '✕' : '☰'}
+        </button>
+        <nav className={`${styles.nav} ${mobileNavOpen ? styles.navOpen : ''}`}>
           <Link
             href="/admin/dashboard"
             className={`${styles.navLink} ${pathname === '/admin/dashboard' ? styles.navLinkActive : ''}`}
+            onClick={() => setMobileNavOpen(false)}
           >
             Dashboard
           </Link>
           <Link
             href="/admin/events"
             className={`${styles.navLink} ${pathname.startsWith('/admin/events') ? styles.navLinkActive : ''}`}
+            onClick={() => setMobileNavOpen(false)}
           >
             Events
           </Link>
           <Link
-            href="/admin/testimonials"
-            className={`${styles.navLink} ${pathname.startsWith('/admin/testimonials') ? styles.navLinkActive : ''}`}
+            href="/admin/articles"
+            className={`${styles.navLink} ${pathname.startsWith('/admin/articles') ? styles.navLinkActive : ''}`}
+            onClick={() => setMobileNavOpen(false)}
           >
-            Testimonials
+            Articles
           </Link>
           <Link
-            href="/admin/settings"
-            className={`${styles.navLink} ${pathname === '/admin/settings' ? styles.navLinkActive : ''}`}
+            href="/admin/testimonials"
+            className={`${styles.navLink} ${pathname.startsWith('/admin/testimonials') ? styles.navLinkActive : ''}`}
+            onClick={() => setMobileNavOpen(false)}
           >
-            Settings
+            Testimonials
           </Link>
           <a href="/" target="_blank" rel="noopener noreferrer" className={styles.viewSiteLink}>
             View Site ↗
@@ -99,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </nav>
       </header>
-      <main>
+      <main className={styles.main}>
         {children}
       </main>
     </div>

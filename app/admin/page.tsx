@@ -19,16 +19,18 @@ export default function LoginPage() {
       body: JSON.stringify({ password })
     });
 
+    const data = await res.json().catch(() => null);
+
     if (res.ok) {
       window.location.href = '/admin/dashboard';
     } else {
-      setError('Invalid password. Try "unlecture2025" (Super Admin) or "ulmanager2025" (Event Manager).');
+      setError(data?.error || 'Invalid password. Please try again.');
     }
   };
 
   return (
-    <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-      <div className={styles.card} style={{ width: '400px' }}>
+    <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '1rem' }}>
+      <div className={styles.card} style={{ width: '100%', maxWidth: '400px' }}>
         <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Admin Login</h1>
         {error && <div className={`${styles.alert} ${styles.alertError}`}>{error}</div>}
         <form onSubmit={handleLogin} className={styles.form}>

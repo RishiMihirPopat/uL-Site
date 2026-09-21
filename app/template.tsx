@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { EASE } from '@/lib/constants/animation';
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       exit={{ opacity: 0, y: -12 }}
       transition={{
         duration: 0.32,
-        ease: [0.16, 1, 0.3, 1],
+        ease: EASE,
       }}
     >
       {children}

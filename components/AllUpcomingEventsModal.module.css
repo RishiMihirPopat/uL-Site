@@ -276,6 +276,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.cardVenue:hover {
+  color: var(--color-terracotta);
+  text-decoration: underline;
 }
 
 .cardPrice {

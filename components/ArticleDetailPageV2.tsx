@@ -4,9 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import MarkdownRenderer from './MarkdownRenderer';
+import { EASE } from '@/lib/constants/animation';
 import styles from './ArticleDetailPageV2.module.css';
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 const ARROW = '/custom-assets/contact-select-arrow.svg';
 
 interface AdjacentArticle {

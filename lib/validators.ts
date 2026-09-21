@@ -73,6 +73,37 @@ export function isValidSubstackUrl(url: string): boolean {
   }
 }
 
+export function isValidGoogleMapsUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return true; // Optional field
+  const trimmed = url.trim();
+  if (trimmed === '') return true;
+  if (!isValidHttpUrl(trimmed)) return false;
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+
+    // Short links: maps.app.goo.gl or goo.gl/maps...
+    if (host === 'maps.app.goo.gl') return true;
+    if (host === 'goo.gl' && parsed.pathname.startsWith('/maps')) return true;
+
+    // Must be a legitimate Google domain (e.g. google.com, maps.google.com, google.co.in)
+    const isGoogleHost = /(^|\.)google\.[a-z]{2,}(\.[a-z]{2})?$/i.test(host);
+    if (!isGoogleHost) return false;
+
+    // Subdomain maps.google.* (e.g. maps.google.com, maps.google.co.in)
+    if (host.startsWith('maps.google.')) return true;
+
+    // Google domain with /maps or ?q= or /search
+    if (parsed.pathname.startsWith('/maps') || parsed.searchParams.has('q')) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Robust tag normalizer that converts any string, JSON array, nested string array,
  * or comma/semicolon-separated string into a clean string array without brackets or quotes.
@@ -82,7 +113,7 @@ export function normalizeTags(raw: any): string[] {
 
   if (Array.isArray(raw)) {
     return raw
-      .flatMap(item => (typeof item === 'string' ? normalizeTags(item) : []))
+      .flatMap(item => normalizeTags(item))
       .map(t => t.trim())
       .filter(Boolean);
   }
@@ -128,6 +159,7 @@ export function formatTagsForDisplay(tags: any): string {
 export function validateEventLinks(data: {
   image?: string | null;
   urbanaut_url?: string | null;
+  venue_map_url?: string | null;
   archive_image?: string | null;
   youtube_urls?: string[] | string | null;
   substack_urls?: string[] | string | null;
@@ -140,6 +172,10 @@ export function validateEventLinks(data: {
 
   if (data.urbanaut_url && data.urbanaut_url.trim() !== '' && !isValidUrbanautUrl(data.urbanaut_url)) {
     errors.urbanaut_url = 'Booking URL must be a valid web link starting with https:// or http://';
+  }
+
+  if (data.venue_map_url && data.venue_map_url.trim() !== '' && !isValidGoogleMapsUrl(data.venue_map_url)) {
+    errors.venue_map_url = 'Location map link must be a valid Google Maps link (e.g. https://maps.app.goo.gl/... or https://google.com/maps/...).';
   }
 
   if (data.archive_image && data.archive_image.trim() !== '' && !isValidImageUrl(data.archive_image)) {

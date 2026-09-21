@@ -3,20 +3,32 @@ import crypto from 'crypto';
 
 const SESSION_COOKIE = 'ul_admin_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
-const AUTH_SECRET = process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD || 'unlecture-auth-secret-key-2025';
+function getAuthSecret(): string {
+  const secret = process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD;
+  if (!secret) {
+    throw new Error('ADMIN_SECRET or ADMIN_PASSWORD environment variable is not configured.');
+  }
+  return secret;
+}
 
 export type AdminRole = 'super_admin' | 'event_manager';
 
-function getAdminPassword(): string {
-  return process.env.ADMIN_PASSWORD || 'unlecture2025';
+function getAdminPassword(): string | null {
+  return process.env.ADMIN_PASSWORD || null;
 }
 
-function getManagerPassword(): string {
-  return process.env.MANAGER_PASSWORD || 'ulmanager2025';
+function getManagerPassword(): string | null {
+  return process.env.MANAGER_PASSWORD || null;
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const hashA = crypto.createHash('sha256').update(a).digest();
+  const hashB = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
 }
 
 function signPayload(payload: string): string {
-  const hmac = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+  const hmac = crypto.createHmac('sha256', getAuthSecret()).update(payload).digest('hex');
   return `${Buffer.from(payload).toString('base64url')}.${hmac}`;
 }
 
@@ -26,7 +38,7 @@ function verifyPayload(signedValue: string): string | null {
     if (parts.length !== 2) return null;
     const [b64Payload, signature] = parts;
     const payload = Buffer.from(b64Payload, 'base64url').toString('utf-8');
-    const expectedHmac = crypto.createHmac('sha256', AUTH_SECRET).update(payload).digest('hex');
+    const expectedHmac = crypto.createHmac('sha256', getAuthSecret()).update(payload).digest('hex');
 
     const sigBuf = Buffer.from(signature, 'hex');
     const expBuf = Buffer.from(expectedHmac, 'hex');
@@ -40,8 +52,15 @@ function verifyPayload(signedValue: string): string | null {
 }
 
 export function validateRole(password: string): AdminRole | null {
-  if (password === getAdminPassword()) return 'super_admin';
-  if (password === getManagerPassword()) return 'event_manager';
+  if (!password) return null;
+  const adminPass = getAdminPassword();
+  if (adminPass && timingSafeStringEqual(password, adminPass)) {
+    return 'super_admin';
+  }
+  const managerPass = getManagerPassword();
+  if (managerPass && timingSafeStringEqual(password, managerPass)) {
+    return 'event_manager';
+  }
   return null;
 }
 

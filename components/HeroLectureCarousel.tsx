@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookingModal from './BookingModal';
 import AllUpcomingEventsModal from './AllUpcomingEventsModal';
 import { Event } from '../lib/types/event';
 import { allUpcomingEventsLabel, checkThemOutLabel } from '../lib/content';
+import { EASE } from '@/lib/constants/animation';
 import styles from './HeroLectureCarousel.module.css';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 // Landing entrance: center card first, then its neighbors — sequenced to
 // land after Nav's own wordmark/links entrance (see Nav.tsx).
 const ENTRANCE_BASE_DELAY = 0.5;
@@ -34,15 +34,9 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
       return { cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 };
     }
     if (window.innerWidth <= 900) {
-      // Exact numbers from the mobile-specific Figma frame (node
-      // 188:4553) — near-square cards, not just a scaled-down desktop
-      // ratio like the tablet/laptop tier below. 900px matches the
-      // breakpoint every other mobile-specific section on this page
-      // uses (Nav, How We Gather, Manifesto, etc.) — this used to switch
-      // in at 480px, which left a 480–900px gap still rendering the old
-      // scaled-desktop tablet ratio (315/221.4/etc., below) instead of
-      // this exact mobile design.
-      return { cardW: 250.871, gap: 20, cardH: 248.788, activeCardW: 274.738, activeCardH: 272.458 };
+      // Sized to maintain the exact desktop aspect ratio (~1.423) so the full poster
+      // image is visible on mobile without being cut off at the corners or sides.
+      return { cardW: 250.871, gap: 20, cardH: 176.39, activeCardW: 274.738, activeCardH: 193.05 };
     }
     if (window.innerWidth <= 1400) {
       return { cardW: 414, gap: 40.5, cardH: 290.7, activeCardW: 486, activeCardH: 341.1 };
@@ -102,8 +96,26 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
   const [page, setPage] = useState(getInitialIndex);
   const [isPaused, setIsPaused] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [touchOffset, setTouchOffset] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<{ url: string; title: string } | null>(null);
   const [showAllEventsModal, setShowAllEventsModal] = useState(false);
+
+  // Touch / swipe gesture refs
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+  const touchDiffX = useRef(0);
+  const isSwiping = useRef(false);
+  const isScrolling = useRef(false);
+  const didSwipe = useRef(false);
+  const rafRef = useRef<number | null>(null);
+
+  // Mouse drag refs (for desktop drag support)
+  const mouseStartX = useRef(0);
+  const mouseStartTime = useRef(0);
+  const mouseDiffX = useRef(0);
+  const isMouseDown = useRef(false);
+  const isMouseDragging = useRef(false);
   // Once the landing entrance has finished, cards mounted later by regular
   // navigation (the infinite window's edges) should appear instantly —
   // only the very first paint gets the staggered reveal.
@@ -115,9 +127,22 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
 
   const hasMultiple = displayList.length > 1;
 
-  // Reset if list changes
+  // Cleanup requestAnimationFrame on unmount
   useEffect(() => {
-    setPage(getInitialIndex());
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  // Reset only if list length actually changes (prevents random jump to start)
+  const prevEventsLengthRef = useRef(displayList.length);
+  useEffect(() => {
+    if (prevEventsLengthRef.current !== displayList.length) {
+      prevEventsLengthRef.current = displayList.length;
+      setPage(getInitialIndex());
+    }
   }, [displayList.length, getInitialIndex]);
 
   // Arrows re-appear on a short fixed timer rather than waiting for the
@@ -140,7 +165,188 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     setPage((prev) => prev - 1);
   }, [hasMultiple]);
 
-  // Auto-slideshow every 3 seconds
+  // Touch handlers for mobile swipe
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!hasMultiple || e.touches.length > 1 || isMoving) return;
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      touchStartTime.current = Date.now();
+      touchDiffX.current = 0;
+      isSwiping.current = false;
+      isScrolling.current = false;
+      setIsPaused(true);
+    },
+    [hasMultiple, isMoving]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!hasMultiple || e.touches.length > 1 || isScrolling.current) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - touchStartX.current;
+      const diffY = currentY - touchStartY.current;
+
+      if (!isSwiping.current) {
+        // If vertical scroll detected, release control to browser
+        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+          isScrolling.current = true;
+          return;
+        }
+        // If horizontal swipe detected, lock into swiping mode
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+          isSwiping.current = true;
+          didSwipe.current = true;
+        }
+      }
+
+      if (isSwiping.current) {
+        touchDiffX.current = diffX;
+        if (rafRef.current === null) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTouchOffset(touchDiffX.current);
+            rafRef.current = null;
+          });
+        }
+      }
+    },
+    [hasMultiple]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setIsPaused(false);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    if (isSwiping.current) {
+      const elapsed = Math.max(Date.now() - touchStartTime.current, 1);
+      const diffX = touchDiffX.current;
+      const velocity = diffX / elapsed;
+      const pitch = cardDims.cardW + cardDims.gap;
+      const count = Math.max(1, Math.round(Math.abs(diffX) / pitch));
+
+      if (diffX < -40 || velocity < -0.3) {
+        setIsMoving(true);
+        setPage((prev) => prev + count);
+      } else if (diffX > 40 || velocity > 0.3) {
+        setIsMoving(true);
+        setPage((prev) => prev - count);
+      }
+
+      setTouchOffset(0);
+      touchDiffX.current = 0;
+      isSwiping.current = false;
+      setTimeout(() => {
+        didSwipe.current = false;
+      }, 120);
+    } else {
+      setTouchOffset(0);
+      touchDiffX.current = 0;
+      didSwipe.current = false;
+    }
+    isScrolling.current = false;
+  }, [cardDims.cardW, cardDims.gap]);
+
+  const handleTouchCancel = useCallback(() => {
+    setIsPaused(false);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setTouchOffset(0);
+    touchDiffX.current = 0;
+    isSwiping.current = false;
+    isScrolling.current = false;
+    setTimeout(() => {
+      didSwipe.current = false;
+    }, 120);
+  }, []);
+
+  // Mouse drag handlers for desktop
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hasMultiple || e.button !== 0 || isMoving) return;
+      if ((e.target as HTMLElement).closest(`.${styles.arrowBtnV2}`)) return;
+
+      isMouseDown.current = true;
+      isMouseDragging.current = false;
+      mouseStartX.current = e.clientX;
+      mouseStartTime.current = Date.now();
+      mouseDiffX.current = 0;
+      setIsPaused(true);
+    },
+    [hasMultiple, isMoving]
+  );
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMouseDown.current) return;
+      const diffX = e.clientX - mouseStartX.current;
+      if (!isMouseDragging.current && Math.abs(diffX) > 6) {
+        isMouseDragging.current = true;
+        didSwipe.current = true;
+      }
+      if (isMouseDragging.current) {
+        mouseDiffX.current = diffX;
+        if (rafRef.current === null) {
+          rafRef.current = requestAnimationFrame(() => {
+            setTouchOffset(mouseDiffX.current);
+            rafRef.current = null;
+          });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!isMouseDown.current) return;
+      isMouseDown.current = false;
+      setIsPaused(false);
+
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      if (isMouseDragging.current) {
+        const elapsed = Math.max(Date.now() - mouseStartTime.current, 1);
+        const diffX = mouseDiffX.current;
+        const velocity = diffX / elapsed;
+        const pitch = cardDims.cardW + cardDims.gap;
+        const count = Math.max(1, Math.round(Math.abs(diffX) / pitch));
+
+        if (diffX < -40 || velocity < -0.3) {
+          setIsMoving(true);
+          setPage((prev) => prev + count);
+        } else if (diffX > 40 || velocity > 0.3) {
+          setIsMoving(true);
+          setPage((prev) => prev - count);
+        }
+
+        setTouchOffset(0);
+        mouseDiffX.current = 0;
+        isMouseDragging.current = false;
+        setTimeout(() => {
+          didSwipe.current = false;
+        }, 120);
+      } else {
+        setTouchOffset(0);
+        mouseDiffX.current = 0;
+        didSwipe.current = false;
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [cardDims.cardW, cardDims.gap]);
+
+  // Auto-slideshow every 3 seconds — restarts interval cleanly when page changes
   useEffect(() => {
     if (!hasMultiple || isPaused || selectedBooking !== null || showAllEventsModal) return;
 
@@ -149,7 +355,7 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [handleNext, hasMultiple, isPaused, selectedBooking, showAllEventsModal]);
+  }, [page, handleNext, hasMultiple, isPaused, selectedBooking, showAllEventsModal]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -194,29 +400,30 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
         aria-label="Upcoming Lectures Poster Carousel"
       >
         {/* Carousel Stage (Viewport with soft side edge fade) */}
-        <div ref={stageRef} className={`${styles.stage} ${styles.stageV2}`}>
+        <div
+          ref={stageRef}
+          className={`${styles.stage} ${styles.stageV2}`}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchCancel}
+          onMouseDown={handleMouseDown}
+          onDragStart={(e) => e.preventDefault()}
+        >
           {hasMultiple ? (
             <motion.div
               className={`${styles.track} ${styles.trackV2}`}
-              animate={{ x: isMounted ? targetX : 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 120,
-                damping: 13,
-                mass: 0.7,
-              }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(_, info) => {
-                const offset = info.offset.x;
-                const velocity = info.velocity.x;
-                if (offset < -40 || velocity < -400) {
-                  handleNext();
-                } else if (offset > 40 || velocity > 400) {
-                  handlePrev();
-                }
-              }}
+              animate={{ x: isMounted ? targetX + touchOffset : 0 }}
+              transition={
+                touchOffset !== 0
+                  ? { duration: 0 }
+                  : {
+                      type: 'spring',
+                      stiffness: 120,
+                      damping: 13,
+                      mass: 0.7,
+                    }
+              }
             >
               {windowOffsets.map((offset) => {
                 const itemIndex = page + offset;
@@ -267,8 +474,11 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                     <div
                       className={`${styles.card} ${isCurrent ? styles.activeCard : styles.inactiveCard} ${styles.cardV2}`}
                       onClick={() => {
+                        if (didSwipe.current) return;
                         if (isCurrent) {
-                          window.open(ev.urbanautUrl, '_blank', 'noopener,noreferrer');
+                          if (ev.urbanautUrl) {
+                            setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                          }
                         } else if (offset < 0) {
                           handlePrev();
                         } else if (offset > 0) {
@@ -296,23 +506,34 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                         )}
 
                         {/* Location + date/time ONLY, no title, no wordmark,
-                            no badge/price/CTA — active card only. */}
-                        {isCurrent && (
-                          <>
-                            <div className={styles.posterGradientOverlayV2} aria-hidden="true" />
-                            <div className={styles.posterContentV2}>
-                              {ev.venue && ev.venue !== '—' && (
-                                <p className={styles.posterMetaV2}>{ev.venue}</p>
-                              )}
-                              {(ev.date || (ev.time && ev.time !== '—')) && (
-                                <p className={styles.posterMetaV2}>
-                                  {ev.date}
-                                  {ev.time && ev.time !== '—' && ` @ ${ev.time}`}
-                                </p>
-                              )}
-                            </div>
-                          </>
-                        )}
+                            no badge/price/CTA — active card only. Smooth cross-fade. */}
+                        <motion.div
+                          className={styles.posterGradientOverlayV2}
+                          aria-hidden="true"
+                          initial={{ opacity: isCurrent ? 1 : 0 }}
+                          animate={{ opacity: isCurrent ? 1 : 0 }}
+                          transition={{ duration: 0.45, ease: EASE }}
+                        />
+                        <motion.div
+                          className={styles.posterContentV2}
+                          initial={{ opacity: isCurrent ? 1 : 0, y: isCurrent ? 0 : 8 }}
+                          animate={{
+                            opacity: isCurrent ? 1 : 0,
+                            y: isCurrent ? 0 : 8,
+                          }}
+                          transition={{ duration: 0.4, ease: EASE }}
+                          style={{ pointerEvents: isCurrent ? 'auto' : 'none' }}
+                        >
+                          {ev.venue && ev.venue !== '—' && (
+                            <p className={styles.posterMetaV2}>{ev.venue}</p>
+                          )}
+                          {(ev.date || (ev.time && ev.time !== '—')) && (
+                            <p className={styles.posterMetaV2}>
+                              {ev.date}
+                              {ev.time && ev.time !== '—' && ` @ ${ev.time}`}
+                            </p>
+                          )}
+                        </motion.div>
                       </div>
                     </div>
                   </motion.div>
@@ -328,9 +549,11 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.55, delay: ENTRANCE_BASE_DELAY, ease: EASE }}
-                onClick={() =>
-                  window.open(displayList[0].urbanautUrl, '_blank', 'noopener,noreferrer')
-                }
+                onClick={() => {
+                  if (displayList[0].urbanautUrl) {
+                    setSelectedBooking({ url: displayList[0].urbanautUrl, title: displayList[0].title });
+                  }
+                }}
                 role="button"
                 tabIndex={0}
                 data-cursor-label="Click to Book!"
@@ -422,27 +645,23 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.5, ease: EASE }}
         >
-          <button
-            type="button"
+          <Link
+            href="/events"
             className={styles.allEventsBtnV2}
-            onClick={() => setShowAllEventsModal(true)}
           >
             <span className={styles.allEventsBtnTextWrapV2}>
               <span className={styles.allEventsBtnTextV2}>{allUpcomingEventsLabel}</span>
               <span className={styles.allEventsBtnTextV2}>{checkThemOutLabel}</span>
             </span>
-          </button>
+          </Link>
         </motion.div>
       </div>
 
       {/* Booking Modal */}
-      {selectedBooking && (
-        <BookingModal
-          url={selectedBooking.url}
-          title={selectedBooking.title}
-          onClose={() => setSelectedBooking(null)}
-        />
-      )}
+      <BookingModal
+        booking={selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+      />
 
       {/* All Upcoming Events Modal */}
       {showAllEventsModal && (

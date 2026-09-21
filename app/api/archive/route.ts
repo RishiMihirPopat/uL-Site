@@ -1,8 +1,9 @@
 import { getFormattedArchivedEvents, getPublishedArticles } from '@/lib/db';
 
 export async function GET() {
-  const events = getFormattedArchivedEvents();
-  const publishedArticles = getPublishedArticles().map((a) => ({
+  const events = await getFormattedArchivedEvents();
+  const articlesList = await getPublishedArticles();
+  const publishedArticles = articlesList.map((a) => ({
     id: `art-${a.id}`,
     date: a.publishedAt,
     title: a.title,

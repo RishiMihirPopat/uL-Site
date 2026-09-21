@@ -1,61 +1,63 @@
+/**
+ * Testimonial Repository Interface & Neon Postgres Implementation.
+ */
+
 import { getDatabaseConnection } from '../db/client';
+import { buildParameterizedUpdate } from '../db/sql-utils';
 import { Testimonial } from '../types/testimonial';
 
 export interface ITestimonialRepository {
-  getAll(): Testimonial[];
-  getById(id: string): Testimonial | null;
-  create(testimonial: Partial<Testimonial>): string;
-  update(id: string, testimonial: Partial<Testimonial>): void;
-  delete(id: string): void;
+  getAll(): Promise<Testimonial[]>;
+  getById(id: string): Promise<Testimonial | null>;
+  create(testimonial: Partial<Testimonial>): Promise<string>;
+  update(id: string, testimonial: Partial<Testimonial>): Promise<void>;
+  delete(id: string): Promise<void>;
 }
 
-export class TestimonialRepository implements ITestimonialRepository {
-  public getAll(): Testimonial[] {
-    const db = getDatabaseConnection();
-    return db
-      .prepare('SELECT * FROM testimonials ORDER BY order_index ASC, created_at DESC')
-      .all() as Testimonial[];
+export class NeonTestimonialRepository implements ITestimonialRepository {
+  private get sql() {
+    return getDatabaseConnection();
   }
 
-  public getById(id: string): Testimonial | null {
-    const db = getDatabaseConnection();
-    const row = db.prepare('SELECT * FROM testimonials WHERE id = ?').get(id);
-    return (row as Testimonial) || null;
+  public async getAll(): Promise<Testimonial[]> {
+    const rows = await this.sql`
+      SELECT * FROM testimonials ORDER BY order_index ASC, created_at DESC
+    `;
+    return rows as Testimonial[];
   }
 
-  public create(testimonial: Partial<Testimonial>): string {
-    const db = getDatabaseConnection();
+  public async getById(id: string): Promise<Testimonial | null> {
+    const rows = await this.sql`
+      SELECT * FROM testimonials WHERE id = ${id} LIMIT 1
+    `;
+    return (rows[0] as Testimonial) || null;
+  }
+
+  public async create(testimonial: Partial<Testimonial>): Promise<string> {
     const id = testimonial.id || `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const stmt = db.prepare(`
-      INSERT INTO testimonials (id, title, recommender, quote, order_index)
-      VALUES (@id, @title, @recommender, @quote, @order_index)
-    `);
+    const title = testimonial.title || '';
+    const recommender = testimonial.recommender || '';
+    const quote = testimonial.quote || '';
+    const orderIndex = testimonial.order_index ?? 0;
 
-    stmt.run({
-      id,
-      title: testimonial.title || '',
-      recommender: testimonial.recommender || '',
-      quote: testimonial.quote || '',
-      order_index: testimonial.order_index ?? 0,
-    });
+    await this.sql`
+      INSERT INTO testimonials (id, title, recommender, quote, order_index, created_at)
+      VALUES (${id}, ${title}, ${recommender}, ${quote}, ${orderIndex}, NOW())
+    `;
 
     return id;
   }
 
-  public update(id: string, testimonial: Partial<Testimonial>): void {
-    const db = getDatabaseConnection();
-    const keys = Object.keys(testimonial).filter(k => k !== 'id' && testimonial[k as keyof Testimonial] !== undefined);
-    if (keys.length === 0) return;
+  public async update(id: string, testimonial: Partial<Testimonial>): Promise<void> {
+    const queryData = buildParameterizedUpdate('testimonials', id, testimonial as Record<string, unknown>);
+    if (!queryData) return;
 
-    const setClauses = keys.map(k => `${k} = @${k}`).join(', ');
-    const stmt = db.prepare(`UPDATE testimonials SET ${setClauses} WHERE id = @id`);
-    stmt.run({ ...testimonial, id });
+    await this.sql.query(queryData.query, queryData.values as any[]);
   }
 
-  public delete(id: string): void {
-    const db = getDatabaseConnection();
-    db.prepare('DELETE FROM testimonials WHERE id = ?').run(id);
+  public async delete(id: string): Promise<void> {
+    await this.sql`DELETE FROM testimonials WHERE id = ${id}`;
   }
 }
 
-export const testimonialRepository = new TestimonialRepository();
+export const testimonialRepository = new NeonTestimonialRepository();

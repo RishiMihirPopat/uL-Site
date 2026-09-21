@@ -3,6 +3,8 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { slugify } from '@/lib/utils/slug';
+import { uploadImageFile } from '@/lib/utils/upload';
 import styles from '../../app/admin/admin.module.css';
 
 interface ArticleFormData {
@@ -59,26 +61,13 @@ export function ArticleForm({
     setUploadingImage(true);
     setUploadError(null);
 
-    const data = new FormData();
-    data.append('file', file);
-    data.append('type', 'archive');
-
-    try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: data,
-      });
-      const result = await res.json();
-      if (res.ok && result.url) {
-        setFormData((prev) => ({ ...prev, cover_image: result.url }));
-      } else {
-        setUploadError(result.error || 'Failed to upload cover image');
-      }
-    } catch {
-      setUploadError('Network error while uploading cover image');
-    } finally {
-      setUploadingImage(false);
+    const result = await uploadImageFile(file, 'archive');
+    if (result.success && result.url) {
+      setFormData((prev) => ({ ...prev, cover_image: result.url! }));
+    } else {
+      setUploadError(result.error || 'Failed to upload cover image');
     }
+    setUploadingImage(false);
   };
 
   const handleChange = (
@@ -93,15 +82,6 @@ export function ArticleForm({
       }
       return updated;
     });
-  };
-
-  const slugify = (text: string) => {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
   };
 
   // Markdown Toolbar helper to insert markdown snippets around selection

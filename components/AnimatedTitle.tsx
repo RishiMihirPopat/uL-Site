@@ -2,13 +2,14 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { EASE } from '@/lib/constants/animation';
 
 export function CardTitle({
   href,
   className,
   children,
 }: {
-  href: string;
+  href?: string;
   className: string;
   children: React.ReactNode;
 }) {
@@ -24,7 +25,7 @@ export function HeaderTitle({
   className,
   children,
 }: {
-  href: string;
+  href?: string;
   className: string;
   children: React.ReactNode;
 }) {
@@ -36,7 +37,7 @@ export function HeaderTitle({
       transition={{
         duration: 0.5,
         delay: 0.05,
-        ease: [0.16, 1, 0.3, 1],
+        ease: EASE,
       }}
     >
       {children}

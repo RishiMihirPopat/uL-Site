@@ -1,17 +1,3 @@
-.cursor {
-  position: fixed;
-  /* Above every known overlay/modal in the app (the archive detail view's
-     portal alone goes up to 1,000,000) — the cursor must never be paintable
-     over. */
-  z-index: 2147483000;
-  width: 34px;
-  height: auto;
-  pointer-events: none;
-  will-change: transform;
-  user-select: none;
-}
-
-/* Figma node 143:560 — bottom-right of the cursor tip. */
 /* Figma nodes 146:563/566/569/572 — "How We Gather" ticket card hovers. */
 .desc {
   position: fixed;
@@ -29,6 +15,7 @@
   will-change: transform;
 }
 
+/* Figma node 143:560 — hover pill (e.g. Hero carousel active card, Article cards). */
 .label {
   position: fixed;
   z-index: 2147483000;
@@ -42,12 +29,4 @@
   white-space: nowrap;
   pointer-events: none;
   will-change: transform;
-}
-
-/* Applied to <body> while a fine pointer is present — forces every
-   descendant's cursor off too, since links/buttons set their own
-   `cursor: pointer` via the UA stylesheet that would otherwise win. */
-.cursorNone,
-.cursorNone * {
-  cursor: none !important;
 }

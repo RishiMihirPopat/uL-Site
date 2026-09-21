@@ -4,6 +4,7 @@
 
 import { IArticleRepository, articleRepository } from '../repositories/article.repository';
 import { Article, ArticleRow } from '../types/article';
+import { slugify } from '../utils/slug';
 
 export class ArticleService {
   constructor(private repo: IArticleRepository = articleRepository) {}
@@ -35,37 +36,34 @@ export class ArticleService {
   }
 
   generateSlug(title: string): string {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    return slugify(title);
   }
 
-  getAllArticles(): Article[] {
-    return this.repo.getAll().map((r) => this.mapRow(r));
+  async getAllArticles(): Promise<Article[]> {
+    const rows = await this.repo.getAll();
+    return rows.map((r) => this.mapRow(r));
   }
 
-  getPublishedArticles(): Article[] {
-    return this.repo.getPublished().map((r) => this.mapRow(r));
+  async getPublishedArticles(): Promise<Article[]> {
+    const rows = await this.repo.getPublished();
+    return rows.map((r) => this.mapRow(r));
   }
 
-  getArticleBySlug(slug: string): Article | null {
-    const row = this.repo.getBySlug(slug);
+  async getArticleBySlug(slug: string): Promise<Article | null> {
+    const row = await this.repo.getBySlug(slug);
     return row ? this.mapRow(row) : null;
   }
 
-  getArticleById(id: string): Article | null {
-    const row = this.repo.getById(id);
+  async getArticleById(id: string): Promise<Article | null> {
+    const row = await this.repo.getById(id);
     return row ? this.mapRow(row) : null;
   }
 
   /**
    * Retrieves next and previous articles in sequence for smooth article switching.
    */
-  getAdjacentArticles(slug: string): { prev: Article | null; next: Article | null } {
-    const published = this.getPublishedArticles();
+  async getAdjacentArticles(slug: string): Promise<{ prev: Article | null; next: Article | null }> {
+    const published = await this.getPublishedArticles();
     const index = published.findIndex((a) => a.slug === slug);
     if (index === -1) return { prev: null, next: null };
 
@@ -75,25 +73,30 @@ export class ArticleService {
     };
   }
 
-  createArticle(data: Partial<ArticleRow>): void {
+  async createArticle(data: Partial<ArticleRow>): Promise<void> {
     if (!data.slug && data.title) {
       data.slug = this.generateSlug(data.title);
     }
     if (data.content && !data.read_time) {
       data.read_time = this.calculateReadTime(data.content);
     }
-    this.repo.create(data);
+    await this.repo.create(data);
   }
 
-  updateArticle(id: string, updates: Partial<ArticleRow>): void {
-    if (updates.content && !updates.read_time) {
-      updates.read_time = this.calculateReadTime(updates.content);
+  async updateArticle(id: string, updates: Partial<ArticleRow>): Promise<void> {
+    const data = { ...updates };
+    delete (data as any).id;
+    delete (data as any).created_at;
+    delete (data as any).updated_at;
+
+    if (data.content && !data.read_time) {
+      data.read_time = this.calculateReadTime(data.content);
     }
-    this.repo.update(id, updates);
+    await this.repo.update(id, data);
   }
 
-  deleteArticle(id: string): void {
-    this.repo.delete(id);
+  async deleteArticle(id: string): Promise<void> {
+    await this.repo.delete(id);
   }
 }
 

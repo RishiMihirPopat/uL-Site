@@ -5,6 +5,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { put } from '@vercel/blob';
 
 export interface IUploadService {
   saveFile(file: File, folderType: 'posters' | 'archive'): Promise<{ url: string; filename: string }>;
@@ -33,4 +34,31 @@ export class LocalUploadService implements IUploadService {
   }
 }
 
-export const uploadService = new LocalUploadService();
+export class VercelBlobUploadService implements IUploadService {
+  async saveFile(file: File, folderType: 'posters' | 'archive' = 'posters'): Promise<{ url: string; filename: string }> {
+    const subDir = folderType === 'archive' ? 'archive' : 'uploads';
+    const sanitizedOriginal = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const pathname = `${subDir}/${Date.now()}-${sanitizedOriginal}`;
+
+    const blob = await put(pathname, file, {
+      access: 'public',
+    });
+
+    return { url: blob.url, filename: pathname };
+  }
+}
+
+export class HybridUploadService implements IUploadService {
+  private localService = new LocalUploadService();
+  private blobService = new VercelBlobUploadService();
+
+  async saveFile(file: File, folderType: 'posters' | 'archive' = 'posters'): Promise<{ url: string; filename: string }> {
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      return this.blobService.saveFile(file, folderType);
+    }
+    return this.localService.saveFile(file, folderType);
+  }
+}
+
+export const uploadService = new HybridUploadService();
+
