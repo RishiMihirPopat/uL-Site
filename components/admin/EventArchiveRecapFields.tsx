@@ -114,10 +114,10 @@ export function EventArchiveRecapFields({
           Archive Cover Photo (Recap photo of the gathering)
         </label>
         <input type="file" accept="image/*" className={styles.input} onChange={onArchiveUpload} />
-        {uploading && <p style={{ fontSize: '0.85rem', color: '#C26540', margin: 0 }}>Uploading archive photo...</p>}
+        {uploading && <p style={{ fontSize: '0.85rem', color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)', margin: 0 }}>Uploading archive photo...</p>}
 
         <div>
-          <label style={{ fontSize: '0.82rem', color: '#666' }}>Archive Photo URL directly:</label>
+          <label style={{ fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>Archive Photo URL directly:</label>
           <input
             name="archive_image"
             className={styles.input}
@@ -133,9 +133,9 @@ export function EventArchiveRecapFields({
             <img
               src={formData.archive_image}
               alt="Archive photo preview"
-              style={{ width: '100px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #D6C9B0' }}
+              style={{ width: '100px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--color-border, #D6C9B0)' }}
             />
-            <span style={{ fontSize: '0.85rem', color: '#2E7D32', fontWeight: 600 }}>High-res recap photo loaded</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-olive, #5A5A3C)', fontFamily: 'var(--font-mono, monospace)', fontWeight: 600 }}>High-res recap photo loaded</span>
           </div>
         )}
       </div>
@@ -144,7 +144,7 @@ export function EventArchiveRecapFields({
         <label>YouTube Video URLs (one per line)</label>
         <textarea
           className={styles.textarea}
-          style={{ minHeight: '80px', borderColor: validationErrors.youtube_urls ? '#D93025' : undefined }}
+          style={{ minHeight: '80px', borderColor: validationErrors.youtube_urls ? 'var(--color-error, #A63224)' : undefined }}
           value={youtubeUrls.join('\n')}
           onChange={(e) => onYoutubeChange(e.target.value.split('\n').filter(Boolean))}
           placeholder="https://www.youtube.com/watch?v=..."
@@ -156,13 +156,13 @@ export function EventArchiveRecapFields({
       <div className={styles.formGroup}>
         <label style={{ fontWeight: 600, fontSize: '0.95rem', display: 'flex', justifyContent: 'space-between' }}>
           <span>Attached Articles & Notes</span>
-          <span style={{ fontSize: '0.8rem', color: '#888' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>
             Shows in the Postcard Archive recap
           </span>
         </label>
 
-        <div style={{ marginBottom: '1rem', background: '#FAF6EE', border: '1px solid #D6C9B0', padding: '1rem', borderRadius: '4px' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#1A1714', marginBottom: '0.4rem' }}>
+        <div style={{ marginBottom: '1rem', background: 'var(--color-bg-surface, #EDE4D3)', border: '1px solid var(--color-border, #D6C9B0)', padding: '1rem', borderRadius: '4px' }}>
+          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text, #1A1714)', marginBottom: '0.4rem', fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase' }}>
             Attach Website Hosted Article:
           </label>
           <select
@@ -190,7 +190,7 @@ export function EventArchiveRecapFields({
 
         {substackUrls.length > 0 ? (
           <div style={{ marginBottom: '1rem' }}>
-            <p style={{ fontSize: '0.82rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#888', margin: '0 0 0.5rem' }}>
+            <p style={{ fontSize: '0.82rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)', margin: '0 0 0.5rem' }}>
               Attached to this event ({substackUrls.length}):
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -209,21 +209,22 @@ export function EventArchiveRecapFields({
                       justifyContent: 'space-between',
                       padding: '8px 12px',
                       background: '#FFFFFF',
-                      border: '1px solid #E4DCD3',
+                      border: '1px solid var(--color-border, #D6C9B0)',
                       borderRadius: '4px',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                       <span
                         style={{
+                          fontFamily: 'var(--font-mono, monospace)',
                           fontSize: '0.7rem',
                           letterSpacing: '0.08em',
                           textTransform: 'uppercase',
                           fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          background: isInternal ? '#FAF0E6' : '#F0EFEA',
-                          color: isInternal ? '#C26540' : '#666',
+                          padding: '2px 8px',
+                          borderRadius: 'var(--radius-full, 9999px)',
+                          background: isInternal ? 'rgba(107, 45, 45, 0.1)' : 'rgba(61, 51, 42, 0.08)',
+                          color: isInternal ? 'var(--color-primary, #6B2D2D)' : 'var(--color-text-muted, #3D332A)',
                         }}
                       >
                         {isInternal ? 'Article' : 'External'}
@@ -232,7 +233,7 @@ export function EventArchiveRecapFields({
                         <strong style={{ fontSize: '0.88rem', color: '#1A1714', display: 'block' }}>
                           {matchedArticle ? matchedArticle.title : url}
                         </strong>
-                        <span style={{ fontSize: '0.76rem', color: '#888' }}>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted, #3D332A)' }}>
                           {isInternal ? (
                             <span>
                               Website Article {matchedArticle ? `• by ${matchedArticle.author}` : ''} (
@@ -260,7 +261,7 @@ export function EventArchiveRecapFields({
             </div>
           </div>
         ) : (
-          <p style={{ fontSize: '0.82rem', fontStyle: 'italic', color: '#888', margin: '0 0 1rem' }}>
+          <p style={{ fontSize: '0.82rem', fontStyle: 'italic', color: 'var(--color-text-muted, #3D332A)', margin: '0 0 1rem' }}>
             No articles attached to this event yet. Use the dropdown above to attach one.
           </p>
         )}

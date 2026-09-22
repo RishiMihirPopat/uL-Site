@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../admin.module.css';
 import { StatusBadge } from '@/components/admin/StatusBadge';
+import { MagnifyingGlass, ImageSquare } from '@phosphor-icons/react';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -128,7 +129,7 @@ export default function EventsPage() {
           </select>
 
           <div className={styles.searchBox}>
-            <span>🔍</span>
+            <MagnifyingGlass size={16} color="var(--color-text-muted, #3D332A)" />
             <input
               type="text"
               placeholder="Search title, speaker, venue..."
@@ -187,18 +188,18 @@ export default function EventsPage() {
                           <img
                             src={e.image}
                             alt=""
-                            style={{ width: '44px', height: '56px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #D6C9B0' }}
+                            style={{ width: '44px', height: '56px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--color-border, #D6C9B0)' }}
                           />
                         ) : (
-                          <div style={{ width: '44px', height: '56px', background: '#EDE4D3', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                            🖼️
+                          <div style={{ width: '44px', height: '56px', background: 'var(--color-bg-surface, #EDE4D3)', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted, #3D332A)' }}>
+                            <ImageSquare size={20} />
                           </div>
                         )}
                         <div>
-                          <strong style={{ fontSize: '0.98rem', display: 'block' }}>{e.title}</strong>
-                          <div style={{ fontSize: '0.78rem', color: '#777', marginTop: '2px' }}>ID: {e.id}</div>
+                          <strong style={{ fontSize: '0.98rem', display: 'block', color: 'var(--color-text, #1A1714)' }}>{e.title}</strong>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)', marginTop: '2px' }}>ID: {e.id}</div>
                           {e.archive_badge && (
-                            <span style={{ fontSize: '0.7rem', background: '#2A2420', color: '#F0E8DC', padding: '1px 5px', borderRadius: '3px', marginTop: '3px', display: 'inline-block' }}>
+                            <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono, monospace)', background: 'rgba(107, 45, 45, 0.1)', color: 'var(--color-primary, #6B2D2D)', border: '1px solid rgba(107, 45, 45, 0.25)', padding: '2px 8px', borderRadius: 'var(--radius-full, 9999px)', marginTop: '3px', display: 'inline-block' }}>
                               {e.archive_badge}
                             </span>
                           )}
@@ -206,17 +207,17 @@ export default function EventsPage() {
                       </div>
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.85rem', textTransform: 'capitalize', color: '#444' }}>
+                      <span style={{ fontSize: '0.85rem', textTransform: 'capitalize', color: 'var(--color-text-muted, #3D332A)' }}>
                         {e.category ? e.category.replace(/-/g, ' ') : '—'}
                       </span>
                     </td>
                     <td>
-                      <div style={{ fontWeight: '500' }}>{e.speaker || '—'}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#666' }}>{e.venue || '—'}</div>
+                      <div style={{ fontWeight: '500', color: 'var(--color-text, #1A1714)' }}>{e.speaker || '—'}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)' }}>{e.venue || '—'}</div>
                     </td>
                     <td>
                       <div>{e.date}</div>
-                      {e.time && <div style={{ fontSize: '0.8rem', color: '#777' }}>{e.time}</div>}
+                      {e.time && <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)' }}>{e.time}</div>}
                     </td>
                     <td>
                       <StatusBadge status={e.archive_status} />

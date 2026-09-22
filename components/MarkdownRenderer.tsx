@@ -26,7 +26,23 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 2. Links: [text](url)
+    // 2. Inline Image: ![alt](url "title")
+    const imgMatch = remaining.match(/^!\[([^\]]*)\]\(\s*([^\s")]+)(?:\s+["']([^"']*)["'])?\s*\)/);
+    if (imgMatch) {
+      tokens.push(
+        <img
+          key={`inline-img-${key++}`}
+          src={imgMatch[2]}
+          alt={imgMatch[1]}
+          title={imgMatch[3] || imgMatch[1]}
+          className={styles.inlineImg}
+        />
+      );
+      remaining = remaining.slice(imgMatch[0].length);
+      continue;
+    }
+
+    // 3. Links: [text](url)
     const linkMatch = remaining.match(/^\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
       const isExternal = linkMatch[2].startsWith('http');
@@ -45,7 +61,7 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 3. Bold + Italic: ***text*** or ___text___
+    // 4. Bold + Italic: ***text*** or ___text___
     const boldItalicMatch = remaining.match(/^(\*\*\*|___)(.+?)\1/);
     if (boldItalicMatch) {
       tokens.push(
@@ -57,7 +73,7 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 4. Bold: **text** or __text__
+    // 5. Bold: **text** or __text__
     const boldMatch = remaining.match(/^(\*\*|__)(.+?)\1/);
     if (boldMatch) {
       tokens.push(<strong key={`b-${key++}`}>{boldMatch[2]}</strong>);
@@ -65,7 +81,7 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 5. Italic: *text* or _text_
+    // 6. Italic: *text* or _text_
     const italicMatch = remaining.match(/^(\*|_)(.+?)\1/);
     if (italicMatch) {
       tokens.push(<em key={`i-${key++}`}>{italicMatch[2]}</em>);
@@ -73,7 +89,7 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 6. Strikethrough: ~~text~~
+    // 7. Strikethrough: ~~text~~
     const strikeMatch = remaining.match(/^~~(.+?)~~/);
     if (strikeMatch) {
       tokens.push(<del key={`del-${key++}`}>{strikeMatch[1]}</del>);
@@ -81,8 +97,8 @@ function renderInline(text: string): React.ReactNode[] {
       continue;
     }
 
-    // 7. Regular text until next special markdown character
-    const nextSpecial = remaining.search(/[`\[\*_~]/);
+    // 8. Regular text until next special markdown character
+    const nextSpecial = remaining.search(/[`!\[\*_~]/);
     if (nextSpecial === -1) {
       tokens.push(remaining);
       break;
@@ -197,15 +213,17 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
       continue;
     }
 
-    // Image: ![alt](url)
-    const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    // Image: ![alt](url) or ![alt](url "optional caption")
+    const imgMatch = line.match(/^!\[([^\]]*)\]\(\s*([^\s")]+)(?:\s+["']([^"']*)["'])?\s*\)$/);
     if (imgMatch) {
+      const src = imgMatch[2];
+      const caption = imgMatch[3] || imgMatch[1];
       blocks.push(
         <figure key={`img-${index++}`} className={styles.figure}>
           <div className={styles.imageWrap}>
-            <img src={imgMatch[2]} alt={imgMatch[1]} className={styles.articleImg} />
+            <img src={src} alt={caption || 'Article photo'} className={styles.articleImg} />
           </div>
-          {imgMatch[1] && <figcaption className={styles.figcaption}>{imgMatch[1]}</figcaption>}
+          {caption && <figcaption className={styles.figcaption}>{caption}</figcaption>}
         </figure>
       );
       i++;

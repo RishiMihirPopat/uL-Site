@@ -2,7 +2,7 @@
   min-height: 100vh;
   width: 100%;
   box-sizing: border-box;
-  background: var(--color-bg, #F5EFE0);
+  background: var(--color-bg-v2, #FFF9F2);
   color: var(--color-text, #1A1714);
   display: flex;
   flex-direction: column;
@@ -49,27 +49,29 @@
 }
 
 .brand:hover {
-  color: var(--color-terracotta, #C26540);
+  color: var(--color-primary-light, #EAD9D9);
 }
 
 .brandBadge {
-  font-size: 0.7rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background: rgba(240, 232, 220, 0.15);
   color: var(--color-text-on-dark, #F0E8DC);
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 9999px);
 }
 
 .roleBadge {
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
 }
 
 .roleSuper {
@@ -93,58 +95,67 @@
 .navLink {
   color: rgba(240, 232, 220, 0.75);
   text-decoration: none;
-  font-size: 0.88rem;
-  letter-spacing: 0.04em;
-  padding: 6px 10px;
-  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  border-radius: var(--radius-full, 9999px);
   transition: all 0.18s ease;
 }
 
 .navLink:hover {
   color: #FFF;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .navLinkActive {
   color: #FFF;
-  background: rgba(194, 101, 64, 0.35);
-  border-bottom: 2px solid var(--color-terracotta, #C26540);
+  background: var(--color-primary, #6B2D2D);
+  border-bottom: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
 
 .viewSiteLink {
-  color: var(--color-terracotta, #C26540);
+  color: var(--color-text-on-dark, #F0E8DC);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: 1px solid rgba(194, 101, 64, 0.4);
-  border-radius: 4px;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1px solid rgba(240, 232, 220, 0.3);
+  border-radius: var(--radius-full, 9999px);
   transition: all 0.18s ease;
 }
 
 .viewSiteLink:hover {
-  background: var(--color-terracotta, #C26540);
+  background: rgba(240, 232, 220, 0.15);
   color: #FFF;
 }
 
 .logoutBtn {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(240, 232, 220, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(240, 232, 220, 0.8);
   cursor: pointer;
-  font-size: 0.82rem;
-  padding: 4px 10px;
-  border-radius: 4px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: var(--radius-full, 9999px);
   transition: all 0.18s ease;
 }
 
 .logoutBtn:hover {
-  background: rgba(217, 48, 37, 0.2);
-  color: #ff8b80;
-  border-color: #d93025;
+  background: rgba(166, 50, 36, 0.25);
+  color: #FFCDD2;
+  border-color: var(--color-error, #A63224);
 }
 
 /* ── Mobile hamburger toggle ── */

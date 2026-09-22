@@ -133,26 +133,26 @@ export default function AdminArticlesPage() {
                 {filtered.map((art) => (
                   <tr key={art.id}>
                     <td>
-                      <strong style={{ display: 'block', color: '#1A1714', fontSize: '0.92rem' }}>
+                      <strong style={{ display: 'block', color: 'var(--color-text, #1A1714)', fontSize: '0.92rem' }}>
                         {art.title}
                       </strong>
-                      <span style={{ fontSize: '0.78rem', color: '#888', fontStyle: 'italic' }}>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>
                         slug: /articles/{art.slug}
                       </span>
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.88rem', color: '#2A2420' }}>{art.author}</span>
+                      <span style={{ fontSize: '0.88rem', color: 'var(--color-text, #1A1714)' }}>{art.author}</span>
                       {art.authorRole && (
-                        <span style={{ display: 'block', fontSize: '0.74rem', color: '#888', fontStyle: 'italic' }}>
+                        <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-text-muted, #3D332A)', fontStyle: 'italic' }}>
                           {art.authorRole}
                         </span>
                       )}
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.82rem', color: '#555', display: 'block' }}>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)', display: 'block' }}>
                         {art.publishedAt}
                       </span>
-                      <span style={{ fontSize: '0.74rem', color: '#888', fontStyle: 'italic' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>
                         {art.readTime}
                       </span>
                     </td>

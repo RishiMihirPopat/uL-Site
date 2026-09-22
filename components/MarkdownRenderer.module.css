@@ -109,28 +109,45 @@
 }
 
 .figure {
-  margin: 2.2rem 0;
+  margin: 2.5rem 0;
+  display: block;
 }
 
 .imageWrap {
   position: relative;
   width: 100%;
-  border-radius: 4px;
+  max-width: 100%;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 20px rgba(42, 36, 32, 0.08);
+  background-color: var(--color-bg-surface, #EDE4D3);
+  border: 1px solid rgba(42, 36, 32, 0.06);
 }
 
 .articleImg {
   width: 100%;
+  max-width: 100%;
   height: auto;
   display: block;
   object-fit: cover;
 }
 
+.inlineImg {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  vertical-align: middle;
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
 .figcaption {
-  margin-top: 0.6rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+  margin-top: 0.75rem;
+  font-family: var(--prose-font-family, var(--font-article, Georgia, serif));
+  font-size: 0.92rem;
+  color: var(--color-text-muted, #3D332A);
   font-style: italic;
   text-align: center;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
 }

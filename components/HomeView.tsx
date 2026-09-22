@@ -1,8 +1,10 @@
 import HeroLectureCarousel from './HeroLectureCarousel';
 import NewsletterFormV2 from './NewsletterFormV2';
+import TestimonialsSection from './TestimonialsSection';
 import FadeIn, { FadeInItem } from './FadeIn';
 import HowWeGatherSection from './HowWeGatherSection';
 import AsSeenInSection from './AsSeenInSection';
+import { testimonialRepository } from '../lib/repositories/testimonial.repository';
 import { getActiveEvents, getCarouselEventIds, mapRowToDisplayEvent } from '../lib/db';
 import {
   hero as heroContent,
@@ -20,6 +22,7 @@ import styles from '../app/page.module.css';
 export default async function HomeView() {
   const activeRows = await getActiveEvents();
   const carouselIds = await getCarouselEventIds();
+  const testimonials = await testimonialRepository.getAll();
 
   const allActiveEvents = activeRows.map(mapRowToDisplayEvent);
 
@@ -81,6 +84,11 @@ export default async function HomeView() {
           </div>
         </FadeInItem>
       </FadeIn>
+
+      {/* ── 3.5. Testimonials — Community Recommends ── */}
+      {testimonials.length > 0 && (
+        <TestimonialsSection testimonials={testimonials} />
+      )}
 
       {/* ── 4. As Seen In — Figma node 133:2325 ── */}
       <AsSeenInSection heading={pressSectionLabelV2} logos={pressLogos} />

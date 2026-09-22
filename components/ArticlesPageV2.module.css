@@ -231,9 +231,9 @@
 .cardBody {
   position: absolute;
   left: 6.196%;
-  top: 70.442%;
+  top: 67.5%;
   width: 88.413%;
-  height: 20.786%;
+  height: 25.5%;
 }
 
 .cardTitle {
@@ -254,17 +254,22 @@
   overflow: hidden;
 }
 
-.cardMetaRow {
+.cardMetaRows {
   position: absolute;
   left: 0;
   right: 0;
-  /* 65px within the 81px-tall zone. */
-  top: 80.25%;
+  top: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0.6;
+}
+
+.cardMetaRow {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
-  opacity: 0.6;
 }
 
 .cardMetaIcon {
@@ -630,12 +635,18 @@
     overflow: hidden;
   }
 
+  .cardMetaRowsMobileV2 {
+    display: flex;
+    flex-direction: column;
+    gap: 8.31px;
+    opacity: 0.6;
+  }
+
   .cardMetaRowMobileV2 {
     display: flex;
     align-items: flex-start;
     gap: 7.555px;
     min-width: 0;
-    opacity: 0.6;
   }
 
   .cardMetaIconMobileV2 {

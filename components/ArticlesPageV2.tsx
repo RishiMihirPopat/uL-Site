@@ -4,17 +4,22 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Calendar } from '@phosphor-icons/react';
+import { Calendar, UserCircle } from '@phosphor-icons/react';
 import { articlesPageV2 } from '../lib/content';
 import { EASE } from '../lib/constants/animation';
 import { formatArticleDate } from '../lib/utils/dateTime';
 import { useOutsideClose } from '../lib/hooks/useOutsideClose';
 import styles from './ArticlesPageV2.module.css';
 
+function toTitleCase(s: string): string {
+  return s.replace(/\b\w+/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+}
+
 export interface ArticlesPageCard {
   id: string;
   slug: string;
   title: string;
+  author?: string;
   coverImage: string;
   publishedAt: string;
 }
@@ -39,7 +44,13 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const matched = q ? articles.filter((a) => a.title.toLowerCase().includes(q)) : articles;
+    const matched = q
+      ? articles.filter(
+          (a) =>
+            a.title.toLowerCase().includes(q) ||
+            (a.author && a.author.toLowerCase().includes(q))
+        )
+      : articles;
     // Source array already arrives most-recently-published first (DB
     // ORDER BY published_at DESC) — "newest first" keeps that order,
     // "oldest first" reverses it.
@@ -139,9 +150,17 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
                 </div>
                 <div className={styles.cardBody}>
                   <p className={styles.cardTitle}>{a.title}</p>
-                  <div className={styles.cardMetaRow}>
-                    <Calendar weight="bold" className={styles.cardMetaIcon} />
-                    <p className={styles.cardMeta}>{formatArticleDate(a.publishedAt)}</p>
+                  <div className={styles.cardMetaRows}>
+                    <div className={styles.cardMetaRow}>
+                      <Calendar weight="bold" className={styles.cardMetaIcon} />
+                      <p className={styles.cardMeta}>{formatArticleDate(a.publishedAt)}</p>
+                    </div>
+                    {a.author?.trim() && (
+                      <div className={styles.cardMetaRow}>
+                        <UserCircle weight="bold" className={styles.cardMetaIcon} />
+                        <p className={styles.cardMeta}>BY {toTitleCase(a.author.trim())}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -259,9 +278,17 @@ export default function ArticlesPageV2({ articles }: ArticlesPageV2Props) {
                   </div>
                   <div className={styles.cardBodyMobileV2}>
                     <p className={styles.cardTitleMobileV2}>{a.title}</p>
-                    <div className={styles.cardMetaRowMobileV2}>
-                      <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
-                      <p className={styles.cardMetaMobileV2}>{formatArticleDate(a.publishedAt)}</p>
+                    <div className={styles.cardMetaRowsMobileV2}>
+                      <div className={styles.cardMetaRowMobileV2}>
+                        <Calendar weight="bold" className={styles.cardMetaIconMobileV2} />
+                        <p className={styles.cardMetaMobileV2}>{formatArticleDate(a.publishedAt)}</p>
+                      </div>
+                      {a.author?.trim() && (
+                        <div className={styles.cardMetaRowMobileV2}>
+                          <UserCircle weight="bold" className={styles.cardMetaIconMobileV2} />
+                          <p className={styles.cardMetaMobileV2}>BY {toTitleCase(a.author.trim())}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

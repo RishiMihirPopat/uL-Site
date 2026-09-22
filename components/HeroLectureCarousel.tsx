@@ -14,6 +14,7 @@ import styles from './HeroLectureCarousel.module.css';
 // land after Nav's own wordmark/links entrance (see Nav.tsx).
 const ENTRANCE_BASE_DELAY = 0.5;
 const ENTRANCE_PER_OFFSET_DELAY = 0.15;
+const AUTOPLAY_INTERVAL_MS = 15000;
 
 interface HeroLectureCarouselProps {
   events: Event[];
@@ -37,9 +38,6 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
       // Sized to maintain the exact desktop aspect ratio (~1.423) so the full poster
       // image is visible on mobile without being cut off at the corners or sides.
       return { cardW: 250.871, gap: 20, cardH: 176.39, activeCardW: 274.738, activeCardH: 193.05 };
-    }
-    if (window.innerWidth <= 1400) {
-      return { cardW: 414, gap: 40.5, cardH: 290.7, activeCardW: 486, activeCardH: 341.1 };
     }
     return { cardW: 576, gap: 55.8, cardH: 405, activeCardW: 675, activeCardH: 474.3 };
   }, []);
@@ -346,13 +344,13 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     };
   }, [cardDims.cardW, cardDims.gap]);
 
-  // Auto-slideshow every 3 seconds — restarts interval cleanly when page changes
+  // Auto-slideshow every 15 seconds — restarts interval cleanly when page changes
   useEffect(() => {
     if (!hasMultiple || isPaused || selectedBooking !== null || showAllEventsModal) return;
 
     const timer = setInterval(() => {
       handleNext();
-    }, 3000);
+    }, AUTOPLAY_INTERVAL_MS);
 
     return () => clearInterval(timer);
   }, [page, handleNext, hasMultiple, isPaused, selectedBooking, showAllEventsModal]);

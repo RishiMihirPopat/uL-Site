@@ -31,10 +31,10 @@ export function EventMediaFields({
           Event Poster Graphic (Upload file or provide path) *
         </label>
         <input type="file" accept="image/*" className={styles.input} onChange={onPosterUpload} />
-        {uploading && <p style={{ fontSize: '0.85rem', color: '#C26540', margin: 0 }}>Uploading poster...</p>}
+        {uploading && <p style={{ fontSize: '0.85rem', color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)', margin: 0 }}>Uploading poster...</p>}
 
         <div>
-          <label style={{ fontSize: '0.82rem', color: '#666' }}>Poster URL directly:</label>
+          <label style={{ fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>Poster URL directly:</label>
           <input
             name="image"
             className={styles.input}
@@ -51,9 +51,9 @@ export function EventMediaFields({
             <img
               src={formData.image}
               alt="Poster preview"
-              style={{ width: '80px', height: '100px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #D6C9B0' }}
+              style={{ width: '80px', height: '100px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--color-border, #D6C9B0)' }}
             />
-            <span style={{ fontSize: '0.85rem', color: '#2E7D32', fontWeight: 600 }}>Poster image loaded</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-olive, #5A5A3C)', fontFamily: 'var(--font-mono, monospace)', fontWeight: 600 }}>Poster image loaded</span>
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../admin.module.css';
 import { Testimonial } from '@/lib/types/testimonial';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 
 export default function DashboardPage() {
   const [counts, setCounts] = useState({
@@ -131,22 +132,6 @@ export default function DashboardPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <span className={`${styles.badge} ${styles.badgeActive}`}>Active</span>;
-      case 'pending_archive':
-        return <span className={`${styles.badge} ${styles.badgePending}`}>Pending Archive</span>;
-      case 'archived':
-        return <span className={`${styles.badge} ${styles.badgeArchived}`}>Archived</span>;
-      case 'hidden':
-        return <span className={`${styles.badge} ${styles.badgeHidden}`}>Hidden Draft</span>;
-      case 'discarded':
-        return <span className={`${styles.badge} ${styles.badgeDiscarded}`}>Discarded</span>;
-      default:
-        return <span className={styles.badge}>{status}</span>;
-    }
-  };
 
   return (
     <div className={styles.page}>
@@ -178,13 +163,13 @@ export default function DashboardPage() {
 
       {/* Hidden Drafts / Concluded Events Alert Banner */}
       {counts.hidden > 0 && (
-        <div className={styles.card} style={{ borderLeft: '5px solid #C26540', background: '#FFF8F4' }}>
+        <div className={styles.card} style={{ borderLeft: '5px solid var(--color-primary, #6B2D2D)', background: 'var(--color-bg-surface, #EDE4D3)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
             <div>
-              <h3 style={{ color: '#C26540', margin: 0, fontSize: '1.15rem' }}>
+              <h3 style={{ color: 'var(--color-primary, #6B2D2D)', margin: 0, fontSize: '1.15rem', fontFamily: 'var(--font-brand, Atelier, serif)' }}>
                 Concluded / Draft Events: {counts.hidden} Event{counts.hidden > 1 ? 's' : ''} in Hidden Drafts
               </h3>
-              <p style={{ margin: '6px 0 0', color: '#554a40', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <p style={{ margin: '6px 0 0', color: 'var(--color-text-muted, #3D332A)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                 Events that have concluded are moved to Hidden Drafts. Review each event to send it to the public archive or discard it.
               </p>
             </div>
@@ -201,21 +186,21 @@ export default function DashboardPage() {
           <span className={styles.statLabel}>Total Events</span>
           <span className={styles.statValue}>{counts.total}</span>
         </Link>
-        <Link href="/admin/events?filter=Active" className={styles.statCard} style={{ borderTop: '3px solid #2E7D32' }}>
+        <Link href="/admin/events?filter=Active" className={styles.statCard} style={{ borderTop: '3px solid var(--color-olive, #5A5A3C)' }}>
           <span className={styles.statLabel}>Active & Booking</span>
-          <span className={styles.statValue} style={{ color: '#2E7D32' }}>{counts.active}</span>
+          <span className={styles.statValue} style={{ color: 'var(--color-olive, #5A5A3C)' }}>{counts.active}</span>
         </Link>
-        <Link href="/admin/events?filter=Hidden" className={styles.statCard} style={{ borderTop: '3px solid #E65100' }}>
+        <Link href="/admin/events?filter=Hidden" className={styles.statCard} style={{ borderTop: '3px solid var(--color-text-muted, #3D332A)' }}>
           <span className={styles.statLabel}>Hidden Drafts</span>
-          <span className={styles.statValue} style={{ color: '#E65100' }}>{counts.hidden}</span>
+          <span className={styles.statValue} style={{ color: 'var(--color-text-muted, #3D332A)' }}>{counts.hidden}</span>
         </Link>
-        <Link href="/admin/events?filter=Archived" className={styles.statCard} style={{ borderTop: '3px solid #1565C0' }}>
+        <Link href="/admin/events?filter=Archived" className={styles.statCard} style={{ borderTop: '3px solid var(--color-primary, #6B2D2D)' }}>
           <span className={styles.statLabel}>Postcard Archive</span>
-          <span className={styles.statValue} style={{ color: '#1565C0' }}>{counts.archived}</span>
+          <span className={styles.statValue} style={{ color: 'var(--color-primary, #6B2D2D)' }}>{counts.archived}</span>
         </Link>
-        <Link href="/admin/testimonials" className={styles.statCard} style={{ borderTop: '3px solid #C8892A' }}>
+        <Link href="/admin/testimonials" className={styles.statCard} style={{ borderTop: '3px solid var(--color-bg-dark, #2A2420)' }}>
           <span className={styles.statLabel}>Testimonials</span>
-          <span className={styles.statValue} style={{ color: '#C8892A' }}>{testimonials.length}</span>
+          <span className={styles.statValue} style={{ color: 'var(--color-bg-dark, #2A2420)' }}>{testimonials.length}</span>
         </Link>
       </div>
 
@@ -250,15 +235,15 @@ export default function DashboardPage() {
 
         <div style={{ padding: '0 1.25rem 1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1A1714' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text, #1A1714)' }}>
               Currently cycling <strong>{selectedCarouselIds.length}</strong> of <strong>{activeEvents.length}</strong> active events on the homepage hero.
             </span>
-            {carouselSaving && <span style={{ fontSize: '0.8rem', color: '#C26540' }}>Saving changes...</span>}
+            {carouselSaving && <span style={{ fontSize: '0.8rem', color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)' }}>Saving changes...</span>}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
             {activeEvents.length === 0 ? (
-              <p style={{ color: '#666', fontStyle: 'italic', margin: 0 }}>No active events found. Create an event to include it in the carousel.</p>
+              <p style={{ color: 'var(--color-text-muted, #3D332A)', fontStyle: 'italic', margin: 0 }}>No active events found. Create an event to include it in the carousel.</p>
             ) : (
               activeEvents.map((evt) => {
                 const isSelected = selectedCarouselIds.includes(evt.id);
@@ -270,9 +255,9 @@ export default function DashboardPage() {
                       alignItems: 'flex-start',
                       gap: '12px',
                       padding: '12px 14px',
-                      background: isSelected ? '#FAF0D0' : '#F5EFE0',
-                      border: isSelected ? '1.5px solid #C8892A' : '1px solid #D6C9B0',
-                      borderRadius: '4px',
+                      background: isSelected ? 'var(--color-bg-surface, #EDE4D3)' : '#FFFFFF',
+                      border: isSelected ? '1.5px solid var(--color-primary, #6B2D2D)' : '1px solid var(--color-border, #D6C9B0)',
+                      borderRadius: '6px',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                     }}
@@ -281,19 +266,19 @@ export default function DashboardPage() {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => handleToggleCarousel(evt.id)}
-                      style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: '#C26540', cursor: 'pointer' }}
+                      style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: 'var(--color-primary, #6B2D2D)', cursor: 'pointer' }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                        <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: '#C26540' }}>
+                        <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)' }}>
                           {evt.category ? evt.category.replace(/-/g, ' ') : 'Event'}
                         </span>
-                        <span style={{ fontSize: '0.72rem', color: '#888' }}>&bull; {evt.date}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted, #3D332A)' }}>&bull; {evt.date}</span>
                       </div>
-                      <strong style={{ fontSize: '0.92rem', color: '#1A1714', display: 'block', lineHeight: 1.3 }}>
+                      <strong style={{ fontSize: '0.92rem', color: 'var(--color-text, #1A1714)', display: 'block', lineHeight: 1.3 }}>
                         {evt.title}
                       </strong>
-                      <div style={{ fontSize: '0.78rem', color: '#555', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted, #3D332A)', marginTop: '2px' }}>
                         {evt.speaker && evt.speaker !== '—' ? evt.speaker : 'unLecture Collective'} {evt.venue && evt.venue !== '—' ? `· ${evt.venue}` : ''}
                       </div>
                     </div>
@@ -326,16 +311,16 @@ export default function DashboardPage() {
                 key={item.id}
                 style={{
                   padding: '12px 14px',
-                  background: '#F8EDCA',
-                  border: '1px solid #D6C9B0',
-                  borderRadius: '4px',
+                  background: 'var(--color-bg-surface, #EDE4D3)',
+                  border: '1px solid var(--color-border, #D6C9B0)',
+                  borderRadius: '6px',
                 }}
               >
-                <strong style={{ fontSize: '0.9rem', color: '#1A1714', display: 'block' }}>{item.title}</strong>
-                <span style={{ fontSize: '0.76rem', color: '#C26540', fontStyle: 'italic', display: 'block', margin: '2px 0 6px' }}>
+                <strong style={{ fontSize: '0.9rem', color: 'var(--color-text, #1A1714)', display: 'block' }}>{item.title}</strong>
+                <span style={{ fontSize: '0.76rem', color: 'var(--color-primary, #6B2D2D)', fontStyle: 'italic', display: 'block', margin: '2px 0 6px', fontFamily: 'var(--font-mono, monospace)' }}>
                   {item.recommender}
                 </span>
-                <p style={{ margin: 0, fontSize: '0.82rem', color: '#333', lineHeight: 1.45, maxHeight: '42px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', lineHeight: 1.45, maxHeight: '42px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {item.quote}
                 </p>
               </div>
@@ -410,29 +395,29 @@ export default function DashboardPage() {
                           <img
                             src={e.image}
                             alt=""
-                            style={{ width: '38px', height: '48px', objectFit: 'cover', borderRadius: '3px', border: '1px solid #ddd' }}
+                            style={{ width: '38px', height: '48px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--color-border, #D6C9B0)' }}
                           />
                         )}
                         <div>
                           <strong>{e.title}</strong>
-                          <div style={{ fontSize: '0.75rem', color: '#777' }}>ID: {e.id}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>ID: {e.id}</div>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <span style={{ fontSize: '0.82rem', textTransform: 'capitalize', color: '#554a40' }}>
+                      <span style={{ fontSize: '0.82rem', textTransform: 'capitalize', color: 'var(--color-text-muted, #3D332A)' }}>
                         {e.category ? e.category.replace(/-/g, ' ') : '—'}
                       </span>
                     </td>
                     <td>
                       <div>{e.speaker || '—'}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#777' }}>{e.venue || '—'}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)' }}>{e.venue || '—'}</div>
                     </td>
                     <td>
                       <div>{e.date}</div>
-                      {e.time && <div style={{ fontSize: '0.8rem', color: '#777' }}>{e.time}</div>}
+                      {e.time && <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)' }}>{e.time}</div>}
                     </td>
-                    <td>{getStatusBadge(e.archive_status)}</td>
+                    <td><StatusBadge status={e.archive_status} /></td>
                     <td>
                       <Link href={`/admin/events/${e.id}`} className={`${styles.btn} ${styles.btnSmall}`}>
                         Edit &rarr;

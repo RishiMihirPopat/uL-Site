@@ -8,7 +8,7 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { EASE } from '@/lib/constants/animation';
 import styles from '../app/page.module.css';
 
-const MOBILE_AUTOPLAY_MS = 3000;
+const MOBILE_AUTOPLAY_MS = 15000;
 
 interface FormatItem {
   id?: string;
@@ -347,7 +347,7 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
     };
   }, [cardDims.cardW, cardDims.gap, handleNext, handlePrev]);
 
-  // Autoplay every 3s — restarts interval cleanly on page changes
+  // Autoplay every 15s — restarts interval cleanly on page changes
   useEffect(() => {
     if (!hasMultiple || isPaused) return;
     const timer = setInterval(() => {

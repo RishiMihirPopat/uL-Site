@@ -188,37 +188,6 @@
   color: var(--color-text-muted);
 }
 
-/* Laptop / mid-desktop 769–1400px — active card 486x341.1 (x0.9) */
-@media (max-width: 1400px) {
-  .stageV2 {
-    height: 396px;
-  }
-
-  .trackV2 {
-    height: 341.1px;
-    margin-top: -170.55px;
-  }
-
-  /* Card 486x341.1 — arrow offsets scaled by the same ratio, x0.9 */
-  .arrowBtnV2 {
-    width: 32.4px;
-    height: 32.4px;
-    bottom: -14.4px;
-  }
-
-  .arrowBtnV2 img {
-    width: 20.7px;
-    height: 20.7px;
-  }
-
-  .arrowBtnV2Prev {
-    left: 52.2px;
-  }
-
-  .arrowBtnV2Next {
-    right: 58.5px;
-  }
-}
 
 /* Mobile <=900px — exact Figma mobile-frame numbers (node 188:4553):
    near-square 274.738x272.458 active card, no arrows, no pill label —

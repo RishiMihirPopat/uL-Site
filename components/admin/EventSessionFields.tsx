@@ -77,7 +77,7 @@ export function EventSessionFields({ formData, validationErrors, onChange }: Eve
       <div className={styles.formGroup}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
           <label style={{ margin: 0 }}>Venue & Location *</label>
-          <span style={{ fontSize: '0.76rem', color: '#888' }}>Select preset or type custom address</span>
+          <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>Select preset or type custom address</span>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <input
@@ -112,7 +112,7 @@ export function EventSessionFields({ formData, validationErrors, onChange }: Eve
               style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
               title="Test Google Maps location link"
             >
-              📍 Test Map ↗
+              Test Map ↗
             </a>
           )}
         </div>
@@ -121,7 +121,7 @@ export function EventSessionFields({ formData, validationErrors, onChange }: Eve
       <div className={styles.formGroup}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
           <label style={{ margin: 0 }}>Google Maps Link (Optional)</label>
-          <span style={{ fontSize: '0.76rem', color: '#888' }}>Direct pin or share link</span>
+          <span style={{ fontSize: '0.76rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>Direct pin or share link</span>
         </div>
         <input
           name="venue_map_url"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, UserCircle } from '@phosphor-icons/react';
@@ -43,6 +43,7 @@ export interface EventsPageV2Props {
   past?: EventsPageCard[];
   initialType?: EventType;
   initialFormat?: FormatFilter;
+  initialSearch?: string;
 }
 
 export type EventType = 'upcoming' | 'archived' | 'past';
@@ -62,13 +63,14 @@ export default function EventsPageV2({
   past,
   initialType = 'upcoming',
   initialFormat = 'all',
+  initialSearch = '',
 }: EventsPageV2Props) {
   const archiveList = archived ?? past ?? [];
   const normalizedInitialType: 'upcoming' | 'archived' =
     initialType === 'past' || initialType === 'archived' ? 'archived' : 'upcoming';
   const [type, setType] = useState<'upcoming' | 'archived'>(normalizedInitialType);
   const [formatFilter, setFormatFilter] = useState<FormatFilter>(initialFormat);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(0);
   const [selectedArchivedEvent, setSelectedArchivedEvent] = useState<EventsPageCard | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<{ url: string; title: string } | null>(null);
@@ -77,6 +79,105 @@ export default function EventsPageV2({
   const [formatOpen, setFormatOpen] = useState(false);
   const typeRef = useOutsideClose(typeOpen, () => setTypeOpen(false));
   const formatRef = useOutsideClose(formatOpen, () => setFormatOpen(false));
+
+  // If page is loaded without query params, restore from sessionStorage fallback
+  const initializedFromStorage = useRef(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasType = urlParams.has('type');
+    const hasFormat = urlParams.has('format');
+    const hasQuery = urlParams.has('q');
+
+    if (!hasType && !hasFormat && !hasQuery && !initializedFromStorage.current) {
+      initializedFromStorage.current = true;
+      try {
+        const saved = sessionStorage.getItem('unlecture_events_filters');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.type === 'upcoming' || parsed.type === 'archived') {
+            setType(parsed.type);
+          }
+          if (
+            parsed.format &&
+            ['all', 'unlecture', 'unlecture-series', 'community', 'grounds-for-thought'].includes(parsed.format)
+          ) {
+            setFormatFilter(parsed.format);
+          }
+          if (typeof parsed.search === 'string' && parsed.search) {
+            setSearch(parsed.search);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
+  // Sync active filters to URL query string and sessionStorage so refresh preserves choices
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      sessionStorage.setItem(
+        'unlecture_events_filters',
+        JSON.stringify({ type, format: formatFilter, search: search.trim() })
+      );
+    } catch {
+      // ignore
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (type === 'upcoming') {
+      params.delete('type');
+    } else {
+      params.set('type', type);
+    }
+
+    if (formatFilter === 'all') {
+      params.delete('format');
+    } else {
+      params.set('format', formatFilter);
+    }
+
+    if (!search.trim()) {
+      params.delete('q');
+    } else {
+      params.set('q', search.trim());
+    }
+
+    const qs = params.toString();
+    const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+
+    if (window.location.search !== (qs ? `?${qs}` : '')) {
+      window.history.replaceState(null, '', newUrl);
+    }
+  }, [type, formatFilter, search]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlType = params.get('type');
+      const urlFormat = params.get('format');
+      const urlQ = params.get('q');
+
+      setType(urlType === 'archived' || urlType === 'past' ? 'archived' : 'upcoming');
+      if (
+        urlFormat &&
+        ['all', 'unlecture', 'unlecture-series', 'community', 'grounds-for-thought'].includes(urlFormat)
+      ) {
+        setFormatFilter(urlFormat as FormatFilter);
+      } else {
+        setFormatFilter('all');
+      }
+      setSearch(urlQ || '');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     if (initialType) {
@@ -87,6 +188,10 @@ export default function EventsPageV2({
   useEffect(() => {
     if (initialFormat) setFormatFilter(initialFormat);
   }, [initialFormat]);
+
+  useEffect(() => {
+    if (initialSearch !== undefined) setSearch(initialSearch);
+  }, [initialSearch]);
 
   useEffect(() => {
     setPage(0);

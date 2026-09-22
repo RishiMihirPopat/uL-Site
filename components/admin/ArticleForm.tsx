@@ -51,8 +51,16 @@ export function ArticleForm({
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploadingBodyImage, setIsUploadingBodyImage] = useState(false);
+  const [bodyUploadError, setBodyUploadError] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [showUrlPrompt, setShowUrlPrompt] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+  const [urlCaptionInput, setUrlCaptionInput] = useState('');
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bodyFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,6 +76,157 @@ export function ArticleForm({
       setUploadError(result.error || 'Failed to upload cover image');
     }
     setUploadingImage(false);
+  };
+
+  /**
+   * Uploads and embeds a photo directly at the editor's cursor / drop position in the article body.
+   */
+  const insertImageAtCursor = async (file: File) => {
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setBodyUploadError('File size exceeds 5MB limit.');
+      return;
+    }
+
+    // Validate MIME format
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setBodyUploadError('Invalid file type. Allowed formats: JPEG, PNG, WebP.');
+      return;
+    }
+
+    setIsUploadingBodyImage(true);
+    setBodyUploadError(null);
+
+    const textarea = textareaRef.current;
+    let insertPos = formData.content.length;
+    if (textarea && typeof textarea.selectionStart === 'number') {
+      insertPos = textarea.selectionStart;
+    }
+
+    // Generate human-friendly initial caption from the filename
+    const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim();
+    const captionName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : 'Article photo';
+    const placeholder = `\n\n![Uploading ${captionName}...]()\n\n`;
+
+    // Insert temporary placeholder into content
+    const currentText = formData.content;
+    const before = currentText.substring(0, insertPos);
+    const after = currentText.substring(insertPos);
+    setFormData((prev) => ({ ...prev, content: before + placeholder + after }));
+
+    try {
+      const result = await uploadImageFile(file, 'archive');
+      if (result.success && result.url) {
+        const finalMarkdown = `\n\n![${captionName}](${result.url})\n\n`;
+        setFormData((prev) => ({
+          ...prev,
+          content: prev.content.replace(placeholder, finalMarkdown),
+        }));
+
+        // Reposition cursor right inside caption brackets so writer can refine caption immediately
+        setTimeout(() => {
+          if (textarea) {
+            textarea.focus();
+            const newPos = before.length + 4; // Start right after '\n\n!['
+            textarea.setSelectionRange(newPos, newPos + captionName.length);
+          }
+        }, 60);
+      } else {
+        // Rollback placeholder on failure
+        setFormData((prev) => ({
+          ...prev,
+          content: prev.content.replace(placeholder, ''),
+        }));
+        setBodyUploadError(result.error || 'Failed to upload photo into article.');
+      }
+    } catch {
+      setFormData((prev) => ({
+        ...prev,
+        content: prev.content.replace(placeholder, ''),
+      }));
+      setBodyUploadError('Network error while uploading photo.');
+    } finally {
+      setIsUploadingBodyImage(false);
+      if (bodyFileInputRef.current) {
+        bodyFileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleBodyImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      insertImageAtCursor(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDraggingOver) setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      insertImageAtCursor(file);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          insertImageAtCursor(file);
+          return;
+        }
+      }
+    }
+  };
+
+  const handleInsertImageUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urlInput.trim()) return;
+
+    const caption = urlCaptionInput.trim() || 'Article photo';
+    const markdown = `\n\n![${caption}](${urlInput.trim()})\n\n`;
+
+    const textarea = textareaRef.current;
+    let insertPos = formData.content.length;
+    if (textarea && typeof textarea.selectionStart === 'number') {
+      insertPos = textarea.selectionStart;
+    }
+
+    const currentText = formData.content;
+    const before = currentText.substring(0, insertPos);
+    const after = currentText.substring(insertPos);
+
+    setFormData((prev) => ({ ...prev, content: before + markdown + after }));
+    setUrlInput('');
+    setUrlCaptionInput('');
+    setShowUrlPrompt(false);
+
+    setTimeout(() => {
+      if (textarea) {
+        textarea.focus();
+        const cursorAfter = before.length + markdown.length;
+        textarea.setSelectionRange(cursorAfter, cursorAfter);
+      }
+    }, 50);
   };
 
   const handleChange = (
@@ -201,7 +360,7 @@ export function ArticleForm({
             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Article Cover Image *</span>
               {formData.cover_image && (
-                <span style={{ fontSize: '0.8rem', color: '#2E7D32', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-olive, #5A5A3C)', fontFamily: 'var(--font-mono, monospace)', fontWeight: 600 }}>
                   Cover image loaded
                 </span>
               )}
@@ -209,10 +368,10 @@ export function ArticleForm({
 
             <div
               style={{
-                border: uploadError ? '2px dashed #C62828' : '2px dashed #D6C9B0',
-                borderRadius: '6px',
+                border: uploadError ? '2px dashed var(--color-error, #A63224)' : '2px dashed var(--color-border-strong, #BFB09A)',
+                borderRadius: '8px',
                 padding: '1.25rem',
-                backgroundColor: '#FAF6EE',
+                backgroundColor: 'var(--color-bg-surface, #EDE4D3)',
                 textAlign: 'center',
                 cursor: uploadingImage ? 'wait' : 'pointer',
                 transition: 'border-color 0.2s ease',
@@ -233,7 +392,7 @@ export function ArticleForm({
 
               {uploadingImage ? (
                 <div style={{ padding: '1rem 0' }}>
-                  <p style={{ margin: 0, fontWeight: 600, color: '#C26540' }}>
+                  <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)' }}>
                     Uploading cover image...
                   </p>
                 </div>
@@ -248,6 +407,7 @@ export function ArticleForm({
                       borderRadius: '4px',
                       marginBottom: '0.75rem',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      border: '1px solid var(--color-border, #D6C9B0)',
                     }}
                   >
                     <img
@@ -274,10 +434,10 @@ export function ArticleForm({
                 </div>
               ) : (
                 <div style={{ padding: '1.5rem 0' }}>
-                  <p style={{ margin: '0 0 0.25rem', fontWeight: 600, color: '#1A1714' }}>
+                  <p style={{ margin: '0 0 0.25rem', fontWeight: 600, color: 'var(--color-text, #1A1714)', fontFamily: 'var(--font-mono, monospace)', textTransform: 'uppercase', fontSize: '0.85rem' }}>
                     Click to upload article cover image
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#666' }}>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>
                     Select an image file (PNG, JPG, WebP)
                   </p>
                 </div>
@@ -331,16 +491,17 @@ export function ArticleForm({
           </div>
 
           {/* Write / Preview Tab Switcher */}
-          <div style={{ display: 'flex', gap: '4px', background: 'rgba(42, 36, 32, 0.08)', padding: '3px', borderRadius: '4px' }}>
+          <div style={{ display: 'flex', gap: '6px', background: 'rgba(42, 36, 32, 0.08)', padding: '4px', borderRadius: 'var(--radius-full, 9999px)' }}>
             <button
               type="button"
               onClick={() => setActiveTab('write')}
               className={`${styles.btn} ${styles.btnSmall}`}
               style={{
-                background: activeTab === 'write' ? 'var(--color-parchment)' : 'transparent',
-                fontWeight: activeTab === 'write' ? 600 : 400,
+                background: activeTab === 'write' ? 'var(--color-primary, #6B2D2D)' : 'transparent',
+                color: activeTab === 'write' ? '#FFFFFF' : 'var(--color-text, #1A1714)',
+                fontWeight: 600,
                 border: 'none',
-                boxShadow: activeTab === 'write' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                boxShadow: activeTab === 'write' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
               }}
             >
               Write
@@ -350,10 +511,11 @@ export function ArticleForm({
               onClick={() => setActiveTab('preview')}
               className={`${styles.btn} ${styles.btnSmall}`}
               style={{
-                background: activeTab === 'preview' ? 'var(--color-parchment)' : 'transparent',
-                fontWeight: activeTab === 'preview' ? 600 : 400,
+                background: activeTab === 'preview' ? 'var(--color-primary, #6B2D2D)' : 'transparent',
+                color: activeTab === 'preview' ? '#FFFFFF' : 'var(--color-text, #1A1714)',
+                fontWeight: 600,
                 border: 'none',
-                boxShadow: activeTab === 'preview' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                boxShadow: activeTab === 'preview' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
               }}
             >
               Preview
@@ -371,17 +533,17 @@ export function ArticleForm({
                   gap: '6px',
                   flexWrap: 'wrap',
                   padding: '8px 10px',
-                  background: '#FAF6EE',
-                  border: '1px solid #D6C9B0',
+                  background: 'var(--color-bg-surface, #EDE4D3)',
+                  border: '1px solid var(--color-border-strong, #BFB09A)',
                   borderBottom: 'none',
-                  borderRadius: '4px 4px 0 0',
+                  borderRadius: '6px 6px 0 0',
                 }}
               >
                 <button
                   type="button"
                   onClick={() => insertFormatting('**', '**', 'bold text')}
                   title="Bold (**text**)"
-                  style={{ padding: '3px 8px', fontWeight: 'bold', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', fontWeight: 'bold', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   B
                 </button>
@@ -389,7 +551,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('*', '*', 'italic text')}
                   title="Italic (*text*)"
-                  style={{ padding: '3px 8px', fontStyle: 'italic', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', fontStyle: 'italic', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   I
                 </button>
@@ -397,7 +559,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('### ', '\n', 'Heading 3')}
                   title="Heading 3 (###)"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   H3
                 </button>
@@ -405,7 +567,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('## ', '\n', 'Heading 2')}
                   title="Heading 2 (##)"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   H2
                 </button>
@@ -413,7 +575,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('> "', '"\n', 'Pull quote goes here')}
                   title="Blockquote (> Quote)"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   &ldquo; Quote
                 </button>
@@ -421,7 +583,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('- ', '\n', 'List item')}
                   title="Bullet List (- )"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   &bull; List
                 </button>
@@ -429,7 +591,7 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('1. ', '\n', 'Numbered item')}
                   title="Numbered List (1. )"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   1. List
                 </button>
@@ -437,23 +599,53 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('[', '](https://example.com)', 'link text')}
                   title="Link ([text](url))"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   Link
                 </button>
                 <button
                   type="button"
-                  onClick={() => insertFormatting('![', '](/category-covers/unlecture.jpg)', 'Image description')}
-                  title="Image (![alt](url))"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  onClick={() => bodyFileInputRef.current?.click()}
+                  title="Upload a photo from your device and embed it at cursor"
+                  disabled={isUploadingBodyImage}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '3px 9px',
+                    fontWeight: 600,
+                    cursor: isUploadingBodyImage ? 'wait' : 'pointer',
+                    background: 'var(--color-primary, #6B2D2D)',
+                    color: '#FFFFFF',
+                    border: '1px solid var(--color-primary, #6B2D2D)',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-mono, monospace)',
+                    fontSize: '0.8rem',
+                  }}
                 >
-                  Image
+                  Upload Photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowUrlPrompt((prev) => !prev)}
+                  title="Insert image by URL"
+                  style={{
+                    padding: '3px 8px',
+                    cursor: 'pointer',
+                    background: showUrlPrompt ? 'var(--color-bg-surface, #EDE4D3)' : '#FFFFFF',
+                    border: '1px solid var(--color-border, #D6C9B0)',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-mono, monospace)',
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Image URL
                 </button>
                 <button
                   type="button"
                   onClick={() => insertFormatting('`', '`', 'code')}
                   title="Inline Code (`code`)"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   `Code`
                 </button>
@@ -461,11 +653,121 @@ export function ArticleForm({
                   type="button"
                   onClick={() => insertFormatting('\n---\n\n', '', '')}
                   title="Divider (---)"
-                  style={{ padding: '3px 8px', cursor: 'pointer', background: 'none', border: '1px solid #D6C9B0', borderRadius: '3px' }}
+                  style={{ padding: '3px 8px', cursor: 'pointer', background: '#FFFFFF', border: '1px solid var(--color-border, #D6C9B0)', borderRadius: '4px', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.8rem' }}
                 >
                   &mdash; Line
                 </button>
               </div>
+
+              {/* Hidden file input for body photo uploads */}
+              <input
+                ref={bodyFileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleBodyImageChange}
+                style={{ display: 'none' }}
+              />
+
+              {/* Optional Insert Image by URL sub-bar */}
+              {showUrlPrompt && (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    background: 'var(--color-bg-surface, #EDE4D3)',
+                    borderLeft: '1px solid var(--color-border-strong, #BFB09A)',
+                    borderRight: '1px solid var(--color-border-strong, #BFB09A)',
+                    borderBottom: '1px solid var(--color-border, #D6C9B0)',
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Image URL (https://... or /archive/...)"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    style={{
+                      flex: '2 1 200px',
+                      padding: '5px 8px',
+                      fontSize: '0.82rem',
+                      fontFamily: 'var(--font-mono, monospace)',
+                      border: '1px solid var(--color-border, #D6C9B0)',
+                      borderRadius: '4px',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Caption / Alt text (optional)"
+                    value={urlCaptionInput}
+                    onChange={(e) => setUrlCaptionInput(e.target.value)}
+                    style={{
+                      flex: '1 1 140px',
+                      padding: '5px 8px',
+                      fontSize: '0.82rem',
+                      fontFamily: 'var(--font-mono, monospace)',
+                      border: '1px solid var(--color-border, #D6C9B0)',
+                      borderRadius: '4px',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleInsertImageUrl}
+                    className={`${styles.btn} ${styles.btnSmall} ${styles.btnPrimary}`}
+                    style={{ padding: '4px 12px', fontSize: '0.78rem' }}
+                  >
+                    Insert
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlPrompt(false)}
+                    className={`${styles.btn} ${styles.btnSmall}`}
+                    style={{ padding: '4px 8px', fontSize: '0.78rem' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Photo Upload Guidance & Active Upload Indicator */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '6px 4px 4px',
+                  fontSize: '0.78rem',
+                  color: 'var(--color-text-muted, #3D332A)',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                }}
+              >
+                <span>
+                  <strong>Tip:</strong> Click <em>&ldquo;Upload Photo&rdquo;</em>, drag &amp; drop photos directly into the editor, or paste (Ctrl+V) screenshots anywhere.
+                </span>
+                {isUploadingBodyImage && (
+                  <span style={{ color: 'var(--color-primary, #6B2D2D)', fontWeight: 600 }}>
+                    Uploading photo into article...
+                  </span>
+                )}
+              </div>
+
+              {bodyUploadError && (
+                <div
+                  style={{
+                    padding: '6px 10px',
+                    marginBottom: '6px',
+                    backgroundColor: 'rgba(166, 50, 36, 0.08)',
+                    border: '1px solid var(--color-error, #A63224)',
+                    borderRadius: '4px',
+                    color: 'var(--color-error, #A63224)',
+                    fontSize: '0.82rem',
+                  }}
+                >
+                  {bodyUploadError}
+                </div>
+              )}
 
               <textarea
                 ref={textareaRef}
@@ -473,14 +775,23 @@ export function ArticleForm({
                 rows={16}
                 className={styles.textarea}
                 style={{
-                  borderRadius: '0 0 4px 4px',
-                  fontFamily: 'monospace',
-                  fontSize: '0.92rem',
+                  borderRadius: '0 0 6px 6px',
+                  fontFamily: 'var(--font-mono, monospace)',
+                  fontSize: '0.9rem',
                   lineHeight: 1.6,
+                  border: isDraggingOver
+                    ? '2px dashed var(--color-primary, #6B2D2D)'
+                    : '1px solid var(--color-border-strong, #BFB09A)',
+                  backgroundColor: isDraggingOver ? 'rgba(107, 45, 45, 0.04)' : '#FFFFFF',
+                  transition: 'border-color 0.15s ease, background-color 0.15s ease',
                 }}
                 value={formData.content}
                 onChange={handleChange}
-                placeholder="Write your article in Markdown here... Use # for headings, **bold**, *italic*, > for pull quotes."
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onPaste={handlePaste}
+                placeholder="Write your article in Markdown here... Use # for headings, **bold**, *italic*, > for pull quotes, or upload photos anywhere in your text."
                 required
               />
             </div>
@@ -489,15 +800,15 @@ export function ArticleForm({
               style={{
                 minHeight: '320px',
                 padding: '1.5rem',
-                background: '#FAF6EE',
-                border: '1px solid #D6C9B0',
-                borderRadius: '4px',
+                background: 'var(--color-bg-surface, #EDE4D3)',
+                border: '1px solid var(--color-border, #D6C9B0)',
+                borderRadius: '6px',
               }}
             >
               {formData.content ? (
                 <MarkdownRenderer content={formData.content} />
               ) : (
-                <p style={{ fontStyle: 'italic', color: '#888' }}>
+                <p style={{ fontStyle: 'italic', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>
                   Nothing to preview yet. Switch back to Write mode to type markdown content.
                 </p>
               )}

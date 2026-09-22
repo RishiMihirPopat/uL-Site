@@ -22,7 +22,7 @@ export function EventLifecycleBanner({
     <div
       className={styles.card}
       style={{
-        borderLeft: status === 'pending_archive' ? '5px solid #C26540' : '5px solid #2A2420',
+        borderLeft: status === 'pending_archive' ? '5px solid var(--color-primary, #6B2D2D)' : '5px solid var(--color-bg-dark, #2A2420)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -36,7 +36,7 @@ export function EventLifecycleBanner({
             {/* Direct Status Selector Dropdown */}
             {onDirectStatusSelect && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
-                <span style={{ fontSize: '0.78rem', color: '#666' }}>Change to:</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>Change to:</span>
                 <select
                   className={styles.select}
                   style={{ padding: '3px 8px', fontSize: '0.82rem', width: 'auto', minWidth: '160px' }}
@@ -53,7 +53,7 @@ export function EventLifecycleBanner({
             )}
           </div>
 
-          <p style={{ margin: '6px 0 0', color: '#554a40', fontSize: '0.88rem' }}>
+          <p style={{ margin: '6px 0 0', color: 'var(--color-text-muted, #3D332A)', fontSize: '0.88rem' }}>
             {status === 'active' && 'This event is currently active, scheduled, and visible to visitors on the live website.'}
             {status === 'pending_archive' && 'This event has concluded. Add recap photos and media below, then click "Publish to Postcard Archive".'}
             {status === 'archived' && 'This event is featured in the public Postcard Archive interactive dossier on the website.'}

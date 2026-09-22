@@ -141,7 +141,7 @@ export const contactPageV2 = {
 
 // V2 Events page (Figma node 156:1012) — events only, no articles.
 export const eventsPageV2 = {
-  heading: 'Events Archive',
+  heading: 'Events',
   searchPlaceholder: 'Search for events',
   perPage: 9,
 };

@@ -209,21 +209,20 @@ body {
 
 /* ─── Desktop scale-to-fit ───────────────────────────────────
    Every page is built for a 1920px-wide canvas. Below 1920, the
-   hand-authored breakpoints in each page's CSS module (900px, 800px,
-   and the 1400px one in app/page.module.css) reflow the layout for
-   tablet/mobile. Above 1400px there is no reflow authored, so between
-   1401px and 1919px we uniformly zoom the whole page down instead of
-   letting it clip — `zoom` (not `transform: scale`) is used on purpose:
-   it reflows layout/scroll height and keeps `position: fixed`
+   hand-authored breakpoints in each page's CSS module reflow the layout
+   for mobile (<= 900px). Above 900px, between 901px and 1919px, we
+   uniformly zoom the whole page down instead of letting cards, text, or
+   wavy PNG banner dividers wrap or clip — `zoom` (not `transform: scale`)
+   is used on purpose: it reflows layout/scroll height and keeps `position: fixed`
    descendants (nav/modals) pinned to the real viewport, so no extra JS
    height/centering compensation is needed. calc(100vw / 1920px) yields
    a unitless zoom factor that lands on exactly 1 at 1920px and hands
-   off to the 1400px reflow breakpoint at the bottom of this range. */
+   off cleanly to the 900px mobile breakpoint at the bottom of this range. */
 .v2-scale-wrap {
   zoom: 1;
 }
 
-@media (min-width: 1401px) and (max-width: 1919px) {
+@media (min-width: 901px) and (max-width: 1919px) {
   .v2-scale-wrap {
     zoom: calc(100vw / 1920px);
   }

@@ -131,7 +131,7 @@ export default function AdminTestimonialsPage() {
 
       {/* Add / Edit Form Card */}
       <div className={styles.card} style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.15rem', marginBottom: '1rem', color: '#1A1714' }}>
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--color-text, #1A1714)', fontFamily: 'var(--font-brand, Atelier, serif)' }}>
           {editingId ? 'Edit Recommendation' : '+ Add New Community Recommendation'}
         </h2>
         <form onSubmit={handleSave} className={styles.form}>
@@ -213,13 +213,13 @@ export default function AdminTestimonialsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted, #3D332A)' }}>
                     Loading recommendations...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted, #3D332A)' }}>
                     No recommendations found. Add your first one above!
                   </td>
                 </tr>
@@ -227,16 +227,16 @@ export default function AdminTestimonialsPage() {
                 items.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <span style={{ fontWeight: 600, color: '#888' }}>#{item.order_index ?? 0}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>#{item.order_index ?? 0}</span>
                     </td>
                     <td>
-                      <strong>{item.title}</strong>
+                      <strong style={{ color: 'var(--color-text, #1A1714)' }}>{item.title}</strong>
                     </td>
                     <td>
-                      <span style={{ color: '#C26540', fontStyle: 'italic' }}>{item.recommender}</span>
+                      <span style={{ color: 'var(--color-primary, #6B2D2D)', fontStyle: 'italic', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.85rem' }}>{item.recommender}</span>
                     </td>
                     <td>
-                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', maxHeight: '48px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted, #3D332A)', maxHeight: '48px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.quote}
                       </p>
                     </td>

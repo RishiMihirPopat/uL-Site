@@ -14,6 +14,7 @@ export default async function ArticlesIndexPage() {
     id: a.id,
     slug: a.slug,
     title: a.title,
+    author: a.author,
     coverImage: a.coverImage,
     publishedAt: a.publishedAt,
   }));

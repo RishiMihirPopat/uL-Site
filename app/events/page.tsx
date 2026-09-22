@@ -4,12 +4,12 @@ import EventsPageV2, { EventType, FormatFilter } from '@/components/EventsPageV2
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Events Archive — unLecture',
+  title: 'Events — unLecture',
   description: 'Browse upcoming and past unLecture events.',
 };
 
 interface EventsPageProps {
-  searchParams: Promise<{ type?: string; format?: string }>;
+  searchParams: Promise<{ type?: string; format?: string; q?: string }>;
 }
 
 export default async function EventsPage({ searchParams }: EventsPageProps) {
@@ -20,6 +20,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     params?.format && validFormats.includes(params.format as FormatFilter)
       ? (params.format as FormatFilter)
       : 'all';
+  const initialSearch = typeof params?.q === 'string' ? params.q : '';
 
   const activeEvents = await getActiveEvents();
   const archivedEvents = await getFormattedArchivedEvents();
@@ -59,6 +60,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       past={archived}
       initialType={initialType}
       initialFormat={initialFormat}
+      initialSearch={initialSearch}
     />
   );
 }

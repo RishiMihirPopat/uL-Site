@@ -131,5 +131,32 @@ export async function runArticleServiceTests() {
   runner.assert(!('created_at' in mockRepo.lastUpdatedData!), 'updateArticle: strips created_at before repository update');
   runner.assert(!('updated_at' in mockRepo.lastUpdatedData!), 'updateArticle: strips updated_at before repository update');
 
+  // 6. Embedded photo markdown support in article body
+  const contentWithImages = [
+    '# Heading',
+    '',
+    'First paragraph of text.',
+    '',
+    '![Library Gathering](/archive/172000-photo.jpg)',
+    '',
+    'Second paragraph in the middle with more reflections.',
+    '',
+    '![Speaker in Discussion](/archive/172001-speaker.png "Yamini Aiyar in conversation")',
+    '',
+    'Closing remarks and conclusion.',
+  ].join('\n');
+
+  await service.createArticle({
+    id: 'art-with-photos',
+    slug: 'gathering-with-photos',
+    title: 'Gathering with Photos',
+    content: contentWithImages,
+    status: 'published',
+  });
+  const artWithPhotos = await service.getArticleById('art-with-photos');
+  runner.assert(artWithPhotos !== null, 'createArticle with embedded photos: successfully creates article');
+  runner.assertEqual(artWithPhotos?.content, contentWithImages, 'createArticle with embedded photos: preserves all markdown photo tags in content');
+  runner.assertEqual(artWithPhotos?.readTime, '1 min read', 'calculateReadTime: correctly calculates read time for content containing embedded photos');
+
   runner.endSuite();
 }
