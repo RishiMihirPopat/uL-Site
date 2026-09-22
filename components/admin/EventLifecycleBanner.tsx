@@ -18,6 +18,8 @@ export function EventLifecycleBanner({
   onDirectStatusSelect,
   onPublishArchive,
 }: EventLifecycleBannerProps) {
+  const isSuperAdmin = role === 'super_admin';
+
   return (
     <div
       className={styles.card}
@@ -99,13 +101,15 @@ export function EventLifecycleBanner({
               >
                 Hide
               </button>
-              <button
-                type="button"
-                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                onClick={() => onStatusChange('discard')}
-              >
-                Discard
-              </button>
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                  onClick={() => onStatusChange('discard')}
+                >
+                  Discard
+                </button>
+              )}
             </>
           )}
 
@@ -140,13 +144,15 @@ export function EventLifecycleBanner({
               >
                 Restore to Active
               </button>
-              <button
-                type="button"
-                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                onClick={() => onStatusChange('discard')}
-              >
-                Discard
-              </button>
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                  onClick={() => onStatusChange('discard')}
+                >
+                  Discard
+                </button>
+              )}
             </>
           )}
 
@@ -159,13 +165,15 @@ export function EventLifecycleBanner({
               >
                 Restore to Active
               </button>
-              <button
-                type="button"
-                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                onClick={() => onStatusChange('discard')}
-              >
-                Delete Permanently
-              </button>
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                  onClick={() => onStatusChange('discard')}
+                >
+                  Delete Permanently
+                </button>
+              )}
             </>
           )}
         </div>

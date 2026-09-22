@@ -1,5 +1,5 @@
 import { eventService } from '@/lib/services/event.service';
-import { isAuthenticated, unauthorizedResponse } from '@/lib/auth';
+import { isAuthenticated, unauthorizedResponse, getSessionRole, forbiddenResponse } from '@/lib/auth';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) return unauthorizedResponse();
@@ -23,8 +23,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthenticated())) return unauthorizedResponse();
+  const role = await getSessionRole();
+  if (!role) return unauthorizedResponse();
+  if (role !== 'super_admin') {
+    return forbiddenResponse('Permission denied: Permanent deletion requires super_admin role.');
+  }
   const { id } = await params;
-  await eventService.deleteEvent(id);
+  await eventService.discardEvent(id);
   return Response.json({ success: true });
 }

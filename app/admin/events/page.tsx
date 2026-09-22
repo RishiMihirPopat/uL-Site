@@ -58,6 +58,8 @@ export default function EventsPage() {
     discarded: events.filter(e => e.archive_status === 'discarded').length,
   }), [events]);
 
+  const isSuperAdmin = role === 'super_admin';
+
   const filteredEvents = useMemo(() => {
     return events.filter(e => {
       // Status filter
@@ -240,9 +242,11 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'hide')}>
                               Hide
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                              Discard
-                            </button>
+                            {isSuperAdmin && (
+                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                                Discard
+                              </button>
+                            )}
                           </>
                         )}
                         {e.archive_status === 'pending_archive' && (
@@ -259,9 +263,11 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'hide')}>
                               Hide
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                              Discard
-                            </button>
+                            {isSuperAdmin && (
+                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                                Discard
+                              </button>
+                            )}
                           </>
                         )}
                         {e.archive_status === 'archived' && (
@@ -285,9 +291,11 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'restore')}>
                               Restore
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                              Discard
-                            </button>
+                            {isSuperAdmin && (
+                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                                Discard
+                              </button>
+                            )}
                           </>
                         )}
                         {e.archive_status === 'discarded' && (
@@ -298,9 +306,11 @@ export default function EventsPage() {
                             <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'restore')}>
                               Restore
                             </button>
-                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
-                              Delete Permanently
-                            </button>
+                            {isSuperAdmin && (
+                              <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                                Delete Permanently
+                              </button>
+                            )}
                           </>
                         )}
                       </div>

@@ -1,9 +1,12 @@
 import { eventService } from '@/lib/services/event.service';
-import { getSessionRole, unauthorizedResponse } from '@/lib/auth';
+import { getSessionRole, unauthorizedResponse, forbiddenResponse } from '@/lib/auth';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const role = await getSessionRole();
   if (!role) return unauthorizedResponse();
+  if (role !== 'super_admin') {
+    return forbiddenResponse('Permission denied: Permanent deletion requires super_admin role.');
+  }
 
   const { id } = await params;
 

@@ -126,6 +126,11 @@ export default function EditEventPage() {
   };
 
   const handleStatusChange = async (action: string) => {
+    if (action === 'discard') {
+      if (!window.confirm('Are you sure you want to permanently delete this event? All uploaded images and data will be permanently removed.')) {
+        return;
+      }
+    }
     try {
       const res = await fetch(`/api/admin/events/${id}/${action}`, { method: 'POST' });
       if (res.ok) {
