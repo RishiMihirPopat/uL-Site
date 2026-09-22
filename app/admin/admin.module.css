@@ -462,6 +462,8 @@
   justify-content: center;
   gap: 6px;
   transition: all 0.18s ease;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .btn:hover {
@@ -508,6 +510,8 @@
   padding: 0.32rem 0.85rem;
   font-size: 0.76rem;
   border-radius: var(--radius-full, 9999px);
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 /* ── Sticky Bottom Action Bar ── */

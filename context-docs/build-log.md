@@ -1,7 +1,7 @@
 # BUILDLOG.md
 
 **Project:** unLecture
-**Version:** v0.14.12
+**Version:** v0.14.13
 
 ---
 
@@ -82,6 +82,23 @@ Granular per-change history lives in `design-build-log.md` (updated after every 
 ## Up Next
 
 - Rebuild Testimonials and Ticker against the Figma design, if/when wanted — no notes doc for this anymore (see git history around the V1 deletion for what they used to be)
+
+---
+
+## Active Decisions (living)
+
+These reflect current direction. A newer entry overrides an older one.
+
+- Responsive sizing uses `calc(100vw * ...)` inside a `.v2-scale-wrap` container; the base design canvas is 1440px wide (`design.md` §3).
+- Testimonials carousel auto-advances every 15 seconds; responsive page size: 1 per slide on mobile (`<=900px`), 3 per row on desktop (`>900px`).
+- Hero carousel and mobile How We Gather carousel both auto-advance every 15 seconds (`15000ms`).
+- All admin views use Phosphor Icons exclusively — zero emojis in UI controls or data tables.
+- All admin action buttons use `white-space: nowrap;` and `line-height: 1.2` to prevent button text or external link arrows from wrapping and distorting button height.
+- Testimonial cards expand to uniform max track height to keep carousel navigation buttons static across all slides.
+- Events filter state persists in URL params and `sessionStorage`.
+- In-article photos use standard Markdown `![caption](url)` with responsive wrappers and italic captions.
+- Neon Serverless Postgres is the primary database with automatic retry on timeout.
+- Local SQLite fallback was deprecated in v0.14.1; database queries run against Neon Postgres directly.
 - The "page seems to end before the footer" report (`design-build-log.md` entry #104) was never reproduced — no CSS height/overflow cap was found anywhere in the ancestor chain. If it resurfaces, get real DevTools evidence (`document.documentElement.scrollHeight` vs. where scrolling actually stops) before changing anything
 
 ---
@@ -90,6 +107,7 @@ Granular per-change history lives in `design-build-log.md` (updated after every 
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v0.14.13 | 2026-09-23 | **Admin Articles Table Action Buttons Wrapping & Height Fix**: Fixed "fat" distorted `VIEW ↗` button in the admin articles list (`/admin/articles`): (1) Added `white-space: nowrap;` and `line-height: 1.2;` to `.btn` and `.btnSmall` in `app/admin/admin.module.css`, preventing the space before the external link arrow `↗` from wrapping onto a second line; (2) Added `whiteSpace: 'nowrap'` to the table header `<th>Actions</th>`, row `<td>`, and `flexWrap: 'nowrap'` on the action buttons container in `app/admin/articles/page.tsx`; (3) Verified via headless browser DOM metrics that all three action buttons (`EDIT`, `VIEW ↗`, `DELETE`) render at an identical 26.8px height with 0px vertical distortion; (4) Verified with clean TypeScript check (`tsc --noEmit`), test suite (228 passed), and production build (`next build`). |
 | v0.14.12 | 2026-09-22 | **Testimonials Vertical Spacing, Uniform Card Heights & 15s Auto-Advance Fix**: Resolved layout glitches, dead space, shifting navigation buttons, and autoplay timing: (1) Added responsive `pageSize` via `useSyncExternalStore` (1 card per slide on mobile `<=900px`, 3 cards per row on desktop `>900px`); (2) Implemented offscreen measurer (`measurerRef`) computing maximum card height across all testimonials and locking slide track height (`trackHeight`), ensuring all cards stretch uniformly (`height: 100%`) and navigation buttons remain anchored at the exact same location across all slide transitions; (3) Updated 15-second auto-advance (`setInterval`) with `[page, totalPages]` dependencies to cleanly reset the 15-second countdown on user interactions (prev/next clicks) and reliably advance every 15s; (4) Added `overflow: hidden` to `.testimonialsCardWrapV2` preventing horizontal jitter during slide transitions; (5) Added `.testimonialsV2 + .pressV2 { margin-top: 0; }` on desktop and mobile, deduplicating stacked margins between Testimonials and As Seen In; (6) Verified with headless browser DOM measurements, TypeScript check (`tsc --noEmit`), test suite (228 passed), and production build (`next build`). |
 | v0.14.11 | 2026-09-22 | **How We Gather Mobile Heading & (Swipe For More) Overlap Fix**: Fixed text collision bug on mobile (`<=900px`) where `How We Gather` overlapped with `(Swipe For More)`: (1) Added `position: static; left: auto; top: auto; text-align: center; margin: 0;` to `.gatherHeadingV2` in `app/page.module.css`, overriding desktop's `position: absolute; top: 20px; left: var(--space-2xl);`; (2) Set `.gatherSubtitleMobileV2` to `margin: 12px 0 0; text-align: center;`, stacking the subtitle cleanly and centered 12px below the heading; (3) Verified with clean TypeScript checks (`tsc --noEmit`), test suite (228 assertions), and production build (`next build`). |
 | v0.14.10 | 2026-09-22 | **Events Page Filter Persistence on Refresh**: (1) Updated `components/EventsPageV2.tsx` to synchronize filter state (`type`, `format`, and search `q`) to the browser URL query string via `window.history.replaceState` and `sessionStorage`; (2) Added fallback restoration on mount from `sessionStorage` when navigating directly to `/events` without URL parameters; (3) Added `popstate` event listener for seamless browser back/forward history traversal; (4) Updated `app/events/page.tsx` to parse `q` from `searchParams` and pass `initialSearch` to `EventsPageV2`; (5) Verified with clean TypeScript checks (`tsc --noEmit`) and passing test suite (228 assertions). |

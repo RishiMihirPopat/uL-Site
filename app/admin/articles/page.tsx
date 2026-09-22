@@ -126,7 +126,7 @@ export default function AdminArticlesPage() {
                   <th>Author</th>
                   <th>Date & Read Time</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th style={{ whiteSpace: 'nowrap' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,8 +165,8 @@ export default function AdminArticlesPage() {
                         {art.status === 'published' ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'nowrap' }}>
                         <Link
                           href={`/admin/articles/${art.id}`}
                           className={`${styles.btn} ${styles.btnSmall}`}
