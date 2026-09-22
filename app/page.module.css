@@ -302,6 +302,23 @@
   max-width: 1499px;
   margin: 60px auto 0;
   position: relative;
+  overflow: hidden;
+}
+
+.testimonialsSlideTrackV2 {
+  position: relative;
+  width: 100%;
+}
+
+.testimonialsMeasurerV2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -100;
+  opacity: 0;
 }
 
 .testimonialsGridV2 {
@@ -309,6 +326,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
   justify-content: center;
+  height: 100%;
+  width: 100%;
 }
 
 /* When fewer than 3 cards, don't stretch them to fill — cap at their
@@ -327,6 +346,8 @@
   text-align: left;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .testimonialsCardTitleV2 {
@@ -429,6 +450,12 @@
   margin-top: 150px;
 }
 
+/* When preceded by Testimonials (which has its own padding-bottom),
+   collapse the legacy Manifesto gap so sections flow naturally. */
+.testimonialsV2 + .pressV2 {
+  margin-top: 0;
+}
+
 @media (max-width: 900px) {
   /* Manifesto box → As Seen In: desktop's 150px never got a mobile
      override, leaving that gap far too wide on a narrow screen — real
@@ -436,6 +463,10 @@
      2594.22) is ~63px. */
   .pressV2 {
     margin-top: 63px;
+  }
+
+  .testimonialsV2 + .pressV2 {
+    margin-top: 0;
   }
 }
 
@@ -917,12 +948,16 @@
 
   .testimonialsGridV2 {
     grid-template-columns: 1fr;
-    gap: 20px;
+    max-width: 440px;
+    margin: 0 auto;
+    gap: 0;
   }
 
   .testimonialsCardV2 {
     padding: 28px 24px;
     border-radius: 18px;
+    height: 100%;
+    box-sizing: border-box;
   }
 
   .testimonialsCardTitleV2 {
