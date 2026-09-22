@@ -36,13 +36,6 @@ export const LIFECYCLE_TRANSITIONS: Record<string, StatusTransitionConfig> = {
     label: 'Restore to Active',
     description: 'Restores a hidden or discarded event back to active status.',
   },
-  discard: {
-    from: 'hidden',
-    to: 'discarded',
-    actionName: 'discard',
-    label: 'Discard Event',
-    description: 'Moves event to trash.',
-  },
 };
 
 export function canPerformTransition(

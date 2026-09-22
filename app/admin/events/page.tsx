@@ -36,6 +36,11 @@ export default function EventsPage() {
   }, []);
 
   const handleAction = async (id: string, action: string) => {
+    if (action === 'discard') {
+      if (!window.confirm('Are you sure you want to permanently delete this event? All uploaded images and data will be permanently removed.')) {
+        return;
+      }
+    }
     const res = await fetch(`/api/admin/events/${id}/${action}`, { method: 'POST' });
     if (!res.ok) {
       const data = await res.json();
@@ -102,7 +107,7 @@ export default function EventsPage() {
             { label: 'Hidden Drafts', key: 'Hidden', count: counts.hidden },
             { label: 'Archived', key: 'Archived', count: counts.archived },
             ...(counts.pending > 0 ? [{ label: 'Pending Archive', key: 'Pending Archive', count: counts.pending }] : []),
-            { label: 'Discarded', key: 'Discarded', count: counts.discarded },
+            ...(counts.discarded > 0 ? [{ label: 'Trash (Discarded)', key: 'Discarded', count: counts.discarded }] : []),
           ].map(t => (
             <button
               key={t.key}
@@ -286,9 +291,17 @@ export default function EventsPage() {
                           </>
                         )}
                         {e.archive_status === 'discarded' && (
-                          <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'restore')}>
-                            Restore
-                          </button>
+                          <>
+                            <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => router.push(`/admin/events/${e.id}`)}>
+                              View
+                            </button>
+                            <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => handleAction(e.id, 'restore')}>
+                              Restore
+                            </button>
+                            <button className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`} onClick={() => handleAction(e.id, 'discard')}>
+                              Delete Permanently
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>

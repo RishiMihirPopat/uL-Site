@@ -202,12 +202,11 @@ export async function runAutoExpire(): Promise<{ expiredCount: number }> {
   }
 }
 
-export async function runAutoArchive(): Promise<{ pending: number; archived: number; discarded: number; expired: number }> {
+export async function runAutoArchive(): Promise<{ pending: number; archived: number; expired: number }> {
   const { expiredCount } = await runAutoExpire();
   return {
     pending: 0,
     archived: 0,
-    discarded: 0,
     expired: expiredCount,
   };
 }

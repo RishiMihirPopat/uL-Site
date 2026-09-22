@@ -47,7 +47,7 @@ export function EventLifecycleBanner({
                   <option value="pending_archive">Pending Archive Review</option>
                   <option value="archived">Published to Archive</option>
                   <option value="hidden">Hidden Draft</option>
-                  <option value="discarded">Discarded (Trash)</option>
+                  {status === 'discarded' && <option value="discarded">Discarded (Legacy Trash)</option>}
                 </select>
               </div>
             )}
@@ -58,7 +58,7 @@ export function EventLifecycleBanner({
             {status === 'pending_archive' && 'This event has concluded. Add recap photos and media below, then click "Publish to Postcard Archive".'}
             {status === 'archived' && 'This event is featured in the public Postcard Archive interactive dossier on the website.'}
             {status === 'hidden' && 'This event has concluded or is saved as a hidden draft. You can send it to the public archive, discard it, or restore it to active.'}
-            {status === 'discarded' && 'This event is in the trash bin.'}
+            {status === 'discarded' && 'This legacy event is in trash. You can restore it to active or permanently delete it along with its uploaded media.'}
           </p>
         </div>
 
@@ -151,13 +151,22 @@ export function EventLifecycleBanner({
           )}
 
           {status === 'discarded' && (
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnSmall} ${styles.btnPrimary}`}
-              onClick={() => onStatusChange('restore')}
-            >
-              Restore Event
-            </button>
+            <>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSmall} ${styles.btnPrimary}`}
+                onClick={() => onStatusChange('restore')}
+              >
+                Restore to Active
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                onClick={() => onStatusChange('discard')}
+              >
+                Delete Permanently
+              </button>
+            </>
           )}
         </div>
       </div>

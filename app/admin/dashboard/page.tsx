@@ -13,7 +13,6 @@ export default function DashboardPage() {
     pending: 0,
     archived: 0,
     hidden: 0,
-    discarded: 0,
   });
   const [recentEvents, setRecentEvents] = useState<any[]>([]);
   const [activeEvents, setActiveEvents] = useState<any[]>([]);
@@ -46,7 +45,6 @@ export default function DashboardPage() {
           pending: events.filter((e: any) => e.archive_status === 'pending_archive').length,
           archived: events.filter((e: any) => e.archive_status === 'archived').length,
           hidden: events.filter((e: any) => e.archive_status === 'hidden').length,
-          discarded: events.filter((e: any) => e.archive_status === 'discarded').length,
         };
         setCounts(stats);
         setRecentEvents(events.slice(0, 6));

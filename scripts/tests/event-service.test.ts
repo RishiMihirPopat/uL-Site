@@ -101,7 +101,7 @@ export async function runEventServiceTests() {
   });
   runner.assert(!invalidMapCreate.success && Boolean(invalidMapCreate.errors?.venue_map_url), 'createEvent: rejects non-Google Maps URL');
 
-  // 3. createEvent valid payload & auto-ID
+  // 3. createEvent valid payload & random ID
   const validCreate = await service.createEvent({
     title: 'When Algorithms Speak',
     speaker: 'Dr. Rao',
@@ -113,19 +113,33 @@ export async function runEventServiceTests() {
     archive_tags: 'tech, ai, ethics',
   });
   runner.assert(validCreate.success && Boolean(validCreate.id), 'createEvent: successfully creates valid event');
-  runner.assertEqual(validCreate.id, 'when-algorithms-speak', 'createEvent: auto-generates slugified id from title');
+  runner.assert(validCreate.id!.startsWith('evt_'), 'createEvent: generates id with evt_ prefix');
+  runner.assert(validCreate.id!.length === 12, 'createEvent: generates 12-char id (evt_ + 8 random chars)');
 
-  const createdEv = await service.getEventById(validCreate.id!);
+  const createdId = validCreate.id!;
+  const createdEv = await service.getEventById(createdId);
   runner.assertEqual(createdEv?.archive_tags, '["tech","ai","ethics"]', 'createEvent: normalizes comma tags to JSON array string');
   runner.assertEqual(createdEv?.venue_map_url, 'https://maps.app.goo.gl/xyz789', 'createEvent: preserves attached venue_map_url');
 
+  // 3b. createEvent with explicit id preserves it
+  const explicitIdCreate = await service.createEvent({
+    id: 'my-custom-id',
+    title: 'Custom ID Event',
+    speaker: 'Test',
+    venue: 'Test Venue',
+    category: 'unlecture',
+    date: 'Mon, 29 Sep',
+    image: '/uploads/custom.png',
+  });
+  runner.assertEqual(explicitIdCreate.id, 'my-custom-id', 'createEvent: preserves explicitly provided id');
+
   // 4. updateEvent validation failure & audit column stripping
-  const invalidUpdate = await service.updateEvent('when-algorithms-speak', {
+  const invalidUpdate = await service.updateEvent(createdId, {
     youtube_urls: ['https://notyoutube.com/evil'],
   } as any);
   runner.assert(!invalidUpdate.success && Boolean(invalidUpdate.errors?.youtube_urls), 'updateEvent: rejects invalid YouTube link');
 
-  await service.updateEvent('when-algorithms-speak', {
+  await service.updateEvent(createdId, {
     title: 'Updated Algorithm Title',
     id: 'attempted-override',
     created_at: '2020-01-01',
@@ -138,12 +152,12 @@ export async function runEventServiceTests() {
   runner.assertEqual(mockRepo.lastUpdatedData?.title, 'Updated Algorithm Title', 'updateEvent: updates specified title');
 
   // 5. publishToArchive
-  await service.publishToArchive('when-algorithms-speak', {
+  await service.publishToArchive(createdId, {
     archive_badge: 'SOLD OUT',
     archive_tags: ['computer-science', 'ai'],
     archive_image: '/archive/recap-photo.jpg',
   });
-  const archivedEv = await service.getEventById('when-algorithms-speak');
+  const archivedEv = await service.getEventById(createdId);
   runner.assertEqual(archivedEv?.archive_status, 'archived', 'publishToArchive: changes status to "archived"');
   runner.assertEqual(archivedEv?.archive_badge, 'SOLD OUT', 'publishToArchive: updates archive_badge');
   runner.assertEqual(archivedEv?.archive_image, '/archive/recap-photo.jpg', 'publishToArchive: updates archive_image');
@@ -158,12 +172,40 @@ export async function runEventServiceTests() {
   runner.assertEqual(card.venueMapUrl, 'https://maps.app.goo.gl/xyz789', 'getFormattedArchiveCards: maps venueMapUrl');
 
   // 7. transitionStatus
-  const transRes = await service.transitionStatus('when-algorithms-speak', 'hide', 'event_manager');
+  const transRes = await service.transitionStatus(createdId, 'hide', 'event_manager');
   runner.assertEqual(transRes.success, true, 'transitionStatus: allows valid transition');
   runner.assertEqual(mockRepo.lastUpdatedStatus?.status, 'hidden', 'transitionStatus: executes transition to "hidden"');
 
-  const invalidTrans = await service.transitionStatus('when-algorithms-speak', 'non-existent-action', 'event_manager');
+  const invalidTrans = await service.transitionStatus(createdId, 'non-existent-action', 'event_manager');
   runner.assert(!invalidTrans.success, 'transitionStatus: fails on invalid action name');
+
+  // 8. discardEvent hard-deletes from repository
+  const discardTarget = await service.createEvent({
+    title: 'Disposable Event',
+    speaker: 'Nobody',
+    venue: 'Nowhere',
+    category: 'community',
+    date: 'Fri, 3 Oct',
+    image: '/uploads/disposable.png',
+  });
+  runner.assert(discardTarget.success, 'discardEvent setup: created disposable event');
+  const discardId = discardTarget.id!;
+
+  const beforeDiscard = await service.getEventById(discardId);
+  runner.assert(beforeDiscard !== null, 'discardEvent: event exists before discard');
+
+  const discardResult = await service.discardEvent(discardId);
+  runner.assertEqual(discardResult.success, true, 'discardEvent: returns success');
+
+  const afterDiscard = await service.getEventById(discardId);
+  runner.assert(afterDiscard === null, 'discardEvent: event is hard-deleted from repository');
+
+  // 8b. discardEvent on non-existent event
+  const ghostDiscard = await service.discardEvent('non-existent-id');
+  runner.assert(!ghostDiscard.success, 'discardEvent: fails gracefully for non-existent event');
+
+  // Clean up the custom-id event
+  await service.deleteEvent('my-custom-id');
 
   runner.endSuite();
 }

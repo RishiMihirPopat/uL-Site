@@ -9,7 +9,7 @@ export function runLifecycleTests() {
   runner.assertEqual(LIFECYCLE_TRANSITIONS.archive.to, 'archived', 'LIFECYCLE_TRANSITIONS.archive targets "archived"');
   runner.assertEqual(LIFECYCLE_TRANSITIONS.hide.to, 'hidden', 'LIFECYCLE_TRANSITIONS.hide targets "hidden"');
   runner.assertEqual(LIFECYCLE_TRANSITIONS.restore.to, 'active', 'LIFECYCLE_TRANSITIONS.restore targets "active"');
-  runner.assertEqual(LIFECYCLE_TRANSITIONS.discard.to, 'discarded', 'LIFECYCLE_TRANSITIONS.discard targets "discarded"');
+  runner.assert(!LIFECYCLE_TRANSITIONS.discard, 'LIFECYCLE_TRANSITIONS: discard action not defined (hard-delete now)');
 
   // 2. Allowed transitions
   const archiveCheck = canPerformTransition('archive', 'super_admin');
@@ -22,7 +22,7 @@ export function runLifecycleTests() {
   runner.assertEqual(restoreCheck, { allowed: true }, 'canPerformTransition: allows restore');
 
   const discardCheck = canPerformTransition('discard', 'super_admin');
-  runner.assertEqual(discardCheck, { allowed: true }, 'canPerformTransition: allows discard');
+  runner.assert(!discardCheck.allowed, 'canPerformTransition: rejects discard (no longer a transition)');
 
   // 3. Unknown actions & edge cases
   const unknownAction = canPerformTransition('permanently_nuke', 'super_admin');

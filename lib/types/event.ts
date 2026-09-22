@@ -13,7 +13,7 @@ export type EventArchiveStatus =
   | 'pending_archive'
   | 'archived'
   | 'hidden'
-  | 'discarded';
+  | 'discarded'; // Legacy: existing DB rows may still have this. New discards hard-delete.
 
 export interface EventIdentity {
   id: string;

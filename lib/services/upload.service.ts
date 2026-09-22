@@ -5,10 +5,21 @@
 
 import path from 'path';
 import fs from 'fs';
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
+
+const VERCEL_BLOB_HOST = '.public.blob.vercel-storage.com';
+
+function isVercelBlobUrl(url: string): boolean {
+  try {
+    return new URL(url).hostname.endsWith(VERCEL_BLOB_HOST);
+  } catch {
+    return false;
+  }
+}
 
 export interface IUploadService {
   saveFile(file: File, folderType: 'posters' | 'archive'): Promise<{ url: string; filename: string }>;
+  deleteUrls(urls: string[]): Promise<void>;
 }
 
 export class LocalUploadService implements IUploadService {
@@ -32,6 +43,21 @@ export class LocalUploadService implements IUploadService {
     const url = `/${subDir}/${filename}`;
     return { url, filename };
   }
+
+  async deleteUrls(urls: string[]): Promise<void> {
+    for (const url of urls) {
+      // Local uploads are relative paths like /uploads/xxx or /archive/xxx
+      if (!url || url.startsWith('http')) continue;
+      const filePath = path.join(process.cwd(), 'public', url);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch {
+        // Best-effort cleanup — don't fail the discard if a file is already gone
+      }
+    }
+  }
 }
 
 export class VercelBlobUploadService implements IUploadService {
@@ -46,6 +72,17 @@ export class VercelBlobUploadService implements IUploadService {
     });
 
     return { url: blob.url, filename: pathname };
+  }
+
+  async deleteUrls(urls: string[]): Promise<void> {
+    const blobUrls = urls.filter((u) => u && isVercelBlobUrl(u));
+    if (blobUrls.length === 0) return;
+
+    try {
+      await del(blobUrls, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    } catch {
+      // Best-effort cleanup — don't fail the discard if blob deletion fails
+    }
   }
 }
 
@@ -67,7 +104,18 @@ export class HybridUploadService implements IUploadService {
 
     return this.localService.saveFile(file, folderType);
   }
+
+  async deleteUrls(urls: string[]): Promise<void> {
+    const blobUrls = urls.filter((u) => u && isVercelBlobUrl(u));
+    const localUrls = urls.filter((u) => u && !isVercelBlobUrl(u) && !u.startsWith('http'));
+
+    if (blobUrls.length > 0) {
+      await this.blobService.deleteUrls(blobUrls);
+    }
+    if (localUrls.length > 0) {
+      await this.localService.deleteUrls(localUrls);
+    }
+  }
 }
 
 export const uploadService = new HybridUploadService();
-

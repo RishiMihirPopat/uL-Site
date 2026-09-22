@@ -8,7 +8,8 @@ import { EventRow, Event, FormattedArchiveCard, EventCategory } from '../types/e
 import { normalizeTags, validateEventLinks } from '../validators';
 import { canPerformTransition, LIFECYCLE_TRANSITIONS } from '../domain/lifecycle';
 import { AdminRole } from '../auth';
-import { slugify } from '../utils/slug';
+import { generateEventId } from '../utils/id';
+import { uploadService } from './upload.service';
 
 export function mapRowToDisplayEvent(e: EventRow): Event {
   return {
@@ -31,10 +32,6 @@ export function mapRowToDisplayEvent(e: EventRow): Event {
 
 export class EventService {
   constructor(private readonly repo: IEventRepository = eventRepository) {}
-
-  public slugify(text: string): string {
-    return slugify(text);
-  }
 
   public async getAllEvents(): Promise<EventRow[]> {
     return await this.repo.getAll();
@@ -106,7 +103,7 @@ export class EventService {
       };
     }
 
-    const id = data.id || this.slugify(data.title || 'untitled-event');
+    const id = data.id || generateEventId();
     const tagsArray = normalizeTags(data.archive_tags);
 
     const newEvent: Partial<EventRow> = {
@@ -180,6 +177,34 @@ export class EventService {
 
   public async deleteEvent(id: string): Promise<void> {
     await this.repo.delete(id);
+  }
+
+  /**
+   * Hard-deletes an event and cleans up its uploaded assets (poster + archive images).
+   */
+  public async discardEvent(id: string): Promise<{ success: boolean; error?: string }> {
+    const event = await this.repo.getById(id);
+    if (!event) {
+      return { success: false, error: 'Event not found' };
+    }
+
+    // Collect image URLs to delete
+    const urlsToDelete = [event.image, event.archive_image].filter(
+      (url): url is string => Boolean(url)
+    );
+
+    // Clean up uploaded assets (best-effort — don't block deletion on asset cleanup failure)
+    if (urlsToDelete.length > 0) {
+      try {
+        await uploadService.deleteUrls(urlsToDelete);
+      } catch {
+        // Log but don't fail — the DB row should still be removed
+        console.warn(`[EventService] Asset cleanup failed for event ${id}, proceeding with deletion.`);
+      }
+    }
+
+    await this.repo.delete(id);
+    return { success: true };
   }
 
   public async publishToArchive(

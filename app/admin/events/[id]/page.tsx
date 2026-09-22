@@ -129,6 +129,10 @@ export default function EditEventPage() {
     try {
       const res = await fetch(`/api/admin/events/${id}/${action}`, { method: 'POST' });
       if (res.ok) {
+        if (action === 'discard') {
+          router.push('/admin/events');
+          return;
+        }
         showToast('success', `Status updated (${action})`);
         loadEvent();
       } else {
