@@ -1,7 +1,7 @@
 # BUILDLOG.md
 
 **Project:** unLecture
-**Version:** v0.14.10
+**Version:** v0.14.11
 
 ---
 
@@ -90,6 +90,7 @@ Granular per-change history lives in `design-build-log.md` (updated after every 
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v0.14.11 | 2026-09-22 | **How We Gather Mobile Heading & (Swipe For More) Overlap Fix**: Fixed text collision bug on mobile (`<=900px`) where `How We Gather` overlapped with `(Swipe For More)`: (1) Added `position: static; left: auto; top: auto; text-align: center; margin: 0;` to `.gatherHeadingV2` in `app/page.module.css`, overriding desktop's `position: absolute; top: 20px; left: var(--space-2xl);`; (2) Set `.gatherSubtitleMobileV2` to `margin: 12px 0 0; text-align: center;`, stacking the subtitle cleanly and centered 12px below the heading; (3) Verified with clean TypeScript checks (`tsc --noEmit`), test suite (228 assertions), and production build (`next build`). |
 | v0.14.10 | 2026-09-22 | **Events Page Filter Persistence on Refresh**: (1) Updated `components/EventsPageV2.tsx` to synchronize filter state (`type`, `format`, and search `q`) to the browser URL query string via `window.history.replaceState` and `sessionStorage`; (2) Added fallback restoration on mount from `sessionStorage` when navigating directly to `/events` without URL parameters; (3) Added `popstate` event listener for seamless browser back/forward history traversal; (4) Updated `app/events/page.tsx` to parse `q` from `searchParams` and pass `initialSearch` to `EventsPageV2`; (5) Verified with clean TypeScript checks (`tsc --noEmit`) and passing test suite (228 assertions). |
 | v0.14.9 | 2026-09-22 | **Testimonials Nav Buttons Styled to Match Hero Carousel**: Updated `.testimonialsNavBtnV2` in `app/page.module.css` and `components/TestimonialsSection.tsx` to mimic the hero carousel arrow buttons (`.arrowBtnV2`): (1) Replaced hollow border styling with solid filled maroon background (`--color-primary`), no border, and hover state (`--color-primary-hover` + 1.06 scale); (2) Sized button to 45x45px with 28.8px white arrow icons, matching desktop hero carousel arrows; (3) Cleaned up inline styles in `TestimonialsSection.tsx` and mirrored the prev arrow using `.testimonialsNavBtnV2Prev img`; (4) Verified clean TypeScript checks (`tsc --noEmit`) and passing test suite (228 assertions). |
 | v0.14.8 | 2026-09-22 | **Events Page Hero Heading Update**: Updated the hero/header banner title on `/events` from "Events Archive" to "Events": (1) Changed `eventsPageV2.heading` in `lib/content.ts` from `'Events Archive'` to `'Events'`, updating both desktop (`.heading`) and mobile (`.headingMobileV2`) hero headings; (2) Updated page metadata title in `app/events/page.tsx` from `'Events Archive — unLecture'` to `'Events — unLecture'`. |

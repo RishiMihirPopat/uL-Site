@@ -690,21 +690,25 @@
     padding: 0 var(--space-md);
   }
 
-  /* Heading + "(Tap For More)" — both Atelier 24px. margin-bottom: 0
-     so it aligns cleanly above .gatherSubtitleMobileV2.
-     line-height: 1 on both — without it, the heading inherits h2's 1.2
-     and the subtitle (a <p>) inherits body's 1.7, both padding extra
-     leading above/below the glyphs that made the visible gap much
-     bigger than the margin-top below actually is. */
+  /* Heading + "(Swipe For More)" — both Atelier 24px, stacked and centered.
+     position: static / left: auto / top: auto overrides desktop's
+     position: absolute so the heading sits cleanly in-flow above the
+     subtitle instead of colliding with it.
+     line-height: 1 on both prevents extra font leading from inflating
+     the intended gap between them. */
   .gatherHeadingV2 {
+    position: static;
+    left: auto;
+    top: auto;
+    text-align: center;
     font-size: 24px;
     line-height: 1;
-    margin-bottom: 0;
+    margin: 0;
   }
 
   .gatherSubtitleMobileV2 {
     display: block;
-    margin: 8px 0 0;
+    margin: 12px 0 0;
     text-align: center;
     font-family: var(--font-brand);
     font-size: 24px;
