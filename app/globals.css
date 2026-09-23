@@ -171,6 +171,8 @@ html {
   height: 100%;
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   /* Lenis (components/SmoothScroll.tsx) handles real inertia-smoothed
      scrolling — CSS scroll-behavior is left off here to avoid
      double-easing against it. */
@@ -189,7 +191,8 @@ body {
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .v2-bg-texture {
@@ -220,6 +223,9 @@ body {
    off cleanly to the 900px mobile breakpoint at the bottom of this range. */
 .v2-scale-wrap {
   zoom: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 @media (min-width: 901px) and (max-width: 1919px) {

@@ -7,6 +7,9 @@
 .pageV2 {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .headerWaveV2 {
@@ -479,6 +482,10 @@
   .headerWaveMobileV2 {
     display: grid;
     position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
   }
 
   .waveImgMobileV2 {
@@ -587,6 +594,11 @@
     flex: 1;
   }
 
+  .dropdownWrapMobileV2Format .dropdownMenuMobileV2 {
+    left: auto;
+    right: 0;
+  }
+
   .pillArrowMobileV2 {
     width: 20px;
     height: 20px;
@@ -605,6 +617,7 @@
     left: 0;
     min-width: 100%;
     width: max-content;
+    max-width: min(calc(100vw - 32px), 280px);
     z-index: 20;
     margin: 0;
     padding: var(--space-sm);
@@ -685,18 +698,21 @@
     left: 3.487%;
     top: 4.684%;
     width: 93.827%;
+    max-width: 93.827%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 52.882px;
+    gap: clamp(24px, 12vw, 52.882px);
+    box-sizing: border-box;
   }
 
   .cardPhotoMobileV2 {
     position: relative;
     left: -2px;
-    width: 322px;
-    max-width: 100%;
-    height: 241.5px;
+    width: 100%;
+    max-width: 322px;
+    aspect-ratio: 322 / 241.5;
+    height: auto;
     border: 1.511px solid var(--color-primary);
     border-radius: 12.087px;
     overflow: hidden;
@@ -718,10 +734,14 @@
     align-items: flex-start;
     gap: 10px;
     width: 88.41%;
+    max-width: 88.41%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .cardTitleMobileV2 {
     margin: 0;
+    width: 100%;
     font-family: var(--font-mono);
     font-weight: 400;
     font-size: 14px;
@@ -732,6 +752,8 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .cardMetaRowsMobileV2 {
@@ -739,12 +761,17 @@
     flex-direction: column;
     gap: 8.31px;
     opacity: 0.6;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .cardMetaRowMobileV2 {
     display: flex;
     align-items: flex-start;
     gap: 7.555px;
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
   }
 
@@ -756,7 +783,9 @@
   }
 
   .cardMetaMobileV2 {
+    flex: 1;
     min-width: 0;
+    max-width: 100%;
     margin: 0;
     font-family: var(--font-mono);
     font-size: 10px;
@@ -773,6 +802,9 @@
   .cardMetaDateRowMobileV2 {
     display: flex;
     white-space: normal;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .cardMetaDateMobileV2 {
@@ -781,6 +813,7 @@
   }
 
   .cardMetaVenueMobileV2 {
+    flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;

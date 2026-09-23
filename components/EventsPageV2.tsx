@@ -245,7 +245,7 @@ export default function EventsPageV2({
               <button
                 type="button"
                 className={styles.pillBtn}
-                onClick={() => setTypeOpen((v) => !v)}
+                onClick={() => { setFormatOpen(false); setTypeOpen((v) => !v); }}
                 aria-haspopup="listbox"
                 aria-expanded={typeOpen}
               >
@@ -289,7 +289,7 @@ export default function EventsPageV2({
               <button
                 type="button"
                 className={styles.pillBtn}
-                onClick={() => setFormatOpen((v) => !v)}
+                onClick={() => { setTypeOpen(false); setFormatOpen((v) => !v); }}
                 aria-haspopup="listbox"
                 aria-expanded={formatOpen}
               >
@@ -496,7 +496,7 @@ export default function EventsPageV2({
                 <button
                   type="button"
                   className={styles.pillBtnMobileV2}
-                  onClick={() => setTypeOpen((v) => !v)}
+                  onClick={() => { setFormatOpen(false); setTypeOpen((v) => !v); }}
                   aria-haspopup="listbox"
                   aria-expanded={typeOpen}
                 >
@@ -530,7 +530,7 @@ export default function EventsPageV2({
                 <button
                   type="button"
                   className={styles.pillBtnMobileV2}
-                  onClick={() => setFormatOpen((v) => !v)}
+                  onClick={() => { setTypeOpen(false); setFormatOpen((v) => !v); }}
                   aria-haspopup="listbox"
                   aria-expanded={formatOpen}
                 >
