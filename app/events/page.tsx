@@ -34,6 +34,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     image: e.image,
     category: e.category,
     urbanautUrl: e.urbanaut_url || '',
+    bookingLinkType: (e.booking_link_type as 'urbanaut' | 'external') || 'urbanaut',
   }));
 
   const archived = archivedEvents.map((e) => ({
@@ -46,6 +47,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     archiveImage: e.image,
     category: e.category,
     urbanautUrl: e.urbanautUrl || '',
+    bookingLinkType: e.bookingLinkType || 'urbanaut',
     specialBadge: e.specialBadge,
     tags: e.tags || [],
     youtubeUrls: e.youtubeUrls || [],

@@ -267,11 +267,22 @@ export default function DashboardPage() {
                       style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: 'var(--color-primary, #6B2D2D)', cursor: 'pointer' }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--color-primary, #6B2D2D)', fontFamily: 'var(--font-mono, monospace)' }}>
                           {evt.category ? evt.category.replace(/-/g, ' ') : 'Event'}
                         </span>
                         <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted, #3D332A)' }}>&bull; {evt.date}</span>
+                        <span style={{
+                          fontSize: '0.65rem',
+                          fontFamily: 'var(--font-mono, monospace)',
+                          padding: '1px 5px',
+                          borderRadius: '3px',
+                          background: evt.booking_link_type === 'external' ? 'rgba(90, 90, 60, 0.15)' : 'rgba(107, 45, 45, 0.08)',
+                          color: evt.booking_link_type === 'external' ? 'var(--color-olive, #5A5A3C)' : 'var(--color-primary, #6B2D2D)',
+                          fontWeight: 600,
+                        }}>
+                          {evt.booking_link_type === 'external' ? '↗ New Tab' : '⊡ Widget'}
+                        </span>
                       </div>
                       <strong style={{ fontSize: '0.92rem', color: 'var(--color-text, #1A1714)', display: 'block', lineHeight: 1.3 }}>
                         {evt.title}
@@ -398,7 +409,20 @@ export default function DashboardPage() {
                         )}
                         <div>
                           <strong>{e.title}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>ID: {e.id}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)' }}>ID: {e.id}</span>
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontFamily: 'var(--font-mono, monospace)',
+                              padding: '1px 5px',
+                              borderRadius: '3px',
+                              background: e.booking_link_type === 'external' ? 'rgba(90, 90, 60, 0.15)' : 'rgba(107, 45, 45, 0.08)',
+                              color: e.booking_link_type === 'external' ? 'var(--color-olive, #5A5A3C)' : 'var(--color-primary, #6B2D2D)',
+                              fontWeight: 600,
+                            }}>
+                              {e.booking_link_type === 'external' ? '↗ New Tab' : '⊡ Widget'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>

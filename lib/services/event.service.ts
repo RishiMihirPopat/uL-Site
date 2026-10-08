@@ -26,6 +26,7 @@ export function mapRowToDisplayEvent(e: EventRow): Event {
     description: e.description,
     image: e.image,
     urbanautUrl: e.urbanaut_url,
+    bookingLinkType: (e.booking_link_type as 'urbanaut' | 'external') || 'urbanaut',
     badge: e.archive_badge || undefined,
   };
 }
@@ -85,6 +86,7 @@ export class EventService {
         specialBadge: event.archive_badge || undefined,
         category: event.category,
         urbanautUrl: event.urbanaut_url,
+        bookingLinkType: (event.booking_link_type as 'urbanaut' | 'external') || 'urbanaut',
         youtubeUrls: Array.isArray(youtubeUrls) ? youtubeUrls : [],
         substackUrls: Array.isArray(substackUrls) ? substackUrls : [],
       };
@@ -110,6 +112,7 @@ export class EventService {
       ...data,
       id,
       venue_map_url: data.venue_map_url || '',
+      booking_link_type: data.booking_link_type || 'urbanaut',
       archive_status: data.archive_status || 'active',
       archive_tags: JSON.stringify(tagsArray),
       youtube_urls: data.youtube_urls

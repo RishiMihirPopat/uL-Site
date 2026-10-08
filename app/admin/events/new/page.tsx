@@ -16,7 +16,7 @@ export default function NewEventPage() {
   const [formData, setFormData] = useState({
     title: '', speaker: '', venue: '', venue_map_url: '', category: '',
     date: '', event_datetime: '', time: '', price: '',
-    description: '', image: '', urbanaut_url: '',
+    description: '', image: '', urbanaut_url: '', booking_link_type: 'urbanaut',
     archive_badge: '', archive_tags: ''
   });
   const [uploading, setUploading] = useState(false);

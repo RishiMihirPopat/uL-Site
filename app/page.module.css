@@ -300,7 +300,7 @@
 
 .testimonialsCardWrapV2 {
   max-width: 1499px;
-  margin: 60px auto 0;
+  margin: 48px auto 0;
   position: relative;
   overflow: hidden;
 }
@@ -943,7 +943,7 @@
   }
 
   .testimonialsCardWrapV2 {
-    margin-top: 32px;
+    margin-top: 28px;
   }
 
   .testimonialsGridV2 {

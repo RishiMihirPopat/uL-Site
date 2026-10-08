@@ -191,7 +191,13 @@ export default function AllUpcomingEventsModal({
                     <button
                       type="button"
                       className={styles.bookBtn}
-                      onClick={() => onSelectBooking(ev.urbanautUrl, ev.title)}
+                      onClick={() => {
+                        if (ev.bookingLinkType === 'external') {
+                          window.open(ev.urbanautUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          onSelectBooking(ev.urbanautUrl, ev.title);
+                        }
+                      }}
                     >
                       Book Tickets &rarr;
                     </button>

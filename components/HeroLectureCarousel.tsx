@@ -82,10 +82,14 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
     };
   }, [getCardDims]);
 
-  // Default to the soonest upcoming event based on today's date
+  // Optimize for unlecture events as default first, then soonest upcoming event
   const getInitialIndex = useCallback(() => {
     if (displayList.length === 0) return 0;
     const today = new Date().toISOString().slice(0, 10);
+    const unlectureUpcomingIdx = displayList.findIndex((e) => e.category === 'unlecture' && (e.date || '') >= today);
+    if (unlectureUpcomingIdx >= 0) return unlectureUpcomingIdx;
+    const unlectureAnyIdx = displayList.findIndex((e) => e.category === 'unlecture');
+    if (unlectureAnyIdx >= 0) return unlectureAnyIdx;
     const idx = displayList.findIndex((e) => (e.date || '') >= today);
     return idx >= 0 ? idx : 0;
   }, [displayList]);
@@ -475,7 +479,11 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                         if (didSwipe.current) return;
                         if (isCurrent) {
                           if (ev.urbanautUrl) {
-                            setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                            if (ev.bookingLinkType === 'external') {
+                              window.open(ev.urbanautUrl, '_blank', 'noopener,noreferrer');
+                            } else {
+                              setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                            }
                           }
                         } else if (offset < 0) {
                           handlePrev();
@@ -548,8 +556,13 @@ export default function HeroLectureCarousel({ events, allEvents }: HeroLectureCa
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.55, delay: ENTRANCE_BASE_DELAY, ease: EASE }}
                 onClick={() => {
-                  if (displayList[0].urbanautUrl) {
-                    setSelectedBooking({ url: displayList[0].urbanautUrl, title: displayList[0].title });
+                  const ev = displayList[0];
+                  if (ev.urbanautUrl) {
+                    if (ev.bookingLinkType === 'external') {
+                      window.open(ev.urbanautUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+                    }
                   }
                 }}
                 role="button"

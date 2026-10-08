@@ -35,6 +35,7 @@ export default function ContactFormV2() {
     setStatus('loading');
 
     const payload = {
+      form_type: 'contact',
       name,
       email,
       phone,

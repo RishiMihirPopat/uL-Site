@@ -55,7 +55,6 @@ export default function EventsPage() {
     pending: events.filter(e => e.archive_status === 'pending_archive').length,
     archived: events.filter(e => e.archive_status === 'archived').length,
     hidden: events.filter(e => e.archive_status === 'hidden').length,
-    discarded: events.filter(e => e.archive_status === 'discarded').length,
   }), [events]);
 
   const isSuperAdmin = role === 'super_admin';
@@ -67,7 +66,6 @@ export default function EventsPage() {
       if (filter === 'Pending Archive' && e.archive_status !== 'pending_archive') return false;
       if (filter === 'Archived' && e.archive_status !== 'archived') return false;
       if (filter === 'Hidden' && e.archive_status !== 'hidden') return false;
-      if (filter === 'Discarded' && e.archive_status !== 'discarded') return false;
 
       // Category filter
       if (categoryFilter !== 'All' && e.category !== categoryFilter) return false;
@@ -109,7 +107,6 @@ export default function EventsPage() {
             { label: 'Hidden Drafts', key: 'Hidden', count: counts.hidden },
             { label: 'Archived', key: 'Archived', count: counts.archived },
             ...(counts.pending > 0 ? [{ label: 'Pending Archive', key: 'Pending Archive', count: counts.pending }] : []),
-            ...(counts.discarded > 0 ? [{ label: 'Trash (Discarded)', key: 'Discarded', count: counts.discarded }] : []),
           ].map(t => (
             <button
               key={t.key}
@@ -204,12 +201,24 @@ export default function EventsPage() {
                         )}
                         <div>
                           <strong style={{ fontSize: '0.98rem', display: 'block', color: 'var(--color-text, #1A1714)' }}>{e.title}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted, #3D332A)', fontFamily: 'var(--font-mono, monospace)', marginTop: '2px' }}>ID: {e.id}</div>
-                          {e.archive_badge && (
-                            <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono, monospace)', background: 'rgba(107, 45, 45, 0.1)', color: 'var(--color-primary, #6B2D2D)', border: '1px solid rgba(107, 45, 45, 0.25)', padding: '2px 8px', borderRadius: 'var(--radius-full, 9999px)', marginTop: '3px', display: 'inline-block' }}>
-                              {e.archive_badge}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+                            <span style={{
+                              fontSize: '0.68rem',
+                              fontFamily: 'var(--font-mono, monospace)',
+                              background: e.booking_link_type === 'external' ? 'rgba(90, 90, 60, 0.12)' : 'rgba(107, 45, 45, 0.08)',
+                              color: e.booking_link_type === 'external' ? 'var(--color-olive, #5A5A3C)' : 'var(--color-primary, #6B2D2D)',
+                              border: e.booking_link_type === 'external' ? '1px solid rgba(90, 90, 60, 0.25)' : '1px solid rgba(107, 45, 45, 0.2)',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                            }}>
+                              {e.booking_link_type === 'external' ? '↗ Redirect Tab' : '⊡ Urbanaut Widget'}
                             </span>
-                          )}
+                            {e.archive_badge && (
+                              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono, monospace)', background: 'rgba(107, 45, 45, 0.1)', color: 'var(--color-primary, #6B2D2D)', border: '1px solid rgba(107, 45, 45, 0.25)', padding: '2px 8px', borderRadius: 'var(--radius-full, 9999px)' }}>
+                                {e.archive_badge}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>

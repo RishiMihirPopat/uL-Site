@@ -30,6 +30,7 @@ export interface EventsPageCard {
   archiveImage?: string;
   category: string;
   urbanautUrl?: string;
+  bookingLinkType?: 'urbanaut' | 'external';
   specialBadge?: string;
   tags?: string[];
   youtubeUrls?: string[];
@@ -211,8 +212,28 @@ export default function EventsPageV2({
         (e.specialBadge && e.specialBadge.toLowerCase().includes(q))
       );
     }
+
+    if (type === 'upcoming' && formatFilter === 'all') {
+      matched = [...matched].sort((a, b) => {
+        const aIsUn = a.category === 'unlecture';
+        const bIsUn = b.category === 'unlecture';
+        if (aIsUn && !bIsUn) return -1;
+        if (!aIsUn && bIsUn) return 1;
+        return 0;
+      });
+    }
+
     return matched;
   }, [type, formatFilter, search, upcoming, archiveList]);
+
+  const handleUpcomingBook = (ev: EventsPageCard) => {
+    if (!ev.urbanautUrl) return;
+    if (ev.bookingLinkType === 'external') {
+      window.open(ev.urbanautUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      setSelectedBooking({ url: ev.urbanautUrl, title: ev.title });
+    }
+  };
 
   const perPage = eventsPageV2.perPage;
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -421,11 +442,11 @@ export default function EventsPageV2({
                   data-cursor-label="Click to Book!"
                   role="button"
                   tabIndex={0}
-                  onClick={() => setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title })}
+                  onClick={() => handleUpcomingBook(ev)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title });
+                      handleUpcomingBook(ev);
                     }
                   }}
                   aria-label={`Book tickets for ${ev.title}`}
@@ -656,11 +677,11 @@ export default function EventsPageV2({
                   className={`${styles.cardMobileV2} ${styles.cardMobileClickableV2}`}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title })}
+                  onClick={() => handleUpcomingBook(ev)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setSelectedBooking({ url: ev.urbanautUrl!, title: ev.title });
+                      handleUpcomingBook(ev);
                     }
                   }}
                   aria-label={`Book tickets for ${ev.title}`}

@@ -345,7 +345,11 @@ export default function ArchiveEventModal({ event, onClose }: ArchiveEventModalP
                 rel="noopener noreferrer"
                 className={styles.urbanautBtn}
               >
-                <span>View Original Gathering Record on Urbanaut</span>
+                <span>
+                  {event.bookingLinkType === 'external'
+                    ? 'View Original Gathering Record'
+                    : 'View Original Gathering Record on Urbanaut'}
+                </span>
                 <ArrowSquareOut size={16} weight="bold" />
               </a>
             )}

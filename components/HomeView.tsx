@@ -31,7 +31,15 @@ export default async function HomeView() {
     ? allActiveEvents.filter(e => carouselIds.includes(e.id))
     : allActiveEvents.filter(e => e.category === 'unlecture');
 
-  const finalCarouselEvents = carouselEvents.length > 0 ? carouselEvents : allActiveEvents;
+  const baseCarouselEvents = carouselEvents.length > 0 ? carouselEvents : allActiveEvents;
+  // Always optimize so unlecture flagship events are prioritized first
+  const finalCarouselEvents = [...baseCarouselEvents].sort((a, b) => {
+    const aIsUnlecture = a.category === 'unlecture';
+    const bIsUnlecture = b.category === 'unlecture';
+    if (aIsUnlecture && !bIsUnlecture) return -1;
+    if (!aIsUnlecture && bIsUnlecture) return 1;
+    return 0;
+  });
 
   return (
     <main className={styles.main}>

@@ -159,6 +159,7 @@ export function formatTagsForDisplay(tags: any): string {
 export function validateEventLinks(data: {
   image?: string | null;
   urbanaut_url?: string | null;
+  booking_link_type?: string | null;
   venue_map_url?: string | null;
   archive_image?: string | null;
   youtube_urls?: string[] | string | null;
@@ -171,7 +172,9 @@ export function validateEventLinks(data: {
   }
 
   if (data.urbanaut_url && data.urbanaut_url.trim() !== '' && !isValidUrbanautUrl(data.urbanaut_url)) {
-    errors.urbanaut_url = 'Booking URL must be a valid web link starting with https:// or http://';
+    errors.urbanaut_url = data.booking_link_type === 'external'
+      ? 'External booking link must be a valid web link starting with https:// or http://'
+      : 'Booking URL must be a valid web link starting with https:// or http://';
   }
 
   if (data.venue_map_url && data.venue_map_url.trim() !== '' && !isValidGoogleMapsUrl(data.venue_map_url)) {

@@ -22,6 +22,7 @@ export default function NewsletterFormV2() {
 
     try {
       const body = new URLSearchParams({
+        form_type: 'newsletter',
         email,
         timestamp: new Date().toISOString(),
       });

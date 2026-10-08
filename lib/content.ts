@@ -50,20 +50,20 @@ export const hero = {
 // supplied for that section (public/category-covers/).
 export const formats = [
   {
-    id: 'grounds-for-thought',
-    name: 'Grounds for Thought',
-    shortLabel: ['GROUNDS FOR', 'THOUGHTS'],
-    desc: "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
-    imgV2: '/category-covers/ground-for-thoughts.jpg',
-    alt: 'Intimate gathering at a Grounds for Thought event with Blue Tokai',
-  },
-  {
     id: 'unlecture',
     name: 'unLecture',
     shortLabel: ['UNLECTURE'],
     desc: 'Our flagship event. It breaks the binary that certain conversations only happen inside certain institutions. We make room for that discourse in the casual spaces we already frequent, and treat learning as something you do out in the city.',
     imgV2: '/category-covers/unlecture.jpg',
     alt: 'Speaker and audience at a flagship unLecture event',
+  },
+  {
+    id: 'grounds-for-thought',
+    name: 'Grounds for Thought',
+    shortLabel: ['GROUNDS FOR', 'THOUGHTS'],
+    desc: "Held across Blue Tokai cafés. A more intimate format to sit with topics that are actually relevant to us. Sometimes it's someone's PhD thesis, other times it's a question that doesn't have a paper written on it yet.",
+    imgV2: '/category-covers/ground-for-thoughts.jpg',
+    alt: 'Intimate gathering at a Grounds for Thought event with Blue Tokai',
   },
   {
     id: 'community',
@@ -119,6 +119,7 @@ export const pressLogos = [
 export const pressSectionLabelV2 = 'As Seen In';
 export const allUpcomingEventsLabel = 'All Upcoming Events';
 export const checkThemOutLabel = 'Check Them Out!';
+export const testimonialsHeadingV2 = 'From the Community';
 
 export const newsletterHeadingV2 = 'Sign Up For Our Newsletter';
 

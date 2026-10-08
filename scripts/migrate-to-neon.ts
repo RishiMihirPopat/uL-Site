@@ -34,6 +34,7 @@ async function migrate() {
       description     TEXT DEFAULT '',
       image           TEXT NOT NULL,
       urbanaut_url    TEXT DEFAULT '',
+      booking_link_type TEXT DEFAULT 'urbanaut',
       archive_status  TEXT NOT NULL DEFAULT 'active',
       archive_image   TEXT,
       archive_badge   TEXT,

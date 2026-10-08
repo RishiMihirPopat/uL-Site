@@ -71,12 +71,12 @@ export class NeonEventRepository implements IEventRepository {
     await this.sql`
       INSERT INTO events (
         id, title, speaker, venue, venue_map_url, category, date, event_datetime, time, price, description,
-        image, urbanaut_url, archive_status, archive_image, archive_badge, archive_tags,
+        image, urbanaut_url, booking_link_type, archive_status, archive_image, archive_badge, archive_tags,
         youtube_urls, substack_urls, created_at, updated_at
       ) VALUES (
         ${event.id}, ${event.title}, ${event.speaker}, ${event.venue}, ${event.venue_map_url || ''}, ${event.category}, ${event.date},
         ${event.event_datetime || null}, ${event.time || ''}, ${event.price || ''}, ${event.description || ''},
-        ${event.image}, ${event.urbanaut_url || ''}, ${event.archive_status || 'active'},
+        ${event.image}, ${event.urbanaut_url || ''}, ${event.booking_link_type || 'urbanaut'}, ${event.archive_status || 'active'},
         ${event.archive_image || null}, ${event.archive_badge || null}, ${event.archive_tags || '[]'},
         ${event.youtube_urls || '[]'}, ${event.substack_urls || '[]'}, NOW(), NOW()
       )

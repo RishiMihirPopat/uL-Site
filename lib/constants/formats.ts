@@ -16,15 +16,6 @@ export interface FormatDefinition {
 }
 
 export const FORMAT_REGISTRY: Record<EventCategory, FormatDefinition> = {
-  'grounds-for-thought': {
-    id: 'grounds-for-thought',
-    name: 'Grounds for Thought',
-    subtitle: 'Café Conversations',
-    description: 'Casual, salon-style discussions held in independent cafés and informal third spaces across the city.',
-    accentColor: '#C26540',
-    themeClass: 'formatTerracotta',
-    badgeLabel: 'Grounds for Thought',
-  },
   'unlecture': {
     id: 'unlecture',
     name: 'unLecture',
@@ -33,6 +24,15 @@ export const FORMAT_REGISTRY: Record<EventCategory, FormatDefinition> = {
     accentColor: '#6B7A5A',
     themeClass: 'formatSage',
     badgeLabel: 'unLecture',
+  },
+  'grounds-for-thought': {
+    id: 'grounds-for-thought',
+    name: 'Grounds for Thought',
+    subtitle: 'Café Conversations',
+    description: 'Casual, salon-style discussions held in independent cafés and informal third spaces across the city.',
+    accentColor: '#C26540',
+    themeClass: 'formatTerracotta',
+    badgeLabel: 'Grounds for Thought',
   },
   'community': {
     id: 'community',

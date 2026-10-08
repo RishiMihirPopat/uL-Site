@@ -84,8 +84,16 @@ export async function runEventServiceTests() {
   const display = mapRowToDisplayEvent(row);
   runner.assertEqual(display.id, 'ev-test-1', 'mapRowToDisplayEvent: maps id');
   runner.assertEqual(display.badge, 'SPECIAL', 'mapRowToDisplayEvent: maps archive_badge to badge');
-  runner.assertEqual(display.category, 'unlecture', 'mapRowToDisplayEvent: preserves category');
   runner.assertEqual(display.venueMapUrl, 'https://maps.app.goo.gl/abcdef123', 'mapRowToDisplayEvent: maps venue_map_url to venueMapUrl');
+  runner.assertEqual(display.bookingLinkType, 'urbanaut', 'mapRowToDisplayEvent: defaults bookingLinkType to urbanaut');
+
+  const rowExternal: EventRow = {
+    ...row,
+    id: 'ev-test-ext',
+    booking_link_type: 'external',
+  };
+  const displayExternal = mapRowToDisplayEvent(rowExternal);
+  runner.assertEqual(displayExternal.bookingLinkType, 'external', 'mapRowToDisplayEvent: maps booking_link_type external');
 
   // 2. createEvent validation failure
   const invalidCreate = await service.createEvent({

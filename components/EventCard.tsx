@@ -106,7 +106,13 @@ export default function EventCard({ event, index = 0 }: { event: Event; index?: 
                 <span className={styles.cardPrice}>{formatEventPrice(event.price)}</span>
                 <button
                   className={styles.bookBtn}
-                  onClick={() => setModalOpen(true)}
+                  onClick={() => {
+                    if (event.bookingLinkType === 'external' && event.urbanautUrl) {
+                      window.open(event.urbanautUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setModalOpen(true);
+                    }
+                  }}
                 >
                   <span>Book Now</span>
                   <ArrowUpRight className={styles.btnArrowIcon} />

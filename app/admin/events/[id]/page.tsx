@@ -39,6 +39,7 @@ export default function EditEventPage() {
         if (!found) return;
         setEvent({
           ...found,
+          booking_link_type: found.booking_link_type || 'urbanaut',
           archive_tags: formatTagsForDisplay(found.archive_tags),
         });
         try {

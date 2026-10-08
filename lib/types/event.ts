@@ -30,9 +30,12 @@ export interface EventSchedule {
   event_datetime: string | null;
 }
 
+export type BookingLinkType = 'urbanaut' | 'external';
+
 export interface EventTicketing {
   price: string;
   urbanaut_url: string;
+  booking_link_type?: BookingLinkType;
 }
 
 export interface EventMedia {
@@ -82,6 +85,7 @@ export interface Event {
   description: string;
   image: string;
   urbanautUrl: string;
+  bookingLinkType?: BookingLinkType;
   badge?: string;
 }
 
@@ -102,6 +106,7 @@ export interface FormattedArchiveCard {
   specialBadge?: string;
   category: string;
   urbanautUrl: string;
+  bookingLinkType?: BookingLinkType;
   youtubeUrls?: string[];
   substackUrls?: string[];
 }

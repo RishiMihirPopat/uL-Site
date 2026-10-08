@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
 import { EASE } from '@/lib/constants/animation';
 import type { Testimonial } from '@/lib/types/testimonial';
+import { testimonialsHeadingV2 } from '@/lib/content';
 import styles from '@/app/page.module.css';
 
 interface TestimonialsSectionProps {
@@ -115,15 +116,8 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
         className={styles.testimonialsHeadingV2}
         variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } } }}
       >
-        Community Testimonials
+        {testimonialsHeadingV2}
       </motion.h2>
-
-      <motion.p
-        className={styles.testimonialsSubheadingV2}
-        variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } } }}
-      >
-        Books, films, and ideas our community keeps coming back to.
-      </motion.p>
 
       <motion.div
         className={styles.testimonialsCardWrapV2}

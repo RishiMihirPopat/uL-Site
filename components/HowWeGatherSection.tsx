@@ -76,8 +76,15 @@ export default function HowWeGatherSection({ heading, hoverLabel, mobileLabel, f
 
   const [cardDims, setCardDims] = useState({ cardW: 232, gap: 16, cardH: 252.6, activeCardW: 260, activeCardH: 283.1 });
 
+  // Default to unlecture format card as the first active card
+  const getInitialIndex = useCallback(() => {
+    if (!formats || formats.length === 0) return 0;
+    const idx = formats.findIndex((f) => f.id === 'unlecture');
+    return idx >= 0 ? idx : 0;
+  }, [formats]);
+
   // Pure infinite page index
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(getInitialIndex);
   const [isPaused, setIsPaused] = useState(false);
   const [touchOffset, setTouchOffset] = useState(0);
   const [isMoving, setIsMoving] = useState(false);

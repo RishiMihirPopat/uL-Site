@@ -5,6 +5,7 @@ interface EventMediaFieldsProps {
   formData: {
     image?: string;
     urbanaut_url?: string;
+    booking_link_type?: string;
   };
   validationErrors: Record<string, string>;
   uploading: boolean;
@@ -19,11 +20,13 @@ export function EventMediaFields({
   onPosterUpload,
   onChange,
 }: EventMediaFieldsProps) {
+  const isExternal = formData.booking_link_type === 'external';
+
   return (
     <div className={styles.formSection}>
       <div className={styles.formSectionHeader}>
         <h2 className={styles.formSectionTitle}>3. Media & Ticketing</h2>
-        <p className={styles.formSectionDesc}>Upload the poster graphic and link to the ticketing platform.</p>
+        <p className={styles.formSectionDesc}>Upload the poster graphic and configure ticketing actions.</p>
       </div>
 
       <div className={`${styles.uploadBox} ${validationErrors.image ? styles.uploadBoxError : ''}`}>
@@ -58,14 +61,116 @@ export function EventMediaFields({
         )}
       </div>
 
+      {/* 2 Options for Event Cards: Urbanaut widget vs Redirect to another tab */}
       <div className={styles.formGroup}>
-        <label>Urbanaut Booking URL (Optional)</label>
+        <label style={{ fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+          Event Card Action / Booking Destination *
+        </label>
+        <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted, #3D332A)', margin: '0 0 10px 0' }}>
+          Choose what happens when visitors click on this event card across the website:
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginBottom: '8px' }}>
+          {/* Option 1: Urbanaut Widget */}
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              padding: '14px 16px',
+              borderRadius: '8px',
+              border: !isExternal
+                ? '2px solid var(--color-primary, #6B2D2D)'
+                : '1px solid var(--color-border-strong, #BFB09A)',
+              background: !isExternal
+                ? 'var(--color-bg-surface, #EDE4D3)'
+                : '#FFFFFF',
+              cursor: 'pointer',
+              transition: 'all 0.18s ease',
+            }}
+          >
+            <input
+              type="radio"
+              name="booking_link_type"
+              value="urbanaut"
+              checked={!isExternal}
+              onChange={onChange}
+              style={{ marginTop: '3px', accentColor: 'var(--color-primary, #6B2D2D)', width: '16px', height: '16px' }}
+            />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                <strong style={{ fontSize: '0.92rem', color: 'var(--color-text, #1A1714)' }}>
+                  Open Urbanaut Widget
+                </strong>
+                <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(107, 45, 45, 0.1)', color: 'var(--color-primary, #6B2D2D)', fontWeight: 700, fontFamily: 'var(--font-mono, monospace)' }}>
+                  POPUP MODAL
+                </span>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)', margin: 0, lineHeight: 1.4 }}>
+                Opens the built-in Urbanaut ticketing widget popup directly on the site (as is).
+              </p>
+            </div>
+          </label>
+
+          {/* Option 2: Redirect to Another Tab */}
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              padding: '14px 16px',
+              borderRadius: '8px',
+              border: isExternal
+                ? '2px solid var(--color-primary, #6B2D2D)'
+                : '1px solid var(--color-border-strong, #BFB09A)',
+              background: isExternal
+                ? 'var(--color-bg-surface, #EDE4D3)'
+                : '#FFFFFF',
+              cursor: 'pointer',
+              transition: 'all 0.18s ease',
+            }}
+          >
+            <input
+              type="radio"
+              name="booking_link_type"
+              value="external"
+              checked={isExternal}
+              onChange={onChange}
+              style={{ marginTop: '3px', accentColor: 'var(--color-primary, #6B2D2D)', width: '16px', height: '16px' }}
+            />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                <strong style={{ fontSize: '0.92rem', color: 'var(--color-text, #1A1714)' }}>
+                  Redirect to Another Tab
+                </strong>
+                <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(90, 90, 60, 0.15)', color: 'var(--color-olive, #5A5A3C)', fontWeight: 700, fontFamily: 'var(--font-mono, monospace)' }}>
+                  NEW TAB ↗
+                </span>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted, #3D332A)', margin: 0, lineHeight: 1.4 }}>
+                Opens directly in a new browser tab (for events not listed on Urbanaut, e.g. Paytm Insider, BookMyShow, Luma, Google Form).
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label>
+          {isExternal
+            ? 'External Ticketing / Registration Link (Optional)'
+            : 'Urbanaut Booking URL (Optional)'}
+        </label>
         <input
           name="urbanaut_url"
           className={styles.input}
           value={formData.urbanaut_url || ''}
           onChange={onChange}
-          placeholder="https://app.urbanaut.in/..."
+          placeholder={
+            isExternal
+              ? 'https://insider.in/... or https://luma.com/...'
+              : 'https://app.urbanaut.in/...'
+          }
         />
         {validationErrors.urbanaut_url && <p className={styles.errorText}>{validationErrors.urbanaut_url}</p>}
       </div>
