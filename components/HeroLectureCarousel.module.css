@@ -278,7 +278,7 @@
 .arrowBtnV2 {
   width: 45px;
   height: 45px;
-  bottom: -19.8px;
+  top: calc(50% - 22.5px);
 }
 
 .arrowBtnV2 img {
@@ -287,7 +287,7 @@
 }
 
 .arrowBtnV2Prev {
-  left: 72.9px;
+  left: -22.5px;
 }
 
 /* Figma exports the same right-pointing arrow for both buttons and mirrors
@@ -297,7 +297,7 @@
 }
 
 .arrowBtnV2Next {
-  right: 81.9px;
+  right: -22.5px;
 }
 
 .allEventsBtnWrapV2 {
